@@ -1397,12 +1397,848 @@ class LabResultsCompanion extends UpdateCompanion<LabResult> {
   }
 }
 
+class $ImportedLabResultsTable extends ImportedLabResults
+    with TableInfo<$ImportedLabResultsTable, ImportedLabResult> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ImportedLabResultsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fileNameMeta = const VerificationMeta(
+    'fileName',
+  );
+  @override
+  late final GeneratedColumn<String> fileName = GeneratedColumn<String>(
+    'file_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reportIdMeta = const VerificationMeta(
+    'reportId',
+  );
+  @override
+  late final GeneratedColumn<String> reportId = GeneratedColumn<String>(
+    'report_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sampleDateRawMeta = const VerificationMeta(
+    'sampleDateRaw',
+  );
+  @override
+  late final GeneratedColumn<String> sampleDateRaw = GeneratedColumn<String>(
+    'sample_date_raw',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sampleDateMeta = const VerificationMeta(
+    'sampleDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> sampleDate = GeneratedColumn<DateTime>(
+    'sample_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reportDateRawMeta = const VerificationMeta(
+    'reportDateRaw',
+  );
+  @override
+  late final GeneratedColumn<String> reportDateRaw = GeneratedColumn<String>(
+    'report_date_raw',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _indicatorCodeMeta = const VerificationMeta(
+    'indicatorCode',
+  );
+  @override
+  late final GeneratedColumn<String> indicatorCode = GeneratedColumn<String>(
+    'indicator_code',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _indicatorNameCnMeta = const VerificationMeta(
+    'indicatorNameCn',
+  );
+  @override
+  late final GeneratedColumn<String> indicatorNameCn = GeneratedColumn<String>(
+    'indicator_name_cn',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _rawValueMeta = const VerificationMeta(
+    'rawValue',
+  );
+  @override
+  late final GeneratedColumn<String> rawValue = GeneratedColumn<String>(
+    'raw_value',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _numericValueMeta = const VerificationMeta(
+    'numericValue',
+  );
+  @override
+  late final GeneratedColumn<double> numericValue = GeneratedColumn<double>(
+    'numeric_value',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _unitMeta = const VerificationMeta('unit');
+  @override
+  late final GeneratedColumn<String> unit = GeneratedColumn<String>(
+    'unit',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _referenceRangeMeta = const VerificationMeta(
+    'referenceRange',
+  );
+  @override
+  late final GeneratedColumn<String> referenceRange = GeneratedColumn<String>(
+    'reference_range',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+    'category',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _importedAtMeta = const VerificationMeta(
+    'importedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> importedAt = GeneratedColumn<DateTime>(
+    'imported_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    fileName,
+    reportId,
+    sampleDateRaw,
+    sampleDate,
+    reportDateRaw,
+    indicatorCode,
+    indicatorNameCn,
+    rawValue,
+    numericValue,
+    unit,
+    referenceRange,
+    category,
+    importedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'imported_lab_results';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ImportedLabResult> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('file_name')) {
+      context.handle(
+        _fileNameMeta,
+        fileName.isAcceptableOrUnknown(data['file_name']!, _fileNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fileNameMeta);
+    }
+    if (data.containsKey('report_id')) {
+      context.handle(
+        _reportIdMeta,
+        reportId.isAcceptableOrUnknown(data['report_id']!, _reportIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_reportIdMeta);
+    }
+    if (data.containsKey('sample_date_raw')) {
+      context.handle(
+        _sampleDateRawMeta,
+        sampleDateRaw.isAcceptableOrUnknown(
+          data['sample_date_raw']!,
+          _sampleDateRawMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_sampleDateRawMeta);
+    }
+    if (data.containsKey('sample_date')) {
+      context.handle(
+        _sampleDateMeta,
+        sampleDate.isAcceptableOrUnknown(data['sample_date']!, _sampleDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sampleDateMeta);
+    }
+    if (data.containsKey('report_date_raw')) {
+      context.handle(
+        _reportDateRawMeta,
+        reportDateRaw.isAcceptableOrUnknown(
+          data['report_date_raw']!,
+          _reportDateRawMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_reportDateRawMeta);
+    }
+    if (data.containsKey('indicator_code')) {
+      context.handle(
+        _indicatorCodeMeta,
+        indicatorCode.isAcceptableOrUnknown(
+          data['indicator_code']!,
+          _indicatorCodeMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_indicatorCodeMeta);
+    }
+    if (data.containsKey('indicator_name_cn')) {
+      context.handle(
+        _indicatorNameCnMeta,
+        indicatorNameCn.isAcceptableOrUnknown(
+          data['indicator_name_cn']!,
+          _indicatorNameCnMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_indicatorNameCnMeta);
+    }
+    if (data.containsKey('raw_value')) {
+      context.handle(
+        _rawValueMeta,
+        rawValue.isAcceptableOrUnknown(data['raw_value']!, _rawValueMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_rawValueMeta);
+    }
+    if (data.containsKey('numeric_value')) {
+      context.handle(
+        _numericValueMeta,
+        numericValue.isAcceptableOrUnknown(
+          data['numeric_value']!,
+          _numericValueMeta,
+        ),
+      );
+    }
+    if (data.containsKey('unit')) {
+      context.handle(
+        _unitMeta,
+        unit.isAcceptableOrUnknown(data['unit']!, _unitMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_unitMeta);
+    }
+    if (data.containsKey('reference_range')) {
+      context.handle(
+        _referenceRangeMeta,
+        referenceRange.isAcceptableOrUnknown(
+          data['reference_range']!,
+          _referenceRangeMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_referenceRangeMeta);
+    }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryMeta);
+    }
+    if (data.containsKey('imported_at')) {
+      context.handle(
+        _importedAtMeta,
+        importedAt.isAcceptableOrUnknown(data['imported_at']!, _importedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_importedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ImportedLabResult map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ImportedLabResult(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      fileName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}file_name'],
+      )!,
+      reportId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}report_id'],
+      )!,
+      sampleDateRaw: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sample_date_raw'],
+      )!,
+      sampleDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}sample_date'],
+      )!,
+      reportDateRaw: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}report_date_raw'],
+      )!,
+      indicatorCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}indicator_code'],
+      )!,
+      indicatorNameCn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}indicator_name_cn'],
+      )!,
+      rawValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}raw_value'],
+      )!,
+      numericValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}numeric_value'],
+      ),
+      unit: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}unit'],
+      )!,
+      referenceRange: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reference_range'],
+      )!,
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      )!,
+      importedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}imported_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ImportedLabResultsTable createAlias(String alias) {
+    return $ImportedLabResultsTable(attachedDatabase, alias);
+  }
+}
+
+class ImportedLabResult extends DataClass
+    implements Insertable<ImportedLabResult> {
+  final String id;
+  final String fileName;
+  final String reportId;
+  final String sampleDateRaw;
+  final DateTime sampleDate;
+  final String reportDateRaw;
+  final String indicatorCode;
+  final String indicatorNameCn;
+  final String rawValue;
+  final double? numericValue;
+  final String unit;
+  final String referenceRange;
+  final String category;
+  final DateTime importedAt;
+  const ImportedLabResult({
+    required this.id,
+    required this.fileName,
+    required this.reportId,
+    required this.sampleDateRaw,
+    required this.sampleDate,
+    required this.reportDateRaw,
+    required this.indicatorCode,
+    required this.indicatorNameCn,
+    required this.rawValue,
+    this.numericValue,
+    required this.unit,
+    required this.referenceRange,
+    required this.category,
+    required this.importedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['file_name'] = Variable<String>(fileName);
+    map['report_id'] = Variable<String>(reportId);
+    map['sample_date_raw'] = Variable<String>(sampleDateRaw);
+    map['sample_date'] = Variable<DateTime>(sampleDate);
+    map['report_date_raw'] = Variable<String>(reportDateRaw);
+    map['indicator_code'] = Variable<String>(indicatorCode);
+    map['indicator_name_cn'] = Variable<String>(indicatorNameCn);
+    map['raw_value'] = Variable<String>(rawValue);
+    if (!nullToAbsent || numericValue != null) {
+      map['numeric_value'] = Variable<double>(numericValue);
+    }
+    map['unit'] = Variable<String>(unit);
+    map['reference_range'] = Variable<String>(referenceRange);
+    map['category'] = Variable<String>(category);
+    map['imported_at'] = Variable<DateTime>(importedAt);
+    return map;
+  }
+
+  ImportedLabResultsCompanion toCompanion(bool nullToAbsent) {
+    return ImportedLabResultsCompanion(
+      id: Value(id),
+      fileName: Value(fileName),
+      reportId: Value(reportId),
+      sampleDateRaw: Value(sampleDateRaw),
+      sampleDate: Value(sampleDate),
+      reportDateRaw: Value(reportDateRaw),
+      indicatorCode: Value(indicatorCode),
+      indicatorNameCn: Value(indicatorNameCn),
+      rawValue: Value(rawValue),
+      numericValue: numericValue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(numericValue),
+      unit: Value(unit),
+      referenceRange: Value(referenceRange),
+      category: Value(category),
+      importedAt: Value(importedAt),
+    );
+  }
+
+  factory ImportedLabResult.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ImportedLabResult(
+      id: serializer.fromJson<String>(json['id']),
+      fileName: serializer.fromJson<String>(json['fileName']),
+      reportId: serializer.fromJson<String>(json['reportId']),
+      sampleDateRaw: serializer.fromJson<String>(json['sampleDateRaw']),
+      sampleDate: serializer.fromJson<DateTime>(json['sampleDate']),
+      reportDateRaw: serializer.fromJson<String>(json['reportDateRaw']),
+      indicatorCode: serializer.fromJson<String>(json['indicatorCode']),
+      indicatorNameCn: serializer.fromJson<String>(json['indicatorNameCn']),
+      rawValue: serializer.fromJson<String>(json['rawValue']),
+      numericValue: serializer.fromJson<double?>(json['numericValue']),
+      unit: serializer.fromJson<String>(json['unit']),
+      referenceRange: serializer.fromJson<String>(json['referenceRange']),
+      category: serializer.fromJson<String>(json['category']),
+      importedAt: serializer.fromJson<DateTime>(json['importedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'fileName': serializer.toJson<String>(fileName),
+      'reportId': serializer.toJson<String>(reportId),
+      'sampleDateRaw': serializer.toJson<String>(sampleDateRaw),
+      'sampleDate': serializer.toJson<DateTime>(sampleDate),
+      'reportDateRaw': serializer.toJson<String>(reportDateRaw),
+      'indicatorCode': serializer.toJson<String>(indicatorCode),
+      'indicatorNameCn': serializer.toJson<String>(indicatorNameCn),
+      'rawValue': serializer.toJson<String>(rawValue),
+      'numericValue': serializer.toJson<double?>(numericValue),
+      'unit': serializer.toJson<String>(unit),
+      'referenceRange': serializer.toJson<String>(referenceRange),
+      'category': serializer.toJson<String>(category),
+      'importedAt': serializer.toJson<DateTime>(importedAt),
+    };
+  }
+
+  ImportedLabResult copyWith({
+    String? id,
+    String? fileName,
+    String? reportId,
+    String? sampleDateRaw,
+    DateTime? sampleDate,
+    String? reportDateRaw,
+    String? indicatorCode,
+    String? indicatorNameCn,
+    String? rawValue,
+    Value<double?> numericValue = const Value.absent(),
+    String? unit,
+    String? referenceRange,
+    String? category,
+    DateTime? importedAt,
+  }) => ImportedLabResult(
+    id: id ?? this.id,
+    fileName: fileName ?? this.fileName,
+    reportId: reportId ?? this.reportId,
+    sampleDateRaw: sampleDateRaw ?? this.sampleDateRaw,
+    sampleDate: sampleDate ?? this.sampleDate,
+    reportDateRaw: reportDateRaw ?? this.reportDateRaw,
+    indicatorCode: indicatorCode ?? this.indicatorCode,
+    indicatorNameCn: indicatorNameCn ?? this.indicatorNameCn,
+    rawValue: rawValue ?? this.rawValue,
+    numericValue: numericValue.present ? numericValue.value : this.numericValue,
+    unit: unit ?? this.unit,
+    referenceRange: referenceRange ?? this.referenceRange,
+    category: category ?? this.category,
+    importedAt: importedAt ?? this.importedAt,
+  );
+  ImportedLabResult copyWithCompanion(ImportedLabResultsCompanion data) {
+    return ImportedLabResult(
+      id: data.id.present ? data.id.value : this.id,
+      fileName: data.fileName.present ? data.fileName.value : this.fileName,
+      reportId: data.reportId.present ? data.reportId.value : this.reportId,
+      sampleDateRaw: data.sampleDateRaw.present
+          ? data.sampleDateRaw.value
+          : this.sampleDateRaw,
+      sampleDate: data.sampleDate.present
+          ? data.sampleDate.value
+          : this.sampleDate,
+      reportDateRaw: data.reportDateRaw.present
+          ? data.reportDateRaw.value
+          : this.reportDateRaw,
+      indicatorCode: data.indicatorCode.present
+          ? data.indicatorCode.value
+          : this.indicatorCode,
+      indicatorNameCn: data.indicatorNameCn.present
+          ? data.indicatorNameCn.value
+          : this.indicatorNameCn,
+      rawValue: data.rawValue.present ? data.rawValue.value : this.rawValue,
+      numericValue: data.numericValue.present
+          ? data.numericValue.value
+          : this.numericValue,
+      unit: data.unit.present ? data.unit.value : this.unit,
+      referenceRange: data.referenceRange.present
+          ? data.referenceRange.value
+          : this.referenceRange,
+      category: data.category.present ? data.category.value : this.category,
+      importedAt: data.importedAt.present
+          ? data.importedAt.value
+          : this.importedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ImportedLabResult(')
+          ..write('id: $id, ')
+          ..write('fileName: $fileName, ')
+          ..write('reportId: $reportId, ')
+          ..write('sampleDateRaw: $sampleDateRaw, ')
+          ..write('sampleDate: $sampleDate, ')
+          ..write('reportDateRaw: $reportDateRaw, ')
+          ..write('indicatorCode: $indicatorCode, ')
+          ..write('indicatorNameCn: $indicatorNameCn, ')
+          ..write('rawValue: $rawValue, ')
+          ..write('numericValue: $numericValue, ')
+          ..write('unit: $unit, ')
+          ..write('referenceRange: $referenceRange, ')
+          ..write('category: $category, ')
+          ..write('importedAt: $importedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    fileName,
+    reportId,
+    sampleDateRaw,
+    sampleDate,
+    reportDateRaw,
+    indicatorCode,
+    indicatorNameCn,
+    rawValue,
+    numericValue,
+    unit,
+    referenceRange,
+    category,
+    importedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ImportedLabResult &&
+          other.id == this.id &&
+          other.fileName == this.fileName &&
+          other.reportId == this.reportId &&
+          other.sampleDateRaw == this.sampleDateRaw &&
+          other.sampleDate == this.sampleDate &&
+          other.reportDateRaw == this.reportDateRaw &&
+          other.indicatorCode == this.indicatorCode &&
+          other.indicatorNameCn == this.indicatorNameCn &&
+          other.rawValue == this.rawValue &&
+          other.numericValue == this.numericValue &&
+          other.unit == this.unit &&
+          other.referenceRange == this.referenceRange &&
+          other.category == this.category &&
+          other.importedAt == this.importedAt);
+}
+
+class ImportedLabResultsCompanion extends UpdateCompanion<ImportedLabResult> {
+  final Value<String> id;
+  final Value<String> fileName;
+  final Value<String> reportId;
+  final Value<String> sampleDateRaw;
+  final Value<DateTime> sampleDate;
+  final Value<String> reportDateRaw;
+  final Value<String> indicatorCode;
+  final Value<String> indicatorNameCn;
+  final Value<String> rawValue;
+  final Value<double?> numericValue;
+  final Value<String> unit;
+  final Value<String> referenceRange;
+  final Value<String> category;
+  final Value<DateTime> importedAt;
+  final Value<int> rowid;
+  const ImportedLabResultsCompanion({
+    this.id = const Value.absent(),
+    this.fileName = const Value.absent(),
+    this.reportId = const Value.absent(),
+    this.sampleDateRaw = const Value.absent(),
+    this.sampleDate = const Value.absent(),
+    this.reportDateRaw = const Value.absent(),
+    this.indicatorCode = const Value.absent(),
+    this.indicatorNameCn = const Value.absent(),
+    this.rawValue = const Value.absent(),
+    this.numericValue = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.referenceRange = const Value.absent(),
+    this.category = const Value.absent(),
+    this.importedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ImportedLabResultsCompanion.insert({
+    required String id,
+    required String fileName,
+    required String reportId,
+    required String sampleDateRaw,
+    required DateTime sampleDate,
+    required String reportDateRaw,
+    required String indicatorCode,
+    required String indicatorNameCn,
+    required String rawValue,
+    this.numericValue = const Value.absent(),
+    required String unit,
+    required String referenceRange,
+    required String category,
+    required DateTime importedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       fileName = Value(fileName),
+       reportId = Value(reportId),
+       sampleDateRaw = Value(sampleDateRaw),
+       sampleDate = Value(sampleDate),
+       reportDateRaw = Value(reportDateRaw),
+       indicatorCode = Value(indicatorCode),
+       indicatorNameCn = Value(indicatorNameCn),
+       rawValue = Value(rawValue),
+       unit = Value(unit),
+       referenceRange = Value(referenceRange),
+       category = Value(category),
+       importedAt = Value(importedAt);
+  static Insertable<ImportedLabResult> custom({
+    Expression<String>? id,
+    Expression<String>? fileName,
+    Expression<String>? reportId,
+    Expression<String>? sampleDateRaw,
+    Expression<DateTime>? sampleDate,
+    Expression<String>? reportDateRaw,
+    Expression<String>? indicatorCode,
+    Expression<String>? indicatorNameCn,
+    Expression<String>? rawValue,
+    Expression<double>? numericValue,
+    Expression<String>? unit,
+    Expression<String>? referenceRange,
+    Expression<String>? category,
+    Expression<DateTime>? importedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (fileName != null) 'file_name': fileName,
+      if (reportId != null) 'report_id': reportId,
+      if (sampleDateRaw != null) 'sample_date_raw': sampleDateRaw,
+      if (sampleDate != null) 'sample_date': sampleDate,
+      if (reportDateRaw != null) 'report_date_raw': reportDateRaw,
+      if (indicatorCode != null) 'indicator_code': indicatorCode,
+      if (indicatorNameCn != null) 'indicator_name_cn': indicatorNameCn,
+      if (rawValue != null) 'raw_value': rawValue,
+      if (numericValue != null) 'numeric_value': numericValue,
+      if (unit != null) 'unit': unit,
+      if (referenceRange != null) 'reference_range': referenceRange,
+      if (category != null) 'category': category,
+      if (importedAt != null) 'imported_at': importedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ImportedLabResultsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? fileName,
+    Value<String>? reportId,
+    Value<String>? sampleDateRaw,
+    Value<DateTime>? sampleDate,
+    Value<String>? reportDateRaw,
+    Value<String>? indicatorCode,
+    Value<String>? indicatorNameCn,
+    Value<String>? rawValue,
+    Value<double?>? numericValue,
+    Value<String>? unit,
+    Value<String>? referenceRange,
+    Value<String>? category,
+    Value<DateTime>? importedAt,
+    Value<int>? rowid,
+  }) {
+    return ImportedLabResultsCompanion(
+      id: id ?? this.id,
+      fileName: fileName ?? this.fileName,
+      reportId: reportId ?? this.reportId,
+      sampleDateRaw: sampleDateRaw ?? this.sampleDateRaw,
+      sampleDate: sampleDate ?? this.sampleDate,
+      reportDateRaw: reportDateRaw ?? this.reportDateRaw,
+      indicatorCode: indicatorCode ?? this.indicatorCode,
+      indicatorNameCn: indicatorNameCn ?? this.indicatorNameCn,
+      rawValue: rawValue ?? this.rawValue,
+      numericValue: numericValue ?? this.numericValue,
+      unit: unit ?? this.unit,
+      referenceRange: referenceRange ?? this.referenceRange,
+      category: category ?? this.category,
+      importedAt: importedAt ?? this.importedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (fileName.present) {
+      map['file_name'] = Variable<String>(fileName.value);
+    }
+    if (reportId.present) {
+      map['report_id'] = Variable<String>(reportId.value);
+    }
+    if (sampleDateRaw.present) {
+      map['sample_date_raw'] = Variable<String>(sampleDateRaw.value);
+    }
+    if (sampleDate.present) {
+      map['sample_date'] = Variable<DateTime>(sampleDate.value);
+    }
+    if (reportDateRaw.present) {
+      map['report_date_raw'] = Variable<String>(reportDateRaw.value);
+    }
+    if (indicatorCode.present) {
+      map['indicator_code'] = Variable<String>(indicatorCode.value);
+    }
+    if (indicatorNameCn.present) {
+      map['indicator_name_cn'] = Variable<String>(indicatorNameCn.value);
+    }
+    if (rawValue.present) {
+      map['raw_value'] = Variable<String>(rawValue.value);
+    }
+    if (numericValue.present) {
+      map['numeric_value'] = Variable<double>(numericValue.value);
+    }
+    if (unit.present) {
+      map['unit'] = Variable<String>(unit.value);
+    }
+    if (referenceRange.present) {
+      map['reference_range'] = Variable<String>(referenceRange.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
+    if (importedAt.present) {
+      map['imported_at'] = Variable<DateTime>(importedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ImportedLabResultsCompanion(')
+          ..write('id: $id, ')
+          ..write('fileName: $fileName, ')
+          ..write('reportId: $reportId, ')
+          ..write('sampleDateRaw: $sampleDateRaw, ')
+          ..write('sampleDate: $sampleDate, ')
+          ..write('reportDateRaw: $reportDateRaw, ')
+          ..write('indicatorCode: $indicatorCode, ')
+          ..write('indicatorNameCn: $indicatorNameCn, ')
+          ..write('rawValue: $rawValue, ')
+          ..write('numericValue: $numericValue, ')
+          ..write('unit: $unit, ')
+          ..write('referenceRange: $referenceRange, ')
+          ..write('category: $category, ')
+          ..write('importedAt: $importedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $LabCategoriesTable labCategories = $LabCategoriesTable(this);
   late final $LabTestsTable labTests = $LabTestsTable(this);
   late final $LabResultsTable labResults = $LabResultsTable(this);
+  late final $ImportedLabResultsTable importedLabResults =
+      $ImportedLabResultsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1411,6 +2247,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     labCategories,
     labTests,
     labResults,
+    importedLabResults,
   ];
 }
 
@@ -2562,6 +3399,417 @@ typedef $$LabResultsTableProcessedTableManager =
       LabResult,
       PrefetchHooks Function({bool testId})
     >;
+typedef $$ImportedLabResultsTableCreateCompanionBuilder =
+    ImportedLabResultsCompanion Function({
+      required String id,
+      required String fileName,
+      required String reportId,
+      required String sampleDateRaw,
+      required DateTime sampleDate,
+      required String reportDateRaw,
+      required String indicatorCode,
+      required String indicatorNameCn,
+      required String rawValue,
+      Value<double?> numericValue,
+      required String unit,
+      required String referenceRange,
+      required String category,
+      required DateTime importedAt,
+      Value<int> rowid,
+    });
+typedef $$ImportedLabResultsTableUpdateCompanionBuilder =
+    ImportedLabResultsCompanion Function({
+      Value<String> id,
+      Value<String> fileName,
+      Value<String> reportId,
+      Value<String> sampleDateRaw,
+      Value<DateTime> sampleDate,
+      Value<String> reportDateRaw,
+      Value<String> indicatorCode,
+      Value<String> indicatorNameCn,
+      Value<String> rawValue,
+      Value<double?> numericValue,
+      Value<String> unit,
+      Value<String> referenceRange,
+      Value<String> category,
+      Value<DateTime> importedAt,
+      Value<int> rowid,
+    });
+
+class $$ImportedLabResultsTableFilterComposer
+    extends Composer<_$AppDatabase, $ImportedLabResultsTable> {
+  $$ImportedLabResultsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fileName => $composableBuilder(
+    column: $table.fileName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reportId => $composableBuilder(
+    column: $table.reportId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sampleDateRaw => $composableBuilder(
+    column: $table.sampleDateRaw,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get sampleDate => $composableBuilder(
+    column: $table.sampleDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reportDateRaw => $composableBuilder(
+    column: $table.reportDateRaw,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get indicatorCode => $composableBuilder(
+    column: $table.indicatorCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get indicatorNameCn => $composableBuilder(
+    column: $table.indicatorNameCn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get rawValue => $composableBuilder(
+    column: $table.rawValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get numericValue => $composableBuilder(
+    column: $table.numericValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get referenceRange => $composableBuilder(
+    column: $table.referenceRange,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get importedAt => $composableBuilder(
+    column: $table.importedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ImportedLabResultsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ImportedLabResultsTable> {
+  $$ImportedLabResultsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fileName => $composableBuilder(
+    column: $table.fileName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reportId => $composableBuilder(
+    column: $table.reportId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sampleDateRaw => $composableBuilder(
+    column: $table.sampleDateRaw,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get sampleDate => $composableBuilder(
+    column: $table.sampleDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reportDateRaw => $composableBuilder(
+    column: $table.reportDateRaw,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get indicatorCode => $composableBuilder(
+    column: $table.indicatorCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get indicatorNameCn => $composableBuilder(
+    column: $table.indicatorNameCn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get rawValue => $composableBuilder(
+    column: $table.rawValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get numericValue => $composableBuilder(
+    column: $table.numericValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get referenceRange => $composableBuilder(
+    column: $table.referenceRange,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get importedAt => $composableBuilder(
+    column: $table.importedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ImportedLabResultsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ImportedLabResultsTable> {
+  $$ImportedLabResultsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get fileName =>
+      $composableBuilder(column: $table.fileName, builder: (column) => column);
+
+  GeneratedColumn<String> get reportId =>
+      $composableBuilder(column: $table.reportId, builder: (column) => column);
+
+  GeneratedColumn<String> get sampleDateRaw => $composableBuilder(
+    column: $table.sampleDateRaw,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get sampleDate => $composableBuilder(
+    column: $table.sampleDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reportDateRaw => $composableBuilder(
+    column: $table.reportDateRaw,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get indicatorCode => $composableBuilder(
+    column: $table.indicatorCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get indicatorNameCn => $composableBuilder(
+    column: $table.indicatorNameCn,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get rawValue =>
+      $composableBuilder(column: $table.rawValue, builder: (column) => column);
+
+  GeneratedColumn<double> get numericValue => $composableBuilder(
+    column: $table.numericValue,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get unit =>
+      $composableBuilder(column: $table.unit, builder: (column) => column);
+
+  GeneratedColumn<String> get referenceRange => $composableBuilder(
+    column: $table.referenceRange,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get importedAt => $composableBuilder(
+    column: $table.importedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$ImportedLabResultsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ImportedLabResultsTable,
+          ImportedLabResult,
+          $$ImportedLabResultsTableFilterComposer,
+          $$ImportedLabResultsTableOrderingComposer,
+          $$ImportedLabResultsTableAnnotationComposer,
+          $$ImportedLabResultsTableCreateCompanionBuilder,
+          $$ImportedLabResultsTableUpdateCompanionBuilder,
+          (
+            ImportedLabResult,
+            BaseReferences<
+              _$AppDatabase,
+              $ImportedLabResultsTable,
+              ImportedLabResult
+            >,
+          ),
+          ImportedLabResult,
+          PrefetchHooks Function()
+        > {
+  $$ImportedLabResultsTableTableManager(
+    _$AppDatabase db,
+    $ImportedLabResultsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ImportedLabResultsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ImportedLabResultsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ImportedLabResultsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> fileName = const Value.absent(),
+                Value<String> reportId = const Value.absent(),
+                Value<String> sampleDateRaw = const Value.absent(),
+                Value<DateTime> sampleDate = const Value.absent(),
+                Value<String> reportDateRaw = const Value.absent(),
+                Value<String> indicatorCode = const Value.absent(),
+                Value<String> indicatorNameCn = const Value.absent(),
+                Value<String> rawValue = const Value.absent(),
+                Value<double?> numericValue = const Value.absent(),
+                Value<String> unit = const Value.absent(),
+                Value<String> referenceRange = const Value.absent(),
+                Value<String> category = const Value.absent(),
+                Value<DateTime> importedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ImportedLabResultsCompanion(
+                id: id,
+                fileName: fileName,
+                reportId: reportId,
+                sampleDateRaw: sampleDateRaw,
+                sampleDate: sampleDate,
+                reportDateRaw: reportDateRaw,
+                indicatorCode: indicatorCode,
+                indicatorNameCn: indicatorNameCn,
+                rawValue: rawValue,
+                numericValue: numericValue,
+                unit: unit,
+                referenceRange: referenceRange,
+                category: category,
+                importedAt: importedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String fileName,
+                required String reportId,
+                required String sampleDateRaw,
+                required DateTime sampleDate,
+                required String reportDateRaw,
+                required String indicatorCode,
+                required String indicatorNameCn,
+                required String rawValue,
+                Value<double?> numericValue = const Value.absent(),
+                required String unit,
+                required String referenceRange,
+                required String category,
+                required DateTime importedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => ImportedLabResultsCompanion.insert(
+                id: id,
+                fileName: fileName,
+                reportId: reportId,
+                sampleDateRaw: sampleDateRaw,
+                sampleDate: sampleDate,
+                reportDateRaw: reportDateRaw,
+                indicatorCode: indicatorCode,
+                indicatorNameCn: indicatorNameCn,
+                rawValue: rawValue,
+                numericValue: numericValue,
+                unit: unit,
+                referenceRange: referenceRange,
+                category: category,
+                importedAt: importedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ImportedLabResultsTable, ImportedLabResult>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $ImportedLabResultsTable,
+                    ImportedLabResult
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ImportedLabResultsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ImportedLabResultsTable,
+      ImportedLabResult,
+      $$ImportedLabResultsTableFilterComposer,
+      $$ImportedLabResultsTableOrderingComposer,
+      $$ImportedLabResultsTableAnnotationComposer,
+      $$ImportedLabResultsTableCreateCompanionBuilder,
+      $$ImportedLabResultsTableUpdateCompanionBuilder,
+      (
+        ImportedLabResult,
+        BaseReferences<
+          _$AppDatabase,
+          $ImportedLabResultsTable,
+          ImportedLabResult
+        >,
+      ),
+      ImportedLabResult,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2572,4 +3820,6 @@ class $AppDatabaseManager {
       $$LabTestsTableTableManager(_db, _db.labTests);
   $$LabResultsTableTableManager get labResults =>
       $$LabResultsTableTableManager(_db, _db.labResults);
+  $$ImportedLabResultsTableTableManager get importedLabResults =>
+      $$ImportedLabResultsTableTableManager(_db, _db.importedLabResults);
 }

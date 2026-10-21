@@ -39,32 +39,59 @@ class LabResults extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [LabCategories, LabTests, LabResults])
+
+/// CSV entries are separate from manual records to preserve original text values.
+class ImportedLabResults extends Table {
+  TextColumn get id => text()();
+  TextColumn get fileName => text()();
+  TextColumn get reportId => text()();
+  TextColumn get sampleDateRaw => text()();
+  DateTimeColumn get sampleDate => dateTime()();
+  TextColumn get reportDateRaw => text()();
+  TextColumn get indicatorCode => text()();
+  TextColumn get indicatorNameCn => text()();
+  TextColumn get rawValue => text()();
+  RealColumn get numericValue => real().nullable()();
+  TextColumn get unit => text()();
+  TextColumn get referenceRange => text()();
+  TextColumn get category => text()();
+  DateTimeColumn get importedAt => dateTime()();
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DriftDatabase(tables: [LabCategories, LabTests, LabResults, ImportedLabResults])
 class AppDatabase extends _$AppDatabase {
   AppDatabase()
-    : super(
-        driftDatabase(
+      : super(driftDatabase(
           name: 'health_record',
           web: DriftWebOptions(
             sqlite3Wasm: Uri.parse('sqlite3.wasm'),
             driftWorker: Uri.parse('drift_worker.dart.js'),
           ),
-        ),
-      );
+        ));
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-    beforeOpen: (details) async {
-      await customStatement('PRAGMA foreign_keys = ON');
-    },
-  );
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            await m.createTable(importedLabResults);
+          }
+        },
+        beforeOpen: (details) async {
+          await customStatement('PRAGMA foreign_keys = ON');
+        },
+      );
 
-  Stream<List<LabCategory>> watchCategories() => (select(
-    labCategories,
-  )..orderBy([(t) => OrderingTerm.asc(t.sortOrder)])).watch();
+  Stream<List<ImportedLabResult>> watchImportedResults() =>
+      (select(importedLabResults)
+        ..orderBy([(t) => OrderingTerm.desc(t.sampleDate)])).watch();
+
+  Stream<List<LabCategory>> watchCategories() =>
+      (select(labCategories)..orderBy([(t) => OrderingTerm.asc(t.sortOrder)])).watch();
 
   Stream<List<LabTest>> watchTests() =>
       (select(labTests)..orderBy([(t) => OrderingTerm.asc(t.nameZh)])).watch();
