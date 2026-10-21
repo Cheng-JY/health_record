@@ -48,8 +48,7 @@ class CsvImportService {
   CsvPreview parse(List<int> bytes) {
     final content = utf8.decode(bytes).replaceFirst('\uFEFF', '');
     // Input uses UTF-8, comma-separated RFC style CSV and period decimals.
-    final records = const CsvToListConverter(shouldParseNumbers: false)
-        .convert(content);
+    final records = csv.decode(content);
     if (records.isEmpty) throw const FormatException('CSV 文件为空');
     final header = records.first.map((e) => e.toString().trim()).toList();
     final absent = fields.where((f) => !header.contains(f)).toList();
@@ -116,20 +115,20 @@ class CsvImportService {
             .into(db.importedLabResults)
             .insert(
               ImportedLabResultsCompanion.insert(
-                id: row.id,
-                fileName: fileName,
-                reportId: v['report_id']!,
-                sampleDateRaw: v['sample_date']!,
-                sampleDate: row.sampleDate,
-                reportDateRaw: v['report_date']!,
-                indicatorCode: v['indicator_code']!,
-                indicatorNameCn: v['indicator_name_cn']!,
-                rawValue: v['value']!,
-                numericValue: Value(row.numericValue),
-                unit: v['unit']!,
-                referenceRange: v['reference_range']!,
-                category: v['category']!,
-                importedAt: DateTime.now(),
+          id: row.id,
+          fileName: fileName,
+          reportId: v['report_id']!,
+          sampleDateRaw: v['sample_date']!,
+          sampleDate: row.sampleDate,
+          reportDateRaw: v['report_date']!,
+          indicatorCode: v['indicator_code']!,
+          indicatorNameCn: v['indicator_name_cn']!,
+          rawValue: v['value']!,
+          numericValue: Value(row.numericValue),
+          unit: v['unit']!,
+          referenceRange: v['reference_range']!,
+          category: v['category']!,
+          importedAt: DateTime.now(),
               ),
             );
         added++;
