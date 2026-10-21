@@ -6,6 +6,7 @@ import 'features/labs/lab_repository.dart';
 import 'features/labs/lab_pages.dart';
 import 'features/labs/unified_lab_page.dart';
 import 'features/csv_import/csv_import_page.dart';
+import 'features/trends/unified_trends_page.dart';
 
 final databaseProvider = Provider<AppDatabase>((ref) {
   final db = AppDatabase();
@@ -68,7 +69,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           children: const [
             DashboardPage(),
             UnifiedLabPage(),
-            TrendsPage(),
+            UnifiedTrendsPage(),
             CsvImportPage(),
           ],
         ),

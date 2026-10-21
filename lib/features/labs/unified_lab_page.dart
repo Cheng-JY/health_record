@@ -207,7 +207,7 @@ class _UnifiedDetailPage extends ConsumerWidget {
                                   builder: (_) => CsvResultEditPage(result: r),
                                 ),
                               );
-                          if (changed == true && context.mounted){
+                          if (changed == true && context.mounted) {
                             Navigator.of(context).pop();
                           }
                         } else if (action == 'delete') {
@@ -266,7 +266,7 @@ class _UnifiedDetailPage extends ConsumerWidget {
                               CsvResultEditPage(result: item.imported!),
                         ),
                       );
-                      if (changed == true && context.mounted){
+                      if (changed == true && context.mounted) {
                         Navigator.of(context).pop();
                       }
                     },

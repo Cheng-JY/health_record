@@ -1,4 +1,3 @@
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -52,17 +51,11 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
         throw StateError('CSV 文件为空');
       }
 
-      final parsed = CsvImportService(
-        ref.read(databaseProvider),
-      ).parse(bytes);
+      final parsed = CsvImportService(ref.read(databaseProvider)).parse(bytes);
 
-      debugPrint(
-        'CSV valid rows: ${parsed.rows.length}',
-      );
+      debugPrint('CSV valid rows: ${parsed.rows.length}');
 
-      debugPrint(
-        'CSV errors: ${parsed.errors.length}',
-      );
+      debugPrint('CSV errors: ${parsed.errors.length}');
 
       if (!mounted) return;
 
@@ -92,9 +85,7 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
   Future<void> save() async {
     final p = preview;
 
-    if (p == null ||
-        p.rows.isEmpty ||
-        fileName == null) {
+    if (p == null || p.rows.isEmpty || fileName == null) {
       return;
     }
 
@@ -111,9 +102,8 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
     });
 
     try {
-      final outcome = await CsvImportService(
-        ref.read(databaseProvider),
-      ).importRows(p.rows, fileName!);
+      final outcome = await CsvImportService(ref.read(databaseProvider))
+          .importRows(p.rows, fileName!);
 
       if (!mounted) return;
 
@@ -156,8 +146,7 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
       final db = ref.read(databaseProvider);
 
       // 获取重复记录数量
-      final duplicateCount =
-          await db.countDuplicateImportedResults();
+      final duplicateCount = await db.countDuplicateImportedResults();
 
       if (!mounted) return;
 
@@ -208,8 +197,7 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
       }
 
       // 在数据库事务中进行清理
-      final removed =
-          await db.cleanupDuplicateImportedResults();
+      final removed = await db.cleanupDuplicateImportedResults();
 
       if (!mounted) return;
 
@@ -217,13 +205,8 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
         message = '清理完成：已软删除 $removed 条重复记录。';
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '已清理 $removed 条重复记录',
-          ),
-        ),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('已清理 $removed 条重复记录')));
     } catch (e) {
       if (!mounted) return;
 
@@ -250,10 +233,7 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Text(
-          'CSV 检查报告导入',
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
+        Text('CSV 检查报告导入', style: Theme.of(context).textTheme.headlineSmall),
 
         const SizedBox(height: 8),
 
@@ -267,7 +247,6 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
         // ----------------------------
         // CSV 导入操作
         // ----------------------------
-
         Wrap(
           spacing: 10,
           runSpacing: 10,
@@ -279,7 +258,8 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
             ),
 
             FilledButton.icon(
-              onPressed: busy ||
+              onPressed:
+                  busy ||
                       preview == null ||
                       preview!.rows.isEmpty ||
                       preview!.errors.isNotEmpty
@@ -296,19 +276,13 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
         // ----------------------------
         // 重复记录管理
         // ----------------------------
-
         Card(
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  '重复记录管理',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium,
-                ),
+                Text('重复记录管理', style: Theme.of(context).textTheme.titleMedium),
 
                 const SizedBox(height: 8),
 
@@ -321,11 +295,8 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
                 const SizedBox(height: 12),
 
                 OutlinedButton.icon(
-                  onPressed:
-                      busy ? null : cleanupDuplicates,
-                  icon: const Icon(
-                    Icons.cleaning_services_outlined,
-                  ),
+                  onPressed: busy ? null : cleanupDuplicates,
+                  icon: const Icon(Icons.cleaning_services_outlined),
                   label: const Text('检查并清理重复记录'),
                 ),
               ],
@@ -338,22 +309,17 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
         // ----------------------------
         // 加载状态与提示
         // ----------------------------
-
-        if (busy)
-          const LinearProgressIndicator(),
+        if (busy) const LinearProgressIndicator(),
 
         if (message != null)
           Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 12,
-            ),
+            padding: const EdgeInsets.symmetric(vertical: 12),
             child: SelectableText(message!),
           ),
 
         // ----------------------------
         // CSV 预览
         // ----------------------------
-
         if (preview != null) ...[
           const SizedBox(height: 14),
 
@@ -369,22 +335,12 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
             for (final error in preview!.errors.take(20))
               Padding(
                 padding: const EdgeInsets.only(bottom: 4),
-                child: Text(
-                  error,
-                  style: const TextStyle(
-                    color: Colors.red,
-                  ),
-                ),
+                child: Text(error, style: const TextStyle(color: Colors.red)),
               ),
 
           const SizedBox(height: 8),
 
-          Text(
-            '导入预览（前 30 行）',
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium,
-          ),
+          Text('导入预览（前 30 行）', style: Theme.of(context).textTheme.titleMedium),
 
           const SizedBox(height: 8),
 
@@ -404,20 +360,12 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
                 for (final r in preview!.rows.take(30))
                   DataRow(
                     cells: [
-                      DataCell(
-                        Text(r.values['sample_date'] ?? ''),
-                      ),
+                      DataCell(Text(r.values['sample_date'] ?? '')),
                       DataCell(Text(r.code)),
                       DataCell(Text(r.name)),
                       DataCell(Text(r.rawValue)),
-                      DataCell(
-                        Text(r.values['unit'] ?? ''),
-                      ),
-                      DataCell(
-                        Text(
-                          r.values['reference_range'] ?? '',
-                        ),
-                      ),
+                      DataCell(Text(r.values['unit'] ?? '')),
+                      DataCell(Text(r.values['reference_range'] ?? '')),
                     ],
                   ),
               ],
@@ -430,14 +378,10 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
         // ----------------------------
         // 已保存的 CSV 记录
         // ----------------------------
-
         imported.when(
-          loading: () =>
-              const LinearProgressIndicator(),
+          loading: () => const LinearProgressIndicator(),
 
-          error: (e, _) => Text(
-            '数据库查询失败：$e',
-          ),
+          error: (e, _) => Text('数据库查询失败：$e'),
 
           data: (items) {
             return Column(
@@ -445,9 +389,7 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
               children: [
                 Text(
                   '已导入记录：${items.length} 条',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium,
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
 
                 const SizedBox(height: 8),
