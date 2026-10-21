@@ -149,7 +149,7 @@ class LabDetailPage extends ConsumerWidget {
                               ],
                             ),
                           );
-                          if (confirmed == true){
+                          if (confirmed == true) {
                             await ref
                                 .read(labRepositoryProvider)
                                 .remove(item.id);
@@ -249,7 +249,7 @@ class _LabFormPageState extends ConsumerState<LabFormPage> {
                 onChanged: (v) {
                   setState(() => testId = v);
                   final t = options.where((t) => t.id == v).firstOrNull;
-                  if (t != null && widget.existing == null){
+                  if (t != null && widget.existing == null) {
                     unitCtrl.text = t.canonicalUnit;
                   }
                 },
@@ -298,7 +298,7 @@ class _LabFormPageState extends ConsumerState<LabFormPage> {
                               );
                           if (context.mounted) Navigator.pop(context);
                         } catch (e) {
-                          if (context.mounted){
+                          if (context.mounted) {
                             ScaffoldMessenger.of(
                               context,
                             ).showSnackBar(SnackBar(content: Text('保存失败：$e')));
@@ -397,7 +397,7 @@ class _TrendsPageState extends ConsumerState<TrendsPage> {
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Text('读取失败：$e'),
               data: (items) {
-                if (items.isEmpty){
+                if (items.isEmpty) {
                   return const Padding(
                     padding: EdgeInsets.all(36),
                     child: Text('还没有这个指标的记录，请先去“检查结果”录入。'),
@@ -448,11 +448,11 @@ class _TrendsPageState extends ConsumerState<TrendsPage> {
                                     final i = v.toInt();
                                     if (i < 0 ||
                                         i >= items.length ||
-                                        v != i.toDouble()){
+                                        v != i.toDouble()) {
                                       return const SizedBox.shrink();
                                     }
                                     if (items.length > 7 &&
-                                        i % ((items.length / 6).ceil()) != 0){
+                                        i % ((items.length / 6).ceil()) != 0) {
                                       return const SizedBox.shrink();
                                     }
                                     return Text(

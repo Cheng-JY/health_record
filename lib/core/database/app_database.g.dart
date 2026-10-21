@@ -1553,6 +1553,48 @@ class $ImportedLabResultsTable extends ImportedLabResults
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _originalSnapshotMeta = const VerificationMeta(
+    'originalSnapshot',
+  );
+  @override
+  late final GeneratedColumn<String> originalSnapshot = GeneratedColumn<String>(
+    'original_snapshot',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _editedAtMeta = const VerificationMeta(
+    'editedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> editedAt = GeneratedColumn<DateTime>(
+    'edited_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1569,6 +1611,10 @@ class $ImportedLabResultsTable extends ImportedLabResults
     referenceRange,
     category,
     importedAt,
+    originalSnapshot,
+    note,
+    editedAt,
+    deletedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1707,6 +1753,33 @@ class $ImportedLabResultsTable extends ImportedLabResults
     } else if (isInserting) {
       context.missing(_importedAtMeta);
     }
+    if (data.containsKey('original_snapshot')) {
+      context.handle(
+        _originalSnapshotMeta,
+        originalSnapshot.isAcceptableOrUnknown(
+          data['original_snapshot']!,
+          _originalSnapshotMeta,
+        ),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('edited_at')) {
+      context.handle(
+        _editedAtMeta,
+        editedAt.isAcceptableOrUnknown(data['edited_at']!, _editedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
     return context;
   }
 
@@ -1772,6 +1845,22 @@ class $ImportedLabResultsTable extends ImportedLabResults
         DriftSqlType.dateTime,
         data['${effectivePrefix}imported_at'],
       )!,
+      originalSnapshot: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}original_snapshot'],
+      ),
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      editedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}edited_at'],
+      ),
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
     );
   }
 
@@ -1797,6 +1886,10 @@ class ImportedLabResult extends DataClass
   final String referenceRange;
   final String category;
   final DateTime importedAt;
+  final String? originalSnapshot;
+  final String? note;
+  final DateTime? editedAt;
+  final DateTime? deletedAt;
   const ImportedLabResult({
     required this.id,
     required this.fileName,
@@ -1812,6 +1905,10 @@ class ImportedLabResult extends DataClass
     required this.referenceRange,
     required this.category,
     required this.importedAt,
+    this.originalSnapshot,
+    this.note,
+    this.editedAt,
+    this.deletedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1832,6 +1929,18 @@ class ImportedLabResult extends DataClass
     map['reference_range'] = Variable<String>(referenceRange);
     map['category'] = Variable<String>(category);
     map['imported_at'] = Variable<DateTime>(importedAt);
+    if (!nullToAbsent || originalSnapshot != null) {
+      map['original_snapshot'] = Variable<String>(originalSnapshot);
+    }
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    if (!nullToAbsent || editedAt != null) {
+      map['edited_at'] = Variable<DateTime>(editedAt);
+    }
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
     return map;
   }
 
@@ -1853,6 +1962,16 @@ class ImportedLabResult extends DataClass
       referenceRange: Value(referenceRange),
       category: Value(category),
       importedAt: Value(importedAt),
+      originalSnapshot: originalSnapshot == null && nullToAbsent
+          ? const Value.absent()
+          : Value(originalSnapshot),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      editedAt: editedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(editedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
     );
   }
 
@@ -1876,6 +1995,10 @@ class ImportedLabResult extends DataClass
       referenceRange: serializer.fromJson<String>(json['referenceRange']),
       category: serializer.fromJson<String>(json['category']),
       importedAt: serializer.fromJson<DateTime>(json['importedAt']),
+      originalSnapshot: serializer.fromJson<String?>(json['originalSnapshot']),
+      note: serializer.fromJson<String?>(json['note']),
+      editedAt: serializer.fromJson<DateTime?>(json['editedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
     );
   }
   @override
@@ -1896,6 +2019,10 @@ class ImportedLabResult extends DataClass
       'referenceRange': serializer.toJson<String>(referenceRange),
       'category': serializer.toJson<String>(category),
       'importedAt': serializer.toJson<DateTime>(importedAt),
+      'originalSnapshot': serializer.toJson<String?>(originalSnapshot),
+      'note': serializer.toJson<String?>(note),
+      'editedAt': serializer.toJson<DateTime?>(editedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
     };
   }
 
@@ -1914,6 +2041,10 @@ class ImportedLabResult extends DataClass
     String? referenceRange,
     String? category,
     DateTime? importedAt,
+    Value<String?> originalSnapshot = const Value.absent(),
+    Value<String?> note = const Value.absent(),
+    Value<DateTime?> editedAt = const Value.absent(),
+    Value<DateTime?> deletedAt = const Value.absent(),
   }) => ImportedLabResult(
     id: id ?? this.id,
     fileName: fileName ?? this.fileName,
@@ -1929,6 +2060,12 @@ class ImportedLabResult extends DataClass
     referenceRange: referenceRange ?? this.referenceRange,
     category: category ?? this.category,
     importedAt: importedAt ?? this.importedAt,
+    originalSnapshot: originalSnapshot.present
+        ? originalSnapshot.value
+        : this.originalSnapshot,
+    note: note.present ? note.value : this.note,
+    editedAt: editedAt.present ? editedAt.value : this.editedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
   );
   ImportedLabResult copyWithCompanion(ImportedLabResultsCompanion data) {
     return ImportedLabResult(
@@ -1962,6 +2099,12 @@ class ImportedLabResult extends DataClass
       importedAt: data.importedAt.present
           ? data.importedAt.value
           : this.importedAt,
+      originalSnapshot: data.originalSnapshot.present
+          ? data.originalSnapshot.value
+          : this.originalSnapshot,
+      note: data.note.present ? data.note.value : this.note,
+      editedAt: data.editedAt.present ? data.editedAt.value : this.editedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
     );
   }
 
@@ -1981,7 +2124,11 @@ class ImportedLabResult extends DataClass
           ..write('unit: $unit, ')
           ..write('referenceRange: $referenceRange, ')
           ..write('category: $category, ')
-          ..write('importedAt: $importedAt')
+          ..write('importedAt: $importedAt, ')
+          ..write('originalSnapshot: $originalSnapshot, ')
+          ..write('note: $note, ')
+          ..write('editedAt: $editedAt, ')
+          ..write('deletedAt: $deletedAt')
           ..write(')'))
         .toString();
   }
@@ -2002,6 +2149,10 @@ class ImportedLabResult extends DataClass
     referenceRange,
     category,
     importedAt,
+    originalSnapshot,
+    note,
+    editedAt,
+    deletedAt,
   );
   @override
   bool operator ==(Object other) =>
@@ -2020,7 +2171,11 @@ class ImportedLabResult extends DataClass
           other.unit == this.unit &&
           other.referenceRange == this.referenceRange &&
           other.category == this.category &&
-          other.importedAt == this.importedAt);
+          other.importedAt == this.importedAt &&
+          other.originalSnapshot == this.originalSnapshot &&
+          other.note == this.note &&
+          other.editedAt == this.editedAt &&
+          other.deletedAt == this.deletedAt);
 }
 
 class ImportedLabResultsCompanion extends UpdateCompanion<ImportedLabResult> {
@@ -2038,6 +2193,10 @@ class ImportedLabResultsCompanion extends UpdateCompanion<ImportedLabResult> {
   final Value<String> referenceRange;
   final Value<String> category;
   final Value<DateTime> importedAt;
+  final Value<String?> originalSnapshot;
+  final Value<String?> note;
+  final Value<DateTime?> editedAt;
+  final Value<DateTime?> deletedAt;
   final Value<int> rowid;
   const ImportedLabResultsCompanion({
     this.id = const Value.absent(),
@@ -2054,6 +2213,10 @@ class ImportedLabResultsCompanion extends UpdateCompanion<ImportedLabResult> {
     this.referenceRange = const Value.absent(),
     this.category = const Value.absent(),
     this.importedAt = const Value.absent(),
+    this.originalSnapshot = const Value.absent(),
+    this.note = const Value.absent(),
+    this.editedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ImportedLabResultsCompanion.insert({
@@ -2071,6 +2234,10 @@ class ImportedLabResultsCompanion extends UpdateCompanion<ImportedLabResult> {
     required String referenceRange,
     required String category,
     required DateTime importedAt,
+    this.originalSnapshot = const Value.absent(),
+    this.note = const Value.absent(),
+    this.editedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        fileName = Value(fileName),
@@ -2100,6 +2267,10 @@ class ImportedLabResultsCompanion extends UpdateCompanion<ImportedLabResult> {
     Expression<String>? referenceRange,
     Expression<String>? category,
     Expression<DateTime>? importedAt,
+    Expression<String>? originalSnapshot,
+    Expression<String>? note,
+    Expression<DateTime>? editedAt,
+    Expression<DateTime>? deletedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2117,6 +2288,10 @@ class ImportedLabResultsCompanion extends UpdateCompanion<ImportedLabResult> {
       if (referenceRange != null) 'reference_range': referenceRange,
       if (category != null) 'category': category,
       if (importedAt != null) 'imported_at': importedAt,
+      if (originalSnapshot != null) 'original_snapshot': originalSnapshot,
+      if (note != null) 'note': note,
+      if (editedAt != null) 'edited_at': editedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2136,6 +2311,10 @@ class ImportedLabResultsCompanion extends UpdateCompanion<ImportedLabResult> {
     Value<String>? referenceRange,
     Value<String>? category,
     Value<DateTime>? importedAt,
+    Value<String?>? originalSnapshot,
+    Value<String?>? note,
+    Value<DateTime?>? editedAt,
+    Value<DateTime?>? deletedAt,
     Value<int>? rowid,
   }) {
     return ImportedLabResultsCompanion(
@@ -2153,6 +2332,10 @@ class ImportedLabResultsCompanion extends UpdateCompanion<ImportedLabResult> {
       referenceRange: referenceRange ?? this.referenceRange,
       category: category ?? this.category,
       importedAt: importedAt ?? this.importedAt,
+      originalSnapshot: originalSnapshot ?? this.originalSnapshot,
+      note: note ?? this.note,
+      editedAt: editedAt ?? this.editedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2202,6 +2385,18 @@ class ImportedLabResultsCompanion extends UpdateCompanion<ImportedLabResult> {
     if (importedAt.present) {
       map['imported_at'] = Variable<DateTime>(importedAt.value);
     }
+    if (originalSnapshot.present) {
+      map['original_snapshot'] = Variable<String>(originalSnapshot.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (editedAt.present) {
+      map['edited_at'] = Variable<DateTime>(editedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2225,6 +2420,10 @@ class ImportedLabResultsCompanion extends UpdateCompanion<ImportedLabResult> {
           ..write('referenceRange: $referenceRange, ')
           ..write('category: $category, ')
           ..write('importedAt: $importedAt, ')
+          ..write('originalSnapshot: $originalSnapshot, ')
+          ..write('note: $note, ')
+          ..write('editedAt: $editedAt, ')
+          ..write('deletedAt: $deletedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3415,6 +3614,10 @@ typedef $$ImportedLabResultsTableCreateCompanionBuilder =
       required String referenceRange,
       required String category,
       required DateTime importedAt,
+      Value<String?> originalSnapshot,
+      Value<String?> note,
+      Value<DateTime?> editedAt,
+      Value<DateTime?> deletedAt,
       Value<int> rowid,
     });
 typedef $$ImportedLabResultsTableUpdateCompanionBuilder =
@@ -3433,6 +3636,10 @@ typedef $$ImportedLabResultsTableUpdateCompanionBuilder =
       Value<String> referenceRange,
       Value<String> category,
       Value<DateTime> importedAt,
+      Value<String?> originalSnapshot,
+      Value<String?> note,
+      Value<DateTime?> editedAt,
+      Value<DateTime?> deletedAt,
       Value<int> rowid,
     });
 
@@ -3512,6 +3719,26 @@ class $$ImportedLabResultsTableFilterComposer
 
   ColumnFilters<DateTime> get importedAt => $composableBuilder(
     column: $table.importedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get originalSnapshot => $composableBuilder(
+    column: $table.originalSnapshot,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get editedAt => $composableBuilder(
+    column: $table.editedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3594,6 +3821,26 @@ class $$ImportedLabResultsTableOrderingComposer
     column: $table.importedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get originalSnapshot => $composableBuilder(
+    column: $table.originalSnapshot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get editedAt => $composableBuilder(
+    column: $table.editedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ImportedLabResultsTableAnnotationComposer
@@ -3662,6 +3909,20 @@ class $$ImportedLabResultsTableAnnotationComposer
     column: $table.importedAt,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get originalSnapshot => $composableBuilder(
+    column: $table.originalSnapshot,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get editedAt =>
+      $composableBuilder(column: $table.editedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
 }
 
 class $$ImportedLabResultsTableTableManager
@@ -3718,6 +3979,10 @@ class $$ImportedLabResultsTableTableManager
                 Value<String> referenceRange = const Value.absent(),
                 Value<String> category = const Value.absent(),
                 Value<DateTime> importedAt = const Value.absent(),
+                Value<String?> originalSnapshot = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<DateTime?> editedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ImportedLabResultsCompanion(
                 id: id,
@@ -3734,6 +3999,10 @@ class $$ImportedLabResultsTableTableManager
                 referenceRange: referenceRange,
                 category: category,
                 importedAt: importedAt,
+                originalSnapshot: originalSnapshot,
+                note: note,
+                editedAt: editedAt,
+                deletedAt: deletedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3752,6 +4021,10 @@ class $$ImportedLabResultsTableTableManager
                 required String referenceRange,
                 required String category,
                 required DateTime importedAt,
+                Value<String?> originalSnapshot = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<DateTime?> editedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ImportedLabResultsCompanion.insert(
                 id: id,
@@ -3768,6 +4041,10 @@ class $$ImportedLabResultsTableTableManager
                 referenceRange: referenceRange,
                 category: category,
                 importedAt: importedAt,
+                originalSnapshot: originalSnapshot,
+                note: note,
+                editedAt: editedAt,
+                deletedAt: deletedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
