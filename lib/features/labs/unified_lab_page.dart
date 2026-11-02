@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../core/database/app_database.dart';
 import '../../main.dart';
 import '../csv_import/csv_import_page.dart';
+import '../hospitals/hospitals_page.dart';
 import 'lab_pages.dart';
 import 'csv_result_edit_page.dart';
 
@@ -34,32 +35,56 @@ class _IndicatorGroup {
   final List<_ResultItem> entries = [];
 }
 
-class UnifiedLabPage extends ConsumerWidget {
+class UnifiedLabPage extends ConsumerStatefulWidget {
   const UnifiedLabPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<UnifiedLabPage> createState() => _UnifiedLabPageState();
+}
+
+class _UnifiedLabPageState extends ConsumerState<UnifiedLabPage> {
+  String selectedHospital = 'all';
+
+  @override
+  Widget build(BuildContext context) {
     final csv = ref.watch(importedProvider);
+    final hospitals = ref.watch(hospitalSummariesProvider);
     final manual = ref.watch(resultsProvider);
     final tests = ref.watch(testsProvider);
     final categories = ref.watch(categoriesProvider);
     if (csv.hasError ||
         manual.hasError ||
         tests.hasError ||
-        categories.hasError) {
+        categories.hasError ||
+        hospitals.hasError) {
       return Center(
         child: SelectableText(
-          '读取失败：${csv.error ?? manual.error ?? tests.error ?? categories.error}',
+          '读取失败：${csv.error ?? manual.error ?? tests.error ?? categories.error ?? hospitals.error}',
         ),
       );
     }
     if (!csv.hasValue ||
         !manual.hasValue ||
         !tests.hasValue ||
-        !categories.hasValue) {
+        !categories.hasValue ||
+        !hospitals.hasValue) {
       return const Center(child: CircularProgressIndicator());
     }
 
+    final hospitalList = hospitals.requireValue;
+    final filteredCsv = csv.requireValue
+        .where(
+          (r) =>
+              selectedHospital == 'all' ||
+              (selectedHospital == 'unassigned'
+                  ? r.hospitalId == null
+                  : r.hospitalId == selectedHospital),
+        )
+        .toList();
+    final filteredManual =
+        selectedHospital == 'all' || selectedHospital == 'unassigned'
+        ? manual.requireValue
+        : <LabResult>[];
     final testById = {for (final t in tests.requireValue) t.id: t};
     final categoryById = {
       for (final c in categories.requireValue) c.id: c.nameZh,
@@ -74,7 +99,7 @@ class UnifiedLabPage extends ConsumerWidget {
           : 'name:$category:${name.trim()}';
     }
 
-    for (final result in manual.requireValue) {
+    for (final result in filteredManual) {
       final test = testById[result.testId];
       if (test == null) continue;
       final category = categoryById[test.categoryId] ?? '其他';
@@ -87,7 +112,7 @@ class UnifiedLabPage extends ConsumerWidget {
       group.entries.add(_ResultItem.manual(result, test.nameZh, category));
     }
 
-    for (final result in csv.requireValue) {
+    for (final result in filteredCsv) {
       final category = result.category.trim().isEmpty
           ? '未分类'
           : result.category.trim();
@@ -124,10 +149,36 @@ class UnifiedLabPage extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 18, 16, 10),
           child: Text(
-            '检查结果 · 共 $total 条（手动 ${manual.requireValue.length} / CSV ${csv.requireValue.length}）',
+            '检查结果 · 共 $total 条（手动 ${filteredManual.length} / CSV ${filteredCsv.length}）',
             style: Theme.of(context).textTheme.titleMedium,
           ),
         ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: DropdownButtonFormField<String>(
+            key: ValueKey('hospital-$selectedHospital-${hospitalList.length}'),
+            initialValue: selectedHospital,
+            decoration: const InputDecoration(
+              labelText: '筛选医院',
+              border: OutlineInputBorder(),
+            ),
+            items: [
+              const DropdownMenuItem(value: 'all', child: Text('所有医院 / 全部来源')),
+              const DropdownMenuItem(
+                value: 'unassigned',
+                child: Text('未指定医院（含手动记录）'),
+              ),
+              for (final item in hospitalList)
+                DropdownMenuItem(
+                  value: item.hospital.id,
+                  child: Text(item.hospital.name),
+                ),
+            ],
+            onChanged: (value) =>
+                setState(() => selectedHospital = value ?? 'all'),
+          ),
+        ),
+        const SizedBox(height: 12),
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 16),
           child: Text('按指标代码合并显示，保留每条记录的原始来源；未自动进行单位换算。'),

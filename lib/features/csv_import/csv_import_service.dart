@@ -118,6 +118,9 @@ class CsvImportService {
 
     await db.transaction(() async {
       for (final row in rows) {
+        final recordId = sha256
+            .convert(utf8.encode('$hospitalId:${row.id}'))
+            .toString();
         final v = row.values;
 
         final reportId = v['report_id']!.trim();
@@ -130,15 +133,24 @@ class CsvImportService {
         final existingRows =
             await (db.select(db.importedLabResults)..where(
                   (t) =>
+                      t.hospitalId.equals(hospitalId) &
                       t.sampleDate.equals(row.sampleDate) &
-                      t.rawValue.equals(rawValue) &
-                      t.unit.equals(v['unit']!.trim()),
+                      t.rawValue.equals(rawValue),
                 ))
                 .get();
 
         final isDuplicate = existingRows.any((existing) {
-          final incomingCode = indicatorCode.trim();
-          final existingCode = existing.indicatorCode.trim();
+          if (existing.unit.trim().replaceAll(
+                RegExp(r'/l\b', caseSensitive: false),
+                '/L',
+              ) !=
+              v['unit']!.trim().replaceAll(
+                RegExp(r'/l\b', caseSensitive: false),
+                '/L',
+              ))
+            return false;
+          final incomingCode = indicatorCode.trim().toUpperCase();
+          final existingCode = existing.indicatorCode.trim().toUpperCase();
 
           if (incomingCode.isNotEmpty && existingCode.isNotEmpty) {
             return incomingCode == existingCode;
@@ -150,7 +162,7 @@ class CsvImportService {
         // 同时检查原来的文件行 ID
         final existingId = await (db.select(
           db.importedLabResults,
-        )..where((t) => t.id.equals(row.id))).getSingleOrNull();
+        )..where((t) => t.id.equals(recordId))).getSingleOrNull();
 
         if (isDuplicate || existingId != null) {
           skipped++;
@@ -162,7 +174,7 @@ class CsvImportService {
             .into(db.importedLabResults)
             .insert(
               ImportedLabResultsCompanion.insert(
-                id: row.id,
+                id: recordId,
                 fileName: fileName,
                 reportId: reportId,
                 sampleDateRaw: v['sample_date']!,

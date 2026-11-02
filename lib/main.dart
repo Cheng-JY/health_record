@@ -7,6 +7,7 @@ import 'features/labs/lab_pages.dart';
 import 'features/labs/unified_lab_page.dart';
 import 'features/csv_import/csv_import_page.dart';
 import 'features/trends/unified_trends_page.dart';
+import 'features/hospitals/hospitals_page.dart';
 
 final databaseProvider = Provider<AppDatabase>((ref) {
   final db = AppDatabase();
@@ -71,6 +72,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             UnifiedLabPage(),
             UnifiedTrendsPage(),
             CsvImportPage(),
+            HospitalsPage(),
           ],
         ),
       ),
@@ -88,6 +90,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           NavigationDestination(icon: Icon(Icons.show_chart), label: '趋势'),
           NavigationDestination(icon: Icon(Icons.upload_file), label: 'CSV 导入'),
+          NavigationDestination(
+            icon: Icon(Icons.local_hospital_outlined),
+            label: '医院',
+          ),
         ],
       ),
       floatingActionButton: index == 1 && init.hasValue

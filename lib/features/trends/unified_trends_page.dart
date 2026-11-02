@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../main.dart';
 import '../csv_import/csv_import_page.dart';
+import '../hospitals/hospitals_page.dart';
 
 /// Read-only view over both sources. No schema changes or copying data.
 class _TrendRecord {
@@ -39,6 +40,7 @@ class UnifiedTrendsPage extends ConsumerStatefulWidget {
 class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
   String? selectedKey;
   String? selectedUnit;
+  String selectedHospital = 'all';
 
   String _key(String code, String name, String category) {
     final normalized = code.trim().toUpperCase();
@@ -56,23 +58,36 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
     final csv = ref.watch(importedProvider);
     final tests = ref.watch(testsProvider);
     final categories = ref.watch(categoriesProvider);
+    final hospitals = ref.watch(hospitalSummariesProvider);
 
     if (manual.hasError ||
         csv.hasError ||
         tests.hasError ||
-        categories.hasError) {
+        categories.hasError || hospitals.hasError) {
       return Center(
         child: SelectableText(
-          '读取趋势数据失败：${manual.error ?? csv.error ?? tests.error ?? categories.error}',
+          '读取趋势数据失败：${manual.error ?? csv.error ?? tests.error ?? categories.error ?? hospitals.error}',
         ),
       );
     }
     if (!manual.hasValue ||
         !csv.hasValue ||
         !tests.hasValue ||
-        !categories.hasValue) {
+        !categories.hasValue || !hospitals.hasValue) {
       return const Center(child: CircularProgressIndicator());
     }
+
+    final hospitalList = hospitals.requireValue;
+    final filteredCsv = csv.requireValue.where((r) => selectedHospital == 'all' ||
+        (selectedHospital == 'unassigned' ? r.hospitalId == null : r.hospitalId == selectedHospital)).toList();
+    
+    final filteredManual = manual.requireValue
+        .where(
+          (r) =>
+              selectedHospital == 'all' ||
+              selectedHospital == 'unassigned',
+        )
+        .toList();
 
     final testMap = {for (final t in tests.requireValue) t.id: t};
     final categoryMap = {
@@ -84,7 +99,7 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
       series.putIfAbsent(key, () => _TrendSeries(label)).records.add(record);
     }
 
-    for (final r in manual.requireValue) {
+    for (final r in filteredManual) {
       final t = testMap[r.testId];
       if (t == null) continue;
       final cat = categoryMap[t.categoryId] ?? '';
@@ -101,7 +116,7 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
       );
     }
 
-    for (final r in csv.requireValue) {
+    for (final r in filteredCsv) {
       final code = r.indicatorCode.trim();
       add(
         _key(code, r.indicatorNameCn, r.category),
@@ -117,7 +132,22 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
     }
 
     if (series.isEmpty) {
-      return const Center(child: Text('还没有检查记录，请先录入或导入 CSV。'));
+      return ListView(padding: const EdgeInsets.all(16), children: [
+        const Text('当前医院没有可显示的趋势记录。'),
+        const SizedBox(height: 12),
+        DropdownButtonFormField<String>(
+          key: ValueKey('hospital-empty-$selectedHospital'),
+          initialValue: selectedHospital,
+          decoration: const InputDecoration(labelText: '筛选医院', border: OutlineInputBorder()),
+          items: [
+            const DropdownMenuItem(value: 'all', child: Text('所有医院 / 全部来源')),
+            const DropdownMenuItem(value: 'unassigned', child: Text('未指定医院（含手动记录）')),
+            for (final item in hospitalList)
+              DropdownMenuItem(value: item.hospital.id, child: Text(item.hospital.name)),
+          ],
+          onChanged: (v) => setState(() { selectedHospital = v ?? 'all'; selectedKey = null; selectedUnit = null; }),
+        ),
+      ]);
     }
 
     final keys = series.keys.toList()
@@ -146,6 +176,21 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
         Text('检查指标趋势', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 8),
         const Text('合并查看手动录入和 CSV 数据。不同单位分别展示，不自动转换。'),
+        const SizedBox(height: 16),
+        DropdownButtonFormField<String>(
+          key: ValueKey('hospital-$selectedHospital-${hospitalList.length}'),
+          initialValue: selectedHospital,
+          decoration: const InputDecoration(labelText: '筛选医院', border: OutlineInputBorder()),
+          items: [
+            const DropdownMenuItem(value: 'all', child: Text('所有医院 / 全部来源')),
+            const DropdownMenuItem(value: 'unassigned', child: Text('未指定医院（含手动记录）')),
+            for (final item in hospitalList)
+              DropdownMenuItem(value: item.hospital.id, child: Text(item.hospital.name)),
+          ],
+          onChanged: (value) => setState(() {
+            selectedHospital = value ?? 'all'; selectedKey = null; selectedUnit = null;
+          }),
+        ),
         const SizedBox(height: 16),
         DropdownButtonFormField<String>(
           key: ValueKey('indicator-$key'),

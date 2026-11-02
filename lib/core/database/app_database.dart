@@ -238,13 +238,6 @@ class AppDatabase extends _$AppDatabase {
       "SELECT name FROM sqlite_master "
       "WHERE type = 'table' AND name = 'hospitals'",
     ).get();
-
-    print(
-      'SQLite database version: '
-      '${version.read<int>('user_version')}',
-    );
-
-    print('Hospitals table exists: ${tables.isNotEmpty}');
   }
 
   Stream<List<ImportedLabResult>> watchImportedResults() =>
@@ -280,10 +273,11 @@ class AppDatabase extends _$AppDatabase {
     final indicator = code.isNotEmpty ? 'code:$code' : 'name:$name';
 
     return [
+      row.hospitalId ?? '',
       row.sampleDate.toIso8601String(),
       indicator,
       row.rawValue.trim(),
-      row.unit.trim(),
+      row.unit.trim().replaceAll(RegExp(r'/l\b', caseSensitive: false), '/L'),
     ].join('\u001F');
   }
 

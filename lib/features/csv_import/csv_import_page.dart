@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../main.dart';
 import '../../core/database/app_database.dart';
 import 'csv_import_service.dart';
-import '../hospitals/hosipital_repository.dart';
+import '../hospitals/hospital_repository.dart';
 
 // 监听已导入的 CSV 检查记录
 final importedProvider = StreamProvider<List<ImportedLabResult>>(
@@ -105,6 +105,8 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
     setState(() {
       busy = true;
       message = null;
+      preview = null;
+      fileName = null;
     });
 
     try {
@@ -434,6 +436,47 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
           ],
         ),
 
+        const SizedBox(height: 10),
+
+        // 直接在导入按钮下面显示禁用原因，避免提示被下方卡片遮挡。
+        Builder(
+          builder: (context) {
+            final reason = busy
+                ? '正在处理，请稍候……'
+                : selectedHospitalId == null
+                    ? '请先选择检查医院（即使下拉框显示名称，也请重新点击选择一次）。'
+                    : preview == null
+                        ? '尚未成功读取 CSV。请查看下方错误提示。'
+                        : preview!.rows.isEmpty
+                            ? 'CSV 中没有有效检查记录。'
+                            : preview!.errors.isNotEmpty
+                                ? 'CSV 有 ${preview!.errors.length} 条解析错误，暂不能导入。'
+                                : '已准备好导入：${preview!.rows.length} 条有效记录。';
+            return SelectableText(
+              '导入状态：$reason\n'
+              '医院 UUID：${selectedHospitalId ?? "未选择"}  |  '
+              '文件：${fileName ?? "无"}  |  '
+              '有效记录：${preview?.rows.length ?? 0}  |  '
+              '错误：${preview?.errors.length ?? 0}',
+              style: TextStyle(
+                fontSize: 13,
+                color: preview != null &&
+                        preview!.rows.isNotEmpty &&
+                        preview!.errors.isEmpty &&
+                        selectedHospitalId != null
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.error,
+              ),
+            );
+          },
+        ),
+
+        if (message != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: SelectableText(message!),
+          ),
+
         const SizedBox(height: 20),
 
         // ========================================
@@ -474,11 +517,6 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
         // ========================================
         if (busy) const LinearProgressIndicator(),
 
-        if (message != null)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: SelectableText(message!),
-          ),
 
         // ========================================
         // 6. CSV 文件预览
