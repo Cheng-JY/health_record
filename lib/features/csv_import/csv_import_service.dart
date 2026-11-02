@@ -95,45 +95,95 @@ class CsvImportService {
 
   /// Transaction: all new records succeed or none are written.
   /// Reimporting the exact same file skips existing row identifiers.
+
   Future<({int added, int skipped})> importRows(
     List<CsvLabRow> rows,
-    String fileName,
-  ) async {
+    String fileName, {
+    required String hospitalId,
+  }) async {
+    // =====================================
+    // 1. 检查所选医院是否存在（新增）
+    // =====================================
+
+    final hospital = await (db.select(
+      db.hospitals,
+    )..where((h) => h.id.equals(hospitalId))).getSingleOrNull();
+
+    if (hospital == null) {
+      throw StateError('选择的医院不存在');
+    }
+
     var added = 0;
     var skipped = 0;
+
     await db.transaction(() async {
       for (final row in rows) {
-        final existing = await (db.select(
+        final v = row.values;
+
+        final reportId = v['report_id']!.trim();
+        final indicatorCode = v['indicator_code']!.trim();
+        final indicatorName = v['indicator_name_cn']!.trim();
+        final rawValue = v['value']!.trim();
+
+        // 优先使用指标代码；代码为空时使用指标名称
+
+        final existingRows =
+            await (db.select(db.importedLabResults)..where(
+                  (t) =>
+                      t.sampleDate.equals(row.sampleDate) &
+                      t.rawValue.equals(rawValue) &
+                      t.unit.equals(v['unit']!.trim()),
+                ))
+                .get();
+
+        final isDuplicate = existingRows.any((existing) {
+          final incomingCode = indicatorCode.trim();
+          final existingCode = existing.indicatorCode.trim();
+
+          if (incomingCode.isNotEmpty && existingCode.isNotEmpty) {
+            return incomingCode == existingCode;
+          }
+
+          return existing.indicatorNameCn.trim() == indicatorName.trim();
+        });
+
+        // 同时检查原来的文件行 ID
+        final existingId = await (db.select(
           db.importedLabResults,
         )..where((t) => t.id.equals(row.id))).getSingleOrNull();
-        if (existing != null) {
+
+        if (isDuplicate || existingId != null) {
           skipped++;
           continue;
         }
-        final v = row.values;
+
+        // 插入新的检查记录
         await db
             .into(db.importedLabResults)
             .insert(
               ImportedLabResultsCompanion.insert(
                 id: row.id,
                 fileName: fileName,
-                reportId: v['report_id']!,
+                reportId: reportId,
                 sampleDateRaw: v['sample_date']!,
                 sampleDate: row.sampleDate,
                 reportDateRaw: v['report_date']!,
-                indicatorCode: v['indicator_code']!,
-                indicatorNameCn: v['indicator_name_cn']!,
-                rawValue: v['value']!,
+                indicatorCode: indicatorCode,
+                indicatorNameCn: indicatorName,
+                rawValue: rawValue,
                 numericValue: Value(row.numericValue),
                 unit: v['unit']!,
                 referenceRange: v['reference_range']!,
                 category: v['category']!,
                 importedAt: DateTime.now(),
+                hospitalId: Value(hospitalId),
               ),
             );
+
         added++;
       }
     });
+
     return (added: added, skipped: skipped);
   }
 }

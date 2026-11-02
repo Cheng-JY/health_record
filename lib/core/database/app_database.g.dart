@@ -1397,6 +1397,311 @@ class LabResultsCompanion extends UpdateCompanion<LabResult> {
   }
 }
 
+class $HospitalsTable extends Hospitals
+    with TableInfo<$HospitalsTable, Hospital> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $HospitalsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _cityMeta = const VerificationMeta('city');
+  @override
+  late final GeneratedColumn<String> city = GeneratedColumn<String>(
+    'city',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, city, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'hospitals';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Hospital> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('city')) {
+      context.handle(
+        _cityMeta,
+        city.isAcceptableOrUnknown(data['city']!, _cityMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Hospital map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Hospital(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      city: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}city'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $HospitalsTable createAlias(String alias) {
+    return $HospitalsTable(attachedDatabase, alias);
+  }
+}
+
+class Hospital extends DataClass implements Insertable<Hospital> {
+  final String id;
+  final String name;
+  final String? city;
+  final DateTime createdAt;
+  const Hospital({
+    required this.id,
+    required this.name,
+    this.city,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || city != null) {
+      map['city'] = Variable<String>(city);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  HospitalsCompanion toCompanion(bool nullToAbsent) {
+    return HospitalsCompanion(
+      id: Value(id),
+      name: Value(name),
+      city: city == null && nullToAbsent ? const Value.absent() : Value(city),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory Hospital.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Hospital(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      city: serializer.fromJson<String?>(json['city']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'city': serializer.toJson<String?>(city),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  Hospital copyWith({
+    String? id,
+    String? name,
+    Value<String?> city = const Value.absent(),
+    DateTime? createdAt,
+  }) => Hospital(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    city: city.present ? city.value : this.city,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  Hospital copyWithCompanion(HospitalsCompanion data) {
+    return Hospital(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      city: data.city.present ? data.city.value : this.city,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Hospital(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('city: $city, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, city, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Hospital &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.city == this.city &&
+          other.createdAt == this.createdAt);
+}
+
+class HospitalsCompanion extends UpdateCompanion<Hospital> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String?> city;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const HospitalsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.city = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  HospitalsCompanion.insert({
+    required String id,
+    required String name,
+    this.city = const Value.absent(),
+    required DateTime createdAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       name = Value(name),
+       createdAt = Value(createdAt);
+  static Insertable<Hospital> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? city,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (city != null) 'city': city,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  HospitalsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? name,
+    Value<String?>? city,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return HospitalsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      city: city ?? this.city,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (city.present) {
+      map['city'] = Variable<String>(city.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HospitalsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('city: $city, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $ImportedLabResultsTable extends ImportedLabResults
     with TableInfo<$ImportedLabResultsTable, ImportedLabResult> {
   @override
@@ -1595,6 +1900,20 @@ class $ImportedLabResultsTable extends ImportedLabResults
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _hospitalIdMeta = const VerificationMeta(
+    'hospitalId',
+  );
+  @override
+  late final GeneratedColumn<String> hospitalId = GeneratedColumn<String>(
+    'hospital_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES hospitals (id)',
+    ),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1615,6 +1934,7 @@ class $ImportedLabResultsTable extends ImportedLabResults
     note,
     editedAt,
     deletedAt,
+    hospitalId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1780,6 +2100,12 @@ class $ImportedLabResultsTable extends ImportedLabResults
         deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
       );
     }
+    if (data.containsKey('hospital_id')) {
+      context.handle(
+        _hospitalIdMeta,
+        hospitalId.isAcceptableOrUnknown(data['hospital_id']!, _hospitalIdMeta),
+      );
+    }
     return context;
   }
 
@@ -1861,6 +2187,10 @@ class $ImportedLabResultsTable extends ImportedLabResults
         DriftSqlType.dateTime,
         data['${effectivePrefix}deleted_at'],
       ),
+      hospitalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}hospital_id'],
+      ),
     );
   }
 
@@ -1890,6 +2220,7 @@ class ImportedLabResult extends DataClass
   final String? note;
   final DateTime? editedAt;
   final DateTime? deletedAt;
+  final String? hospitalId;
   const ImportedLabResult({
     required this.id,
     required this.fileName,
@@ -1909,6 +2240,7 @@ class ImportedLabResult extends DataClass
     this.note,
     this.editedAt,
     this.deletedAt,
+    this.hospitalId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1941,6 +2273,9 @@ class ImportedLabResult extends DataClass
     if (!nullToAbsent || deletedAt != null) {
       map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
+    if (!nullToAbsent || hospitalId != null) {
+      map['hospital_id'] = Variable<String>(hospitalId);
+    }
     return map;
   }
 
@@ -1972,6 +2307,9 @@ class ImportedLabResult extends DataClass
       deletedAt: deletedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(deletedAt),
+      hospitalId: hospitalId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(hospitalId),
     );
   }
 
@@ -1999,6 +2337,7 @@ class ImportedLabResult extends DataClass
       note: serializer.fromJson<String?>(json['note']),
       editedAt: serializer.fromJson<DateTime?>(json['editedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      hospitalId: serializer.fromJson<String?>(json['hospitalId']),
     );
   }
   @override
@@ -2023,6 +2362,7 @@ class ImportedLabResult extends DataClass
       'note': serializer.toJson<String?>(note),
       'editedAt': serializer.toJson<DateTime?>(editedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'hospitalId': serializer.toJson<String?>(hospitalId),
     };
   }
 
@@ -2045,6 +2385,7 @@ class ImportedLabResult extends DataClass
     Value<String?> note = const Value.absent(),
     Value<DateTime?> editedAt = const Value.absent(),
     Value<DateTime?> deletedAt = const Value.absent(),
+    Value<String?> hospitalId = const Value.absent(),
   }) => ImportedLabResult(
     id: id ?? this.id,
     fileName: fileName ?? this.fileName,
@@ -2066,6 +2407,7 @@ class ImportedLabResult extends DataClass
     note: note.present ? note.value : this.note,
     editedAt: editedAt.present ? editedAt.value : this.editedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    hospitalId: hospitalId.present ? hospitalId.value : this.hospitalId,
   );
   ImportedLabResult copyWithCompanion(ImportedLabResultsCompanion data) {
     return ImportedLabResult(
@@ -2105,6 +2447,9 @@ class ImportedLabResult extends DataClass
       note: data.note.present ? data.note.value : this.note,
       editedAt: data.editedAt.present ? data.editedAt.value : this.editedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      hospitalId: data.hospitalId.present
+          ? data.hospitalId.value
+          : this.hospitalId,
     );
   }
 
@@ -2128,7 +2473,8 @@ class ImportedLabResult extends DataClass
           ..write('originalSnapshot: $originalSnapshot, ')
           ..write('note: $note, ')
           ..write('editedAt: $editedAt, ')
-          ..write('deletedAt: $deletedAt')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('hospitalId: $hospitalId')
           ..write(')'))
         .toString();
   }
@@ -2153,6 +2499,7 @@ class ImportedLabResult extends DataClass
     note,
     editedAt,
     deletedAt,
+    hospitalId,
   );
   @override
   bool operator ==(Object other) =>
@@ -2175,7 +2522,8 @@ class ImportedLabResult extends DataClass
           other.originalSnapshot == this.originalSnapshot &&
           other.note == this.note &&
           other.editedAt == this.editedAt &&
-          other.deletedAt == this.deletedAt);
+          other.deletedAt == this.deletedAt &&
+          other.hospitalId == this.hospitalId);
 }
 
 class ImportedLabResultsCompanion extends UpdateCompanion<ImportedLabResult> {
@@ -2197,6 +2545,7 @@ class ImportedLabResultsCompanion extends UpdateCompanion<ImportedLabResult> {
   final Value<String?> note;
   final Value<DateTime?> editedAt;
   final Value<DateTime?> deletedAt;
+  final Value<String?> hospitalId;
   final Value<int> rowid;
   const ImportedLabResultsCompanion({
     this.id = const Value.absent(),
@@ -2217,6 +2566,7 @@ class ImportedLabResultsCompanion extends UpdateCompanion<ImportedLabResult> {
     this.note = const Value.absent(),
     this.editedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
+    this.hospitalId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ImportedLabResultsCompanion.insert({
@@ -2238,6 +2588,7 @@ class ImportedLabResultsCompanion extends UpdateCompanion<ImportedLabResult> {
     this.note = const Value.absent(),
     this.editedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
+    this.hospitalId = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        fileName = Value(fileName),
@@ -2271,6 +2622,7 @@ class ImportedLabResultsCompanion extends UpdateCompanion<ImportedLabResult> {
     Expression<String>? note,
     Expression<DateTime>? editedAt,
     Expression<DateTime>? deletedAt,
+    Expression<String>? hospitalId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2292,6 +2644,7 @@ class ImportedLabResultsCompanion extends UpdateCompanion<ImportedLabResult> {
       if (note != null) 'note': note,
       if (editedAt != null) 'edited_at': editedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
+      if (hospitalId != null) 'hospital_id': hospitalId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2315,6 +2668,7 @@ class ImportedLabResultsCompanion extends UpdateCompanion<ImportedLabResult> {
     Value<String?>? note,
     Value<DateTime?>? editedAt,
     Value<DateTime?>? deletedAt,
+    Value<String?>? hospitalId,
     Value<int>? rowid,
   }) {
     return ImportedLabResultsCompanion(
@@ -2336,6 +2690,7 @@ class ImportedLabResultsCompanion extends UpdateCompanion<ImportedLabResult> {
       note: note ?? this.note,
       editedAt: editedAt ?? this.editedAt,
       deletedAt: deletedAt ?? this.deletedAt,
+      hospitalId: hospitalId ?? this.hospitalId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2397,6 +2752,9 @@ class ImportedLabResultsCompanion extends UpdateCompanion<ImportedLabResult> {
     if (deletedAt.present) {
       map['deleted_at'] = Variable<DateTime>(deletedAt.value);
     }
+    if (hospitalId.present) {
+      map['hospital_id'] = Variable<String>(hospitalId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2424,6 +2782,7 @@ class ImportedLabResultsCompanion extends UpdateCompanion<ImportedLabResult> {
           ..write('note: $note, ')
           ..write('editedAt: $editedAt, ')
           ..write('deletedAt: $deletedAt, ')
+          ..write('hospitalId: $hospitalId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2436,6 +2795,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LabCategoriesTable labCategories = $LabCategoriesTable(this);
   late final $LabTestsTable labTests = $LabTestsTable(this);
   late final $LabResultsTable labResults = $LabResultsTable(this);
+  late final $HospitalsTable hospitals = $HospitalsTable(this);
   late final $ImportedLabResultsTable importedLabResults =
       $ImportedLabResultsTable(this);
   @override
@@ -2446,6 +2806,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     labCategories,
     labTests,
     labResults,
+    hospitals,
     importedLabResults,
   ];
 }
@@ -3598,6 +3959,292 @@ typedef $$LabResultsTableProcessedTableManager =
       LabResult,
       PrefetchHooks Function({bool testId})
     >;
+typedef $$HospitalsTableCreateCompanionBuilder = HospitalsCompanion Function({
+  required String id,
+  required String name,
+  Value<String?> city,
+  required DateTime createdAt,
+  Value<int> rowid,
+});
+typedef $$HospitalsTableUpdateCompanionBuilder = HospitalsCompanion Function({
+  Value<String> id,
+  Value<String> name,
+  Value<String?> city,
+  Value<DateTime> createdAt,
+  Value<int> rowid,
+});
+
+final class $$HospitalsTableReferences
+    extends BaseReferences<_$AppDatabase, $HospitalsTable, Hospital> {
+  $$HospitalsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$ImportedLabResultsTable, List<ImportedLabResult>>
+  _importedLabResultsRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.importedLabResults,
+        aliasName: 'hospitals__id__imported_lab_results__hospital_id',
+      );
+
+  $$ImportedLabResultsTableProcessedTableManager get importedLabResultsRefs {
+    final manager = $$ImportedLabResultsTableTableManager(
+      $_db,
+      $_db.importedLabResults,
+    ).filter((f) => f.hospitalId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _importedLabResultsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$HospitalsTableFilterComposer
+    extends Composer<_$AppDatabase, $HospitalsTable> {
+  $$HospitalsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get city => $composableBuilder(
+    column: $table.city,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> importedLabResultsRefs(
+    Expression<bool> Function($$ImportedLabResultsTableFilterComposer f) f,
+  ) {
+    final $$ImportedLabResultsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.importedLabResults,
+      getReferencedColumn: (t) => t.hospitalId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ImportedLabResultsTableFilterComposer(
+            $db: $db,
+            $table: $db.importedLabResults,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$HospitalsTableOrderingComposer
+    extends Composer<_$AppDatabase, $HospitalsTable> {
+  $$HospitalsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get city => $composableBuilder(
+    column: $table.city,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$HospitalsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $HospitalsTable> {
+  $$HospitalsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get city =>
+      $composableBuilder(column: $table.city, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  Expression<T> importedLabResultsRefs<T extends Object>(
+    Expression<T> Function($$ImportedLabResultsTableAnnotationComposer a) f,
+  ) {
+    final $$ImportedLabResultsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.importedLabResults,
+          getReferencedColumn: (t) => t.hospitalId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ImportedLabResultsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.importedLabResults,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$HospitalsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $HospitalsTable,
+          Hospital,
+          $$HospitalsTableFilterComposer,
+          $$HospitalsTableOrderingComposer,
+          $$HospitalsTableAnnotationComposer,
+          $$HospitalsTableCreateCompanionBuilder,
+          $$HospitalsTableUpdateCompanionBuilder,
+          (Hospital, $$HospitalsTableReferences),
+          Hospital,
+          PrefetchHooks Function({bool importedLabResultsRefs})
+        > {
+  $$HospitalsTableTableManager(_$AppDatabase db, $HospitalsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$HospitalsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$HospitalsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$HospitalsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String?> city = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => HospitalsCompanion(
+                id: id,
+                name: name,
+                city: city,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String name,
+                Value<String?> city = const Value.absent(),
+                required DateTime createdAt,
+                Value<int> rowid = const Value.absent(),
+              }) => HospitalsCompanion.insert(
+                id: id,
+                name: name,
+                city: city,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$HospitalsTable, Hospital>(table),
+                  $$HospitalsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({importedLabResultsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (importedLabResultsRefs) db.importedLabResults,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (importedLabResultsRefs)
+                    await $_getPrefetchedData<
+                      Hospital,
+                      $HospitalsTable,
+                      ImportedLabResult
+                    >(
+                      currentTable: table,
+                      referencedTable: $$HospitalsTableReferences
+                          ._importedLabResultsRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$HospitalsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).importedLabResultsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.hospitalId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$HospitalsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $HospitalsTable,
+      Hospital,
+      $$HospitalsTableFilterComposer,
+      $$HospitalsTableOrderingComposer,
+      $$HospitalsTableAnnotationComposer,
+      $$HospitalsTableCreateCompanionBuilder,
+      $$HospitalsTableUpdateCompanionBuilder,
+      (Hospital, $$HospitalsTableReferences),
+      Hospital,
+      PrefetchHooks Function({bool importedLabResultsRefs})
+    >;
 typedef $$ImportedLabResultsTableCreateCompanionBuilder =
     ImportedLabResultsCompanion Function({
       required String id,
@@ -3618,6 +4265,7 @@ typedef $$ImportedLabResultsTableCreateCompanionBuilder =
       Value<String?> note,
       Value<DateTime?> editedAt,
       Value<DateTime?> deletedAt,
+      Value<String?> hospitalId,
       Value<int> rowid,
     });
 typedef $$ImportedLabResultsTableUpdateCompanionBuilder =
@@ -3640,8 +4288,40 @@ typedef $$ImportedLabResultsTableUpdateCompanionBuilder =
       Value<String?> note,
       Value<DateTime?> editedAt,
       Value<DateTime?> deletedAt,
+      Value<String?> hospitalId,
       Value<int> rowid,
     });
+
+final class $$ImportedLabResultsTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $ImportedLabResultsTable,
+          ImportedLabResult
+        > {
+  $$ImportedLabResultsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $HospitalsTable _hospitalIdTable(_$AppDatabase db) => db.hospitals
+      .createAlias('imported_lab_results__hospital_id__hospitals__id');
+
+  $$HospitalsTableProcessedTableManager? get hospitalId {
+    final $_column = $_itemColumn<String>('hospital_id');
+    if ($_column == null) return null;
+    final manager = $$HospitalsTableTableManager(
+      $_db,
+      $_db.hospitals,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_hospitalIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
 
 class $$ImportedLabResultsTableFilterComposer
     extends Composer<_$AppDatabase, $ImportedLabResultsTable> {
@@ -3741,6 +4421,29 @@ class $$ImportedLabResultsTableFilterComposer
     column: $table.deletedAt,
     builder: (column) => ColumnFilters(column),
   );
+
+  $$HospitalsTableFilterComposer get hospitalId {
+    final $$HospitalsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.hospitalId,
+      referencedTable: $db.hospitals,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HospitalsTableFilterComposer(
+            $db: $db,
+            $table: $db.hospitals,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$ImportedLabResultsTableOrderingComposer
@@ -3841,6 +4544,29 @@ class $$ImportedLabResultsTableOrderingComposer
     column: $table.deletedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  $$HospitalsTableOrderingComposer get hospitalId {
+    final $$HospitalsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.hospitalId,
+      referencedTable: $db.hospitals,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HospitalsTableOrderingComposer(
+            $db: $db,
+            $table: $db.hospitals,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$ImportedLabResultsTableAnnotationComposer
@@ -3923,6 +4649,29 @@ class $$ImportedLabResultsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get deletedAt =>
       $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  $$HospitalsTableAnnotationComposer get hospitalId {
+    final $$HospitalsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.hospitalId,
+      referencedTable: $db.hospitals,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HospitalsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.hospitals,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$ImportedLabResultsTableTableManager
@@ -3936,16 +4685,9 @@ class $$ImportedLabResultsTableTableManager
           $$ImportedLabResultsTableAnnotationComposer,
           $$ImportedLabResultsTableCreateCompanionBuilder,
           $$ImportedLabResultsTableUpdateCompanionBuilder,
-          (
-            ImportedLabResult,
-            BaseReferences<
-              _$AppDatabase,
-              $ImportedLabResultsTable,
-              ImportedLabResult
-            >,
-          ),
+          (ImportedLabResult, $$ImportedLabResultsTableReferences),
           ImportedLabResult,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool hospitalId})
         > {
   $$ImportedLabResultsTableTableManager(
     _$AppDatabase db,
@@ -3983,6 +4725,7 @@ class $$ImportedLabResultsTableTableManager
                 Value<String?> note = const Value.absent(),
                 Value<DateTime?> editedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String?> hospitalId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ImportedLabResultsCompanion(
                 id: id,
@@ -4003,6 +4746,7 @@ class $$ImportedLabResultsTableTableManager
                 note: note,
                 editedAt: editedAt,
                 deletedAt: deletedAt,
+                hospitalId: hospitalId,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -4025,6 +4769,7 @@ class $$ImportedLabResultsTableTableManager
                 Value<String?> note = const Value.absent(),
                 Value<DateTime?> editedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String?> hospitalId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ImportedLabResultsCompanion.insert(
                 id: id,
@@ -4045,6 +4790,7 @@ class $$ImportedLabResultsTableTableManager
                 note: note,
                 editedAt: editedAt,
                 deletedAt: deletedAt,
+                hospitalId: hospitalId,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -4053,15 +4799,49 @@ class $$ImportedLabResultsTableTableManager
                   e.readTable<$ImportedLabResultsTable, ImportedLabResult>(
                     table,
                   ),
-                  BaseReferences<
-                    _$AppDatabase,
-                    $ImportedLabResultsTable,
-                    ImportedLabResult
-                  >(db, table, e),
+                  $$ImportedLabResultsTableReferences(db, table, e),
                 ),
               )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({hospitalId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (hospitalId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.hospitalId,
+                        referencedTable: $$ImportedLabResultsTableReferences
+                            ._hospitalIdTable(db),
+                        referencedColumn: $$ImportedLabResultsTableReferences
+                            ._hospitalIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
         ),
       );
 }
@@ -4076,16 +4856,9 @@ typedef $$ImportedLabResultsTableProcessedTableManager =
       $$ImportedLabResultsTableAnnotationComposer,
       $$ImportedLabResultsTableCreateCompanionBuilder,
       $$ImportedLabResultsTableUpdateCompanionBuilder,
-      (
-        ImportedLabResult,
-        BaseReferences<
-          _$AppDatabase,
-          $ImportedLabResultsTable,
-          ImportedLabResult
-        >,
-      ),
+      (ImportedLabResult, $$ImportedLabResultsTableReferences),
       ImportedLabResult,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool hospitalId})
     >;
 
 class $AppDatabaseManager {
@@ -4097,6 +4870,8 @@ class $AppDatabaseManager {
       $$LabTestsTableTableManager(_db, _db.labTests);
   $$LabResultsTableTableManager get labResults =>
       $$LabResultsTableTableManager(_db, _db.labResults);
+  $$HospitalsTableTableManager get hospitals =>
+      $$HospitalsTableTableManager(_db, _db.hospitals);
   $$ImportedLabResultsTableTableManager get importedLabResults =>
       $$ImportedLabResultsTableTableManager(_db, _db.importedLabResults);
 }

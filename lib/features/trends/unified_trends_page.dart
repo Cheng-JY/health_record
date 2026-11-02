@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../../core/database/app_database.dart';
 import '../../main.dart';
 import '../csv_import/csv_import_page.dart';
 
@@ -58,19 +57,27 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
     final tests = ref.watch(testsProvider);
     final categories = ref.watch(categoriesProvider);
 
-    if (manual.hasError || csv.hasError || tests.hasError || categories.hasError) {
+    if (manual.hasError ||
+        csv.hasError ||
+        tests.hasError ||
+        categories.hasError) {
       return Center(
         child: SelectableText(
           '读取趋势数据失败：${manual.error ?? csv.error ?? tests.error ?? categories.error}',
         ),
       );
     }
-    if (!manual.hasValue || !csv.hasValue || !tests.hasValue || !categories.hasValue) {
+    if (!manual.hasValue ||
+        !csv.hasValue ||
+        !tests.hasValue ||
+        !categories.hasValue) {
       return const Center(child: CircularProgressIndicator());
     }
 
     final testMap = {for (final t in tests.requireValue) t.id: t};
-    final categoryMap = {for (final c in categories.requireValue) c.id: c.nameZh};
+    final categoryMap = {
+      for (final c in categories.requireValue) c.id: c.nameZh,
+    };
     final series = <String, _TrendSeries>{};
 
     void add(String key, String label, _TrendRecord record) {
@@ -115,7 +122,9 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
 
     final keys = series.keys.toList()
       ..sort((a, b) => series[a]!.label.compareTo(series[b]!.label));
-    final preferred = keys.where((k) => series[k]!.records.where((r) => r.value != null).length >= 2);
+    final preferred = keys.where(
+      (k) => series[k]!.records.where((r) => r.value != null).length >= 2,
+    );
     final key = series.containsKey(selectedKey)
         ? selectedKey!
         : (preferred.isNotEmpty ? preferred.first : keys.first);
@@ -124,8 +133,12 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
     final unit = units.contains(selectedUnit) ? selectedUnit! : units.first;
     final sameUnit = group.records.where((r) => r.unit == unit).toList()
       ..sort((a, b) => a.date.compareTo(b.date));
-    final numeric = sameUnit.where((r) => r.value != null && r.value!.isFinite).toList();
-    final other = sameUnit.where((r) => r.value == null || !r.value!.isFinite).toList();
+    final numeric = sameUnit
+        .where((r) => r.value != null && r.value!.isFinite)
+        .toList();
+    final other = sameUnit
+        .where((r) => r.value == null || !r.value!.isFinite)
+        .toList();
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -138,10 +151,16 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
           key: ValueKey('indicator-$key'),
           initialValue: key,
           isExpanded: true,
-          decoration: const InputDecoration(labelText: '检查指标', border: OutlineInputBorder()),
+          decoration: const InputDecoration(
+            labelText: '检查指标',
+            border: OutlineInputBorder(),
+          ),
           items: [
             for (final k in keys)
-              DropdownMenuItem(value: k, child: Text(series[k]!.label, overflow: TextOverflow.ellipsis)),
+              DropdownMenuItem(
+                value: k,
+                child: Text(series[k]!.label, overflow: TextOverflow.ellipsis),
+              ),
           ],
           onChanged: (k) => setState(() {
             selectedKey = k;
@@ -153,14 +172,22 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
           DropdownButtonFormField<String>(
             key: ValueKey('unit-$key-$unit'),
             initialValue: unit,
-            decoration: const InputDecoration(labelText: '单位（分别绘制）', border: OutlineInputBorder()),
-            items: [for (final u in units) DropdownMenuItem(value: u, child: Text(u.isEmpty ? '无单位' : u))],
+            decoration: const InputDecoration(
+              labelText: '单位（分别绘制）',
+              border: OutlineInputBorder(),
+            ),
+            items: [
+              for (final u in units)
+                DropdownMenuItem(value: u, child: Text(u.isEmpty ? '无单位' : u)),
+            ],
             onChanged: (u) => setState(() => selectedUnit = u),
           ),
           const SizedBox(height: 12),
         ],
-        Text('数值记录：${numeric.length} · 非数值记录：${other.length}',
-            style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          '数值记录：${numeric.length} · 非数值记录：${other.length}',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         const SizedBox(height: 16),
         if (numeric.isEmpty)
           const Text('该指标在当前单位下没有可绘图的数值结果。')
@@ -177,7 +204,9 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
           ListTile(
             dense: true,
             title: Text('${r.rawValue} ${r.unit}'),
-            subtitle: Text('${DateFormat('yyyy-MM-dd HH:mm').format(r.date)} · ${r.source}'),
+            subtitle: Text(
+              '${DateFormat('yyyy-MM-dd HH:mm').format(r.date)} · ${r.source}',
+            ),
           ),
         const SizedBox(height: 12),
         const Text('提示：这是数据展示，不是医学诊断；相同指标代码不一定保证相同检测方法或标本。'),
@@ -187,7 +216,11 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
 }
 
 class _TrendChart extends StatelessWidget {
-  const _TrendChart({required this.points, required this.unit, required this.x});
+  const _TrendChart({
+    required this.points,
+    required this.unit,
+    required this.x,
+  });
   final List<_TrendRecord> points;
   final String unit;
   final double Function(DateTime) x;
@@ -222,8 +255,12 @@ class _TrendChart extends StatelessWidget {
                 maxY: high + padding,
                 gridData: const FlGridData(show: true),
                 titlesData: FlTitlesData(
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  rightTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
@@ -233,8 +270,10 @@ class _TrendChart extends StatelessWidget {
                         final dt = DateTime.fromMillisecondsSinceEpoch(
                           (v * Duration.millisecondsPerDay).round(),
                         );
-                        return Text(DateFormat('MM/dd').format(dt),
-                            style: const TextStyle(fontSize: 10));
+                        return Text(
+                          DateFormat('MM/dd').format(dt),
+                          style: const TextStyle(fontSize: 10),
+                        );
                       },
                     ),
                   ),

@@ -62,12 +62,22 @@ class ImportedLabResults extends Table {
   TextColumn get note => text().nullable()();
   DateTimeColumn get editedAt => dateTime().nullable()();
   DateTimeColumn get deletedAt => dateTime().nullable()();
+  TextColumn get hospitalId => text().nullable().references(Hospitals, #id)();
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+class Hospitals extends Table {
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  TextColumn get city => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
   @override
   Set<Column> get primaryKey => {id};
 }
 
 @DriftDatabase(
-  tables: [LabCategories, LabTests, LabResults, ImportedLabResults],
+  tables: [LabCategories, LabTests, LabResults, ImportedLabResults, Hospitals],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase()
@@ -82,7 +92,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -115,9 +125,57 @@ class AppDatabase extends _$AppDatabase {
           'ADD COLUMN deleted_at INTEGER',
         );
       }
+
+      // v3 -> v4
+      // 为 CSV 表增加医院字段，并创建医院表
+      if (from < 4) {
+        await m.createTable(hospitals);
+
+        // 历史结果允许没有医院
+        await customStatement(
+          'ALTER TABLE imported_lab_results '
+          'ADD COLUMN hospital_id TEXT '
+          'REFERENCES hospitals(id)',
+        );
+      }
     },
 
     beforeOpen: (details) async {
+      // 检查医院表是否存在
+      final tables = await customSelect(
+        "SELECT name FROM sqlite_master "
+        "WHERE type = 'table' AND name = 'hospitals'",
+      ).get();
+
+      if (tables.isEmpty) {
+        // 创建缺失的医院表
+        await customStatement('''
+          CREATE TABLE IF NOT EXISTS hospitals (
+            id TEXT NOT NULL PRIMARY KEY,
+            name TEXT NOT NULL,
+            city TEXT,
+            created_at INTEGER NOT NULL
+          )
+        ''');
+      }
+
+      // 检查 CSV 记录是否已有 hospital_id 字段
+      final columns = await customSelect(
+        'PRAGMA table_info(imported_lab_results)',
+      ).get();
+
+      final hasHospitalId = columns.any(
+        (row) => row.read<String>('name') == 'hospital_id',
+      );
+
+      if (!hasHospitalId) {
+        await customStatement(
+          'ALTER TABLE imported_lab_results '
+          'ADD COLUMN hospital_id TEXT '
+          'REFERENCES hospitals(id)',
+        );
+      }
+
       await customStatement('PRAGMA foreign_keys = ON');
     },
   );
@@ -171,6 +229,22 @@ class AppDatabase extends _$AppDatabase {
     await (update(importedLabResults)..where((t) => t.id.equals(id))).write(
       ImportedLabResultsCompanion(deletedAt: Value(DateTime.now())),
     );
+  }
+
+  Future<void> checkHospitalDatabase() async {
+    final version = await customSelect('PRAGMA user_version').getSingle();
+
+    final tables = await customSelect(
+      "SELECT name FROM sqlite_master "
+      "WHERE type = 'table' AND name = 'hospitals'",
+    ).get();
+
+    print(
+      'SQLite database version: '
+      '${version.read<int>('user_version')}',
+    );
+
+    print('Hospitals table exists: ${tables.isNotEmpty}');
   }
 
   Stream<List<ImportedLabResult>> watchImportedResults() =>
