@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,27 +9,121 @@ import '../../main.dart';
 import '../csv_import/csv_import_page.dart';
 import '../hospitals/hospitals_page.dart';
 
-/// Read-only view over both sources. No schema changes or copying data.
+// A plotting replacement is never written back to the database.
+enum _LessThanRule { threshold, half, custom }
+
+class _ResultValue {
+  const _ResultValue(this.number, {this.censored = false});
+  final double? number;
+  final bool censored;
+}
+
+class _Reference {
+  const _Reference(this.low, this.high, this.original);
+  final double? low;
+  final double? high;
+  final String original;
+
+  bool get hasBound => low != null || high != null;
+  String get signature => '${low ?? ""}|${high ?? ""}|${original.trim()}';
+}
+
 class _TrendRecord {
   const _TrendRecord({
     required this.date,
-    required this.value,
     required this.rawValue,
+    required this.exactValue,
     required this.unit,
     required this.source,
+    required this.reference,
   });
-
   final DateTime date;
-  final double? value;
   final String rawValue;
+  final double? exactValue;
   final String unit;
   final String source;
+  final _Reference reference;
 }
 
 class _TrendSeries {
   _TrendSeries(this.label);
   final String label;
   final List<_TrendRecord> records = [];
+}
+
+class _PlottedPoint {
+  const _PlottedPoint(this.record, this.result);
+  final _TrendRecord record;
+  final _ResultValue result;
+}
+
+// Interpret only plain numeric values and explicit inequalities.
+// Never parse qualitative results such as positive / negative into a number.
+_ResultValue _parseValue(
+  _TrendRecord record,
+  _LessThanRule rule,
+  double factor,
+) {
+  final raw = record.rawValue
+      .trim()
+      .replaceAll('≤', '<=')
+      .replaceAll('≥', '>=')
+      .replaceAll('＜', '<')
+      .replaceAll('＞', '>');
+  final normalized = raw.replaceAll(',', '.');
+  final direct = double.tryParse(normalized);
+  if (direct != null && direct.isFinite) {
+    return _ResultValue(direct);
+  }
+  final match = RegExp(
+    r'^(<=|>=|<|>)\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)$',
+  ).firstMatch(normalized);
+  if (match == null) {
+    final exact = record.exactValue;
+    return _ResultValue(exact != null && exact.isFinite ? exact : null);
+  }
+  final threshold = double.tryParse(match.group(2)!);
+  if (threshold == null || !threshold.isFinite) return const _ResultValue(null);
+  final op = match.group(1)!;
+  double plotted = threshold;
+  if (op.startsWith('<')) {
+    if (rule == _LessThanRule.half) {
+      plotted = threshold / 2;
+    } else if (rule == _LessThanRule.custom) {
+      plotted = threshold * factor;
+    }
+  }
+  // Values above a detection bound use their threshold as a boundary marker.
+  // They are NOT exact measured values, even if they plot at the threshold.
+  return _ResultValue(plotted, censored: true);
+}
+
+_Reference _referenceFromText(String raw) {
+  final text = raw
+      .trim()
+      .replaceAll('≤', '<=')
+      .replaceAll('≥', '>=')
+      .replaceAll('＜', '<')
+      .replaceAll('＞', '>')
+      .replaceAll('–', '-')
+      .replaceAll('—', '-')
+      .replaceAll('~', '-')
+      .replaceAll('～', '-')
+      .replaceAll(',', '.');
+  const number = r'([+-]?(?:\d+(?:\.\d*)?|\.\d+))';
+  final between = RegExp('^$number\\s*-\\s*$number\$').firstMatch(text);
+  if (between != null) {
+    final a = double.tryParse(between.group(1)!);
+    final b = double.tryParse(between.group(2)!);
+    if (a != null && b != null && a <= b) return _Reference(a, b, raw);
+  }
+  final below = RegExp('^(?:<|<=)\\s*$number\$').firstMatch(text);
+  if (below != null)
+    return _Reference(null, double.tryParse(below.group(1)!), raw);
+  final above = RegExp('^(?:>|>=)\\s*$number\$').firstMatch(text);
+  if (above != null)
+    return _Reference(double.tryParse(above.group(1)!), null, raw);
+  return _Reference(null, null, raw);
 }
 
 class UnifiedTrendsPage extends ConsumerStatefulWidget {
@@ -41,6 +137,8 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
   String? selectedKey;
   String? selectedUnit;
   String selectedHospital = 'all';
+  _LessThanRule lessThanRule = _LessThanRule.threshold;
+  double customFactor = 0.95;
 
   String _key(String code, String name, String category) {
     final normalized = code.trim().toUpperCase();
@@ -48,7 +146,6 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
     return 'name:${category.trim()}:${name.trim()}';
   }
 
-  // Convert DateTime to a real, monotonic chart x-axis (days since epoch).
   double _x(DateTime date) =>
       date.millisecondsSinceEpoch / Duration.millisecondsPerDay;
 
@@ -63,7 +160,8 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
     if (manual.hasError ||
         csv.hasError ||
         tests.hasError ||
-        categories.hasError || hospitals.hasError) {
+        categories.hasError ||
+        hospitals.hasError) {
       return Center(
         child: SelectableText(
           '读取趋势数据失败：${manual.error ?? csv.error ?? tests.error ?? categories.error ?? hospitals.error}',
@@ -73,22 +171,32 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
     if (!manual.hasValue ||
         !csv.hasValue ||
         !tests.hasValue ||
-        !categories.hasValue || !hospitals.hasValue) {
+        !categories.hasValue ||
+        !hospitals.hasValue) {
       return const Center(child: CircularProgressIndicator());
     }
 
     final hospitalList = hospitals.requireValue;
-    final filteredCsv = csv.requireValue.where((r) => selectedHospital == 'all' ||
-        (selectedHospital == 'unassigned' ? r.hospitalId == null : r.hospitalId == selectedHospital)).toList();
-    
-    final filteredManual = manual.requireValue
+    final validHospitalIds = hospitalList.map((e) => e.hospital.id).toSet();
+    final selected =
+        selectedHospital == 'all' ||
+            selectedHospital == 'unassigned' ||
+            validHospitalIds.contains(selectedHospital)
+        ? selectedHospital
+        : 'all';
+    final filteredCsv = csv.requireValue
         .where(
           (r) =>
-              selectedHospital == 'all' ||
-              selectedHospital == 'unassigned',
+              selected == 'all' ||
+              (selected == 'unassigned'
+                  ? r.hospitalId == null
+                  : r.hospitalId == selected),
         )
         .toList();
-
+    // Manual records have no hospitalId in schema v4.
+    final filteredManual = manual.requireValue
+        .where((_) => selected == 'all' || selected == 'unassigned')
+        .toList();
     final testMap = {for (final t in tests.requireValue) t.id: t};
     final categoryMap = {
       for (final c in categories.requireValue) c.id: c.nameZh,
@@ -108,10 +216,17 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
         '${t.nameZh} (${t.code})',
         _TrendRecord(
           date: r.measuredAt,
-          value: r.valueNumeric,
           rawValue: r.valueNumeric.toString(),
+          exactValue: r.valueNumeric,
           unit: r.unit.trim(),
           source: '手动录入',
+          reference: _Reference(
+            r.referenceLow,
+            r.referenceHigh,
+            r.referenceLow == null && r.referenceHigh == null
+                ? ''
+                : '${r.referenceLow ?? ""}–${r.referenceHigh ?? ""}',
+          ),
         ),
       );
     }
@@ -123,141 +238,257 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
         code.isEmpty ? r.indicatorNameCn : '${r.indicatorNameCn} ($code)',
         _TrendRecord(
           date: r.sampleDate,
-          value: r.numericValue,
           rawValue: r.rawValue,
+          exactValue: r.numericValue,
           unit: r.unit.trim(),
           source: 'CSV',
+          reference: _referenceFromText(r.referenceRange),
         ),
       );
-    }
-
-    if (series.isEmpty) {
-      return ListView(padding: const EdgeInsets.all(16), children: [
-        const Text('当前医院没有可显示的趋势记录。'),
-        const SizedBox(height: 12),
-        DropdownButtonFormField<String>(
-          key: ValueKey('hospital-empty-$selectedHospital'),
-          initialValue: selectedHospital,
-          decoration: const InputDecoration(labelText: '筛选医院', border: OutlineInputBorder()),
-          items: [
-            const DropdownMenuItem(value: 'all', child: Text('所有医院 / 全部来源')),
-            const DropdownMenuItem(value: 'unassigned', child: Text('未指定医院（含手动记录）')),
-            for (final item in hospitalList)
-              DropdownMenuItem(value: item.hospital.id, child: Text(item.hospital.name)),
-          ],
-          onChanged: (v) => setState(() { selectedHospital = v ?? 'all'; selectedKey = null; selectedUnit = null; }),
-        ),
-      ]);
     }
 
     final keys = series.keys.toList()
       ..sort((a, b) => series[a]!.label.compareTo(series[b]!.label));
     final preferred = keys.where(
-      (k) => series[k]!.records.where((r) => r.value != null).length >= 2,
+      (k) =>
+          series[k]!.records
+              .where(
+                (r) =>
+                    _parseValue(r, lessThanRule, customFactor).number != null,
+              )
+              .length >=
+          2,
     );
     final key = series.containsKey(selectedKey)
-        ? selectedKey!
-        : (preferred.isNotEmpty ? preferred.first : keys.first);
-    final group = series[key]!;
-    final units = group.records.map((r) => r.unit).toSet().toList()..sort();
-    final unit = units.contains(selectedUnit) ? selectedUnit! : units.first;
-    final sameUnit = group.records.where((r) => r.unit == unit).toList()
-      ..sort((a, b) => a.date.compareTo(b.date));
-    final numeric = sameUnit
-        .where((r) => r.value != null && r.value!.isFinite)
+        ? selectedKey
+        : (preferred.isNotEmpty
+              ? preferred.first
+              : (keys.isEmpty ? null : keys.first));
+    final group = key == null ? null : series[key];
+    final units = group == null
+        ? <String>[]
+        : (group.records.map((r) => r.unit).toSet().toList()..sort());
+    final unit = units.contains(selectedUnit)
+        ? selectedUnit
+        : (units.isEmpty ? null : units.first);
+    final sameUnit = group == null
+        ? <_TrendRecord>[]
+        : (group.records.where((r) => r.unit == unit).toList()
+            ..sort((a, b) => a.date.compareTo(b.date)));
+    final plotted = [
+      for (final r in sameUnit)
+        _PlottedPoint(r, _parseValue(r, lessThanRule, customFactor)),
+    ];
+    final numeric = plotted
+        .where((p) => p.result.number != null && p.result.number!.isFinite)
         .toList();
-    final other = sameUnit
-        .where((r) => r.value == null || !r.value!.isFinite)
-        .toList();
+    final other = plotted.where((p) => p.result.number == null).toList();
+    final references = sameUnit.where((r) => r.reference.hasBound).toList();
+    final referenceSignatures = references
+        .map((r) => '${r.reference.low}|${r.reference.high}')
+        .toSet();
+    final sameReference = referenceSignatures.length <= 1;
+    // With conflicting ranges, no single line is portrayed as universal.
+    final chartReference = sameReference && references.isNotEmpty
+        ? references.last.reference
+        : null;
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
         Text('检查指标趋势', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 8),
-        const Text('合并查看手动录入和 CSV 数据。不同单位分别展示，不自动转换。'),
+        const Text('合并查看手动录入和 CSV 数据。不同单位分别显示；原始结果不会被修改。'),
         const SizedBox(height: 16),
         DropdownButtonFormField<String>(
-          key: ValueKey('hospital-$selectedHospital-${hospitalList.length}'),
-          initialValue: selectedHospital,
-          decoration: const InputDecoration(labelText: '筛选医院', border: OutlineInputBorder()),
-          items: [
-            const DropdownMenuItem(value: 'all', child: Text('所有医院 / 全部来源')),
-            const DropdownMenuItem(value: 'unassigned', child: Text('未指定医院（含手动记录）')),
-            for (final item in hospitalList)
-              DropdownMenuItem(value: item.hospital.id, child: Text(item.hospital.name)),
-          ],
-          onChanged: (value) => setState(() {
-            selectedHospital = value ?? 'all'; selectedKey = null; selectedUnit = null;
-          }),
-        ),
-        const SizedBox(height: 16),
-        DropdownButtonFormField<String>(
-          key: ValueKey('indicator-$key'),
-          initialValue: key,
-          isExpanded: true,
+          key: ValueKey('hospital-$selected-${hospitalList.length}'),
+          initialValue: selected,
           decoration: const InputDecoration(
-            labelText: '检查指标',
+            labelText: '筛选医院',
             border: OutlineInputBorder(),
           ),
           items: [
-            for (final k in keys)
+            const DropdownMenuItem(value: 'all', child: Text('所有医院 / 全部来源')),
+            const DropdownMenuItem(
+              value: 'unassigned',
+              child: Text('未指定医院（含手动记录）'),
+            ),
+            for (final item in hospitalList)
               DropdownMenuItem(
-                value: k,
-                child: Text(series[k]!.label, overflow: TextOverflow.ellipsis),
+                value: item.hospital.id,
+                child: Text(
+                  item.hospital.name,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
           ],
-          onChanged: (k) => setState(() {
-            selectedKey = k;
+          onChanged: (v) => setState(() {
+            selectedHospital = v ?? 'all';
+            selectedKey = null;
             selectedUnit = null;
           }),
         ),
-        const SizedBox(height: 12),
-        if (units.length > 1) ...[
+        const SizedBox(height: 16),
+        if (key == null) ...[
+          const Text('当前医院没有可显示的趋势记录。'),
+        ] else ...[
           DropdownButtonFormField<String>(
-            key: ValueKey('unit-$key-$unit'),
-            initialValue: unit,
+            key: ValueKey('indicator-$key'),
+            initialValue: key,
+            isExpanded: true,
             decoration: const InputDecoration(
-              labelText: '单位（分别绘制）',
+              labelText: '检查指标',
               border: OutlineInputBorder(),
             ),
             items: [
-              for (final u in units)
-                DropdownMenuItem(value: u, child: Text(u.isEmpty ? '无单位' : u)),
+              for (final k in keys)
+                DropdownMenuItem(
+                  value: k,
+                  child: Text(
+                    series[k]!.label,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
             ],
-            onChanged: (u) => setState(() => selectedUnit = u),
+            onChanged: (v) => setState(() {
+              selectedKey = v;
+              selectedUnit = null;
+            }),
           ),
           const SizedBox(height: 12),
-        ],
-        Text(
-          '数值记录：${numeric.length} · 非数值记录：${other.length}',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const SizedBox(height: 16),
-        if (numeric.isEmpty)
-          const Text('该指标在当前单位下没有可绘图的数值结果。')
-        else
-          _TrendChart(points: numeric, unit: unit, x: _x),
-        if (numeric.length == 1)
-          const Padding(
-            padding: EdgeInsets.only(top: 8),
-            child: Text('目前只有一个数值数据点，暂无连续趋势。'),
-          ),
-        const SizedBox(height: 20),
-        Text('历史记录', style: Theme.of(context).textTheme.titleLarge),
-        for (final r in sameUnit.reversed)
-          ListTile(
-            dense: true,
-            title: Text('${r.rawValue} ${r.unit}'),
-            subtitle: Text(
-              '${DateFormat('yyyy-MM-dd HH:mm').format(r.date)} · ${r.source}',
+          if (units.length > 1) ...[
+            DropdownButtonFormField<String>(
+              key: ValueKey('unit-$key-$unit'),
+              initialValue: unit,
+              decoration: const InputDecoration(
+                labelText: '单位（分别绘制）',
+                border: OutlineInputBorder(),
+              ),
+              items: [
+                for (final u in units)
+                  DropdownMenuItem(
+                    value: u,
+                    child: Text(u.isEmpty ? '无单位' : u),
+                  ),
+              ],
+              onChanged: (v) => setState(() => selectedUnit = v),
+            ),
+            const SizedBox(height: 12),
+          ],
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '小于号结果的绘图规则',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<_LessThanRule>(
+                    key: ValueKey('rule-$lessThanRule'),
+                    initialValue: lessThanRule,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: _LessThanRule.threshold,
+                        child: Text('取阈值：<3 → 3'),
+                      ),
+                      DropdownMenuItem(
+                        value: _LessThanRule.half,
+                        child: Text('取一半：<3 → 1.5'),
+                      ),
+                      DropdownMenuItem(
+                        value: _LessThanRule.custom,
+                        child: Text('自定义比例：<3 → 3 × 系数'),
+                      ),
+                    ],
+                    onChanged: (v) {
+                      if (v != null) setState(() => lessThanRule = v);
+                    },
+                  ),
+                  if (lessThanRule == _LessThanRule.custom) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      '系数：${customFactor.toStringAsFixed(2)}（<3 → ${(3 * customFactor).toStringAsFixed(2)}）',
+                    ),
+                    Slider(
+                      value: customFactor,
+                      min: 0.05,
+                      max: 1,
+                      divisions: 19,
+                      label: customFactor.toStringAsFixed(2),
+                      onChanged: (v) => setState(() => customFactor = v),
+                    ),
+                  ],
+                  const SizedBox(height: 6),
+                  const Text(
+                    '注意：<、≤、>、≥ 是区间结果，不是精确测量值。这里只替换绘图位置，原始记录保留。',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                ],
+              ),
             ),
           ),
-        const SizedBox(height: 12),
-        const Text('提示：这是数据展示，不是医学诊断；相同指标代码不一定保证相同检测方法或标本。'),
+          const SizedBox(height: 14),
+          Text(
+            '数值点：${numeric.length}（含 ${numeric.where((p) => p.result.censored).length} 个界限值） · 非数值结果：${other.length}',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 10),
+          if (numeric.isEmpty)
+            const Text('该指标在当前单位下没有可绘图的数值结果。')
+          else
+            _TrendChart(
+              points: numeric,
+              unit: unit ?? '',
+              x: _x,
+              reference: chartReference,
+            ),
+          if (numeric.length == 1)
+            const Padding(
+              padding: EdgeInsets.only(top: 8),
+              child: Text('目前只有一个可绘制数据点。'),
+            ),
+          if (!sameReference)
+            const Padding(
+              padding: EdgeInsets.only(top: 8),
+              child: Text('不同记录的参考范围不一致：图表不显示统一参考线，具体范围见各条记录。'),
+            ),
+          if (chartReference != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                '图中参考范围：${chartReference.original.isEmpty ? "按记录上下限" : chartReference.original} ${unit ?? ""}',
+              ),
+            ),
+          const SizedBox(height: 18),
+          Text('历史记录', style: Theme.of(context).textTheme.titleLarge),
+          for (final p in plotted.reversed)
+            ListTile(
+              dense: true,
+              title: Text(
+                '${p.record.rawValue} ${p.record.unit}${p.result.censored && p.result.number != null ? "  · 绘图值 ${_formatNumber(p.result.number!)}" : ""}',
+              ),
+              subtitle: Text(
+                '${DateFormat('yyyy-MM-dd HH:mm').format(p.record.date)} · ${p.record.source}'
+                '${p.record.reference.original.trim().isEmpty ? "" : " · 参考范围 ${p.record.reference.original}"}',
+              ),
+            ),
+          const SizedBox(height: 12),
+          const Text('提示：界限值的绘图替代数值不是实际检测结果；不同医院或检测方法的参考范围可能不同。'),
+        ],
       ],
     );
   }
+}
+
+String _formatNumber(double n) {
+  final result = n.toStringAsFixed(3).replaceFirst(RegExp(r'\.?0+$'), '');
+  return result.isEmpty || result == '-0' ? '0' : result;
 }
 
 class _TrendChart extends StatelessWidget {
@@ -265,33 +496,44 @@ class _TrendChart extends StatelessWidget {
     required this.points,
     required this.unit,
     required this.x,
+    required this.reference,
   });
-  final List<_TrendRecord> points;
+  final List<_PlottedPoint> points;
   final String unit;
   final double Function(DateTime) x;
+  final _Reference? reference;
 
   @override
   Widget build(BuildContext context) {
-    final spots = [for (final p in points) FlSpot(x(p.date), p.value!)];
-    final values = spots.map((s) => s.y).toList();
-    final low = values.reduce((a, b) => a < b ? a : b);
-    final high = values.reduce((a, b) => a > b ? a : b);
-    final padding = high == low ? (high.abs() * .1 + 0.1) : (high - low) * 0.15;
+    final spots = [
+      for (final p in points) FlSpot(x(p.record.date), p.result.number!),
+    ];
+    final values = [
+      ...spots.map((s) => s.y),
+      if (reference?.low != null) reference!.low!,
+      if (reference?.high != null) reference!.high!,
+    ];
+    final low = values.reduce(math.min);
+    final high = values.reduce(math.max);
+    final padding = high == low
+        ? (high.abs() * 0.1 + 0.1)
+        : (high - low) * 0.15;
     final minX = spots.first.x;
     final maxX = spots.last.x;
     final spread = maxX - minX;
     final xPad = spread == 0 ? 1.0 : spread * 0.04;
     final xInterval = spread == 0 ? 1.0 : (spread / 4).ceilToDouble();
+    final theme = Theme.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('数值趋势${unit.isEmpty ? '' : ' ($unit)'}'),
+        Text('数值趋势${unit.isEmpty ? "" : " ($unit)"}'),
         const SizedBox(height: 8),
         SizedBox(
-          height: 280,
+          height: 320,
           child: Padding(
-            padding: const EdgeInsets.only(right: 16),
+            padding: const EdgeInsets.only(right: 24),
             child: LineChart(
               LineChartData(
                 minX: minX - xPad,
@@ -323,15 +565,62 @@ class _TrendChart extends StatelessWidget {
                     ),
                   ),
                 ),
+                // Light green background marks the reported reference interval.
+                // One-sided bounds (<5 or >10) extend to the visible chart edge.
+                rangeAnnotations: RangeAnnotations(
+                  horizontalRangeAnnotations: [
+                    if (reference != null && reference!.hasBound)
+                      HorizontalRangeAnnotation(
+                        y1: reference!.low ?? (low - padding),
+                        y2: reference!.high ?? (high + padding),
+                        color: Colors.green.withValues(alpha: 0.20),
+                      ),
+                  ],
+                ),
+                extraLinesData: ExtraLinesData(
+                  horizontalLines: [
+                    if (reference?.low != null)
+                      HorizontalLine(
+                        y: reference!.low!,
+                        color: Colors.green.shade700,
+                        strokeWidth: 1,
+                        dashArray: [6, 4],
+                        label: HorizontalLineLabel(
+                          show: true,
+                          alignment: Alignment.topRight,
+                          labelResolver: (_) =>
+                              '下限 ${_formatNumber(reference!.low!)}',
+                        ),
+                      ),
+                    if (reference?.high != null)
+                      HorizontalLine(
+                        y: reference!.high!,
+                        color: Colors.green.shade700,
+                        strokeWidth: 1,
+                        dashArray: [6, 4],
+                        label: HorizontalLineLabel(
+                          show: true,
+                          alignment: Alignment.bottomRight,
+                          labelResolver: (_) =>
+                              '上限 ${_formatNumber(reference!.high!)}',
+                        ),
+                      ),
+                  ],
+                ),
                 lineTouchData: LineTouchData(
                   touchTooltipData: LineTouchTooltipData(
-                    getTooltipItems: (touchedSpots) => touchedSpots.map((s) {
-                      final dt = DateTime.fromMillisecondsSinceEpoch(
-                        (s.x * Duration.millisecondsPerDay).round(),
-                      );
+                    getTooltipItems: (touched) => touched.map((s) {
+                      final point = points[s.spotIndex];
+                      final time = DateFormat('yyyy-MM-dd HH:mm')
+                          .format(point.record.date);
+                      final original = '${point.record.rawValue} $unit';
+                      final estimate = point.result.censored
+                          ? '\n绘图值：${_formatNumber(s.y)} $unit（代用值）'
+                          : '';
+                      final ref = point.record.reference.original.trim();
                       return LineTooltipItem(
-                        '${DateFormat('yyyy-MM-dd HH:mm').format(dt)}\n${s.y} $unit',
-                        const TextStyle(color: Colors.white),
+                        '$time\n原始值：$original$estimate${ref.isEmpty ? "" : "\n参考范围：$ref"}',
+                        TextStyle(color: theme.colorScheme.onInverseSurface),
                       );
                     }).toList(),
                   ),
@@ -348,6 +637,38 @@ class _TrendChart extends StatelessWidget {
             ),
           ),
         ),
+        if (reference != null && reference!.hasBound)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Row(
+              children: [
+                Container(
+                  width: 16,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: Colors.green.withValues(alpha: 0.20),
+                    border: Border.all(color: Colors.green.shade700),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    '绿色区域：该检查报告的参考范围',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        if (points.any((p) => p.result.censored))
+          const Padding(
+            padding: EdgeInsets.only(top: 8),
+            child: Text(
+              '部分点由 < / > 等界限结果换算，仅用于显示趋势，不代表实测值。',
+              style: TextStyle(fontSize: 12),
+            ),
+          ),
       ],
     );
   }
