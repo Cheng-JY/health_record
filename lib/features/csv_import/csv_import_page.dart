@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:file_picker_web/file_picker_web.dart';
 
 import '../../main.dart';
 import '../../core/database/app_database.dart';
@@ -101,47 +102,106 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
   // 1. 选择并解析 CSV
   // ========================================
 
+
   Future<void> choose() async {
+    if (busy) {
+      return;
+    }
+
     setState(() {
       busy = true;
-      message = null;
-      preview = null;
-      fileName = null;
+      message = '正在打开 CSV 文件选择窗口……';
     });
 
     try {
-      final file = await FilePicker.pickFile(
-        type: FileType.custom,
-        allowedExtensions: ['csv'],
-      );
+      debugPrint('[CSV] Opening file picker');
+
+      
+        final file = await FilePicker.pickFile(
+          type: FileType.custom,
+          allowedExtensions: ['csv'],
+          webOptions: FilePickerWebOptions(
+            cancelUploadOnWindowBlur: false,
+          ),
+        );
+
 
       if (file == null) {
+        debugPrint('[CSV] File selection cancelled');
+
+        if (!mounted) {
+          return;
+        }
+
+        setState(() {
+          message = '已取消文件选择';
+        });
         return;
       }
 
+      debugPrint('[CSV] Selected file: ${file.name}');
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        message = '已选择 ${file.name}，正在读取文件……';
+      });
+
       final bytes = await file.readAsBytes();
+
+      debugPrint('[CSV] File size: ${bytes.length} bytes');
 
       if (bytes.isEmpty) {
         throw StateError('CSV 文件为空');
       }
 
-      final parsed = CsvImportService(ref.read(databaseProvider)).parse(bytes);
+      if (!mounted) {
+        return;
+      }
 
-      debugPrint('CSV valid rows: ${parsed.rows.length}');
+      setState(() {
+        message = 'CSV 文件读取成功，正在解析……';
+      });
 
-      debugPrint('CSV errors: ${parsed.errors.length}');
+      final parsed = CsvImportService(
+        ref.read(databaseProvider),
+      ).parse(bytes);
 
-      if (!mounted) return;
+      debugPrint('[CSV] Valid rows: ${parsed.rows.length}');
+      debugPrint('[CSV] Errors: ${parsed.errors.length}');
+
+      if (!mounted) {
+        return;
+      }
 
       setState(() {
         preview = parsed;
         fileName = file.name;
+
+        if (parsed.errors.isNotEmpty) {
+          message =
+              'CSV 已读取，但存在 ${parsed.errors.length} 条解析错误。'
+              '请查看下方错误详情。';
+        } else if (parsed.rows.isEmpty) {
+          message = 'CSV 已读取，但没有识别到有效检查记录。';
+        } else {
+          message =
+              'CSV 读取成功：${parsed.rows.length} 条有效记录。'
+              '现在可以确认导入。';
+        }
       });
-    } catch (e) {
-      if (!mounted) return;
+    } catch (e, stackTrace) {
+      debugPrint('[CSV] ERROR: $e');
+      debugPrintStack(stackTrace: stackTrace);
+
+      if (!mounted) {
+        return;
+      }
 
       setState(() {
-        message = '读取失败：$e';
+        message = 'CSV 读取或解析失败：$e';
       });
     } finally {
       if (mounted) {
@@ -151,6 +211,7 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
       }
     }
   }
+
 
   // ========================================
   // 2. 保存 CSV 到 SQLite

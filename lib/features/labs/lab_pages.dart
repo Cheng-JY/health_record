@@ -5,48 +5,103 @@ import 'package:intl/intl.dart';
 
 import '../../main.dart';
 import '../../core/database/app_database.dart';
+import '../csv_import/csv_import_page.dart';
 
 String dateText(DateTime d) => DateFormat('yyyy-MM-dd').format(d);
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final results = ref.watch(resultsProvider);
+    final manual = ref.watch(resultsProvider);
+    final imported = ref.watch(importedProvider);
     final tests = ref.watch(testsProvider);
+
+    final manualCount = manual.asData?.value.length;
+    final importedCount = imported.asData?.value.length;
+
+    final totalCount = manualCount != null && importedCount != null
+        ? manualCount + importedCount
+        : null;
+
+    String countText(num? count) => count?.toString() ?? '…';
+
+    final countError = manual.asError?.error ?? imported.asError?.error;
+
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
         Text('健康数据概览', style: Theme.of(context).textTheme.headlineMedium),
+
         const SizedBox(height: 16),
+
+        // 所有检查结果
         Card(
           child: ListTile(
+            leading: const Icon(Icons.monitor_heart_outlined),
             title: const Text('已保存检查结果'),
-            subtitle: const Text('本地 SQLite 数据库'),
+            subtitle: const Text('手动录入 + CSV 导入'),
             trailing: Text(
-              results.when(
-                data: (r) => '${r.length}',
-                loading: () => '…',
-                error: (_, _) => '!',
-              ),
+              countError != null ? '!' : countText(totalCount),
               style: Theme.of(context).textTheme.headlineMedium,
             ),
           ),
         ),
+
+        const SizedBox(height: 8),
+
+        // CSV 导入数量
         Card(
           child: ListTile(
-            title: const Text('可录入指标'),
+            leading: const Icon(Icons.upload_file),
+            title: const Text('CSV 导入记录'),
+            subtitle: const Text('未删除的 CSV 检查结果'),
+            trailing: Text(countText(importedCount)),
+          ),
+        ),
+
+        // 手动录入数量
+        Card(
+          child: ListTile(
+            leading: const Icon(Icons.edit_note),
+            title: const Text('手动录入记录'),
+            subtitle: const Text('未删除的手动检查结果'),
+            trailing: Text(countText(manualCount)),
+          ),
+        ),
+
+        // 预设指标数量
+        Card(
+          child: ListTile(
+            leading: const Icon(Icons.science_outlined),
+            title: const Text('预设检查指标'),
+            subtitle: const Text('不包含 CSV 中的其他指标'),
             trailing: Text(
               tests.when(
-                data: (t) => '${t.length}',
+                data: (items) => '${items.length}',
                 loading: () => '…',
                 error: (_, _) => '!',
               ),
             ),
           ),
         ),
+
+        if (countError != null)
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Text(
+              '读取检查记录失败：$countError',
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ),
+
         const SizedBox(height: 20),
-        const Text('目前为本地优先 MVP：请只输入模拟数据。尚未启用加密、备份和报告识别。'),
+
+        const Text(
+          '数据保存在本地 SQLite 数据库中。'
+          '请定期备份健康记录。',
+        ),
       ],
     );
   }
