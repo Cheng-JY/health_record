@@ -102,7 +102,6 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
   // 1. 选择并解析 CSV
   // ========================================
 
-
   Future<void> choose() async {
     if (busy) {
       return;
@@ -116,15 +115,11 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
     try {
       debugPrint('[CSV] Opening file picker');
 
-      
-        final file = await FilePicker.pickFile(
-          type: FileType.custom,
-          allowedExtensions: ['csv'],
-          webOptions: FilePickerWebOptions(
-            cancelUploadOnWindowBlur: false,
-          ),
-        );
-
+      final file = await FilePicker.pickFile(
+        type: FileType.custom,
+        allowedExtensions: ['csv'],
+        webOptions: FilePickerWebOptions(cancelUploadOnWindowBlur: false),
+      );
 
       if (file == null) {
         debugPrint('[CSV] File selection cancelled');
@@ -165,9 +160,7 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
         message = 'CSV 文件读取成功，正在解析……';
       });
 
-      final parsed = CsvImportService(
-        ref.read(databaseProvider),
-      ).parse(bytes);
+      final parsed = CsvImportService(ref.read(databaseProvider)).parse(bytes);
 
       debugPrint('[CSV] Valid rows: ${parsed.rows.length}');
       debugPrint('[CSV] Errors: ${parsed.errors.length}');
@@ -211,7 +204,6 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
       }
     }
   }
-
 
   // ========================================
   // 2. 保存 CSV 到 SQLite
@@ -505,14 +497,14 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
             final reason = busy
                 ? '正在处理，请稍候……'
                 : selectedHospitalId == null
-                    ? '请先选择检查医院（即使下拉框显示名称，也请重新点击选择一次）。'
-                    : preview == null
-                        ? '尚未成功读取 CSV。请查看下方错误提示。'
-                        : preview!.rows.isEmpty
-                            ? 'CSV 中没有有效检查记录。'
-                            : preview!.errors.isNotEmpty
-                                ? 'CSV 有 ${preview!.errors.length} 条解析错误，暂不能导入。'
-                                : '已准备好导入：${preview!.rows.length} 条有效记录。';
+                ? '请先选择检查医院（即使下拉框显示名称，也请重新点击选择一次）。'
+                : preview == null
+                ? '尚未成功读取 CSV。请查看下方错误提示。'
+                : preview!.rows.isEmpty
+                ? 'CSV 中没有有效检查记录。'
+                : preview!.errors.isNotEmpty
+                ? 'CSV 有 ${preview!.errors.length} 条解析错误，暂不能导入。'
+                : '已准备好导入：${preview!.rows.length} 条有效记录。';
             return SelectableText(
               '导入状态：$reason\n'
               '医院 UUID：${selectedHospitalId ?? "未选择"}  |  '
@@ -521,7 +513,8 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
               '错误：${preview?.errors.length ?? 0}',
               style: TextStyle(
                 fontSize: 13,
-                color: preview != null &&
+                color:
+                    preview != null &&
                         preview!.rows.isNotEmpty &&
                         preview!.errors.isEmpty &&
                         selectedHospitalId != null
@@ -577,7 +570,6 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
         // 5. 加载状态和操作结果
         // ========================================
         if (busy) const LinearProgressIndicator(),
-
 
         // ========================================
         // 6. CSV 文件预览

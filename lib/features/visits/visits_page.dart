@@ -48,9 +48,8 @@ class _VisitsPageState extends ConsumerState<VisitsPage> {
 
   void notify(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<void> editVisit(List<Hospital> hospitals, [Visit? original]) async {
@@ -69,18 +68,20 @@ class _VisitsPageState extends ConsumerState<VisitsPage> {
     if (result == null || !mounted) return;
     setState(() => busy = true);
     try {
-      await ref.read(visitRepositoryProvider).saveVisit(
-        id: original?.id,
-        hospitalId: result.hospitalId,
-        visitType: result.visitType,
-        startDate: result.startDate,
-        endDate: result.endDate,
-        department: result.department,
-        doctor: result.doctor,
-        reason: result.reason,
-        diagnosis: result.diagnosis,
-        notes: result.notes,
-      );
+      await ref
+          .read(visitRepositoryProvider)
+          .saveVisit(
+            id: original?.id,
+            hospitalId: result.hospitalId,
+            visitType: result.visitType,
+            startDate: result.startDate,
+            endDate: result.endDate,
+            department: result.department,
+            doctor: result.doctor,
+            reason: result.reason,
+            diagnosis: result.diagnosis,
+            notes: result.notes,
+          );
       notify(original == null ? '就诊记录已新增' : '就诊记录已更新');
     } catch (e) {
       notify('保存失败：$e');
@@ -94,7 +95,9 @@ class _VisitsPageState extends ConsumerState<VisitsPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('删除就诊记录'),
-        content: Text('确定删除 ${_formatDate(visit.startDate)} 的就诊记录吗？本次就诊的报告分组及其关联将一并移除，但原始检查结果不会删除。此操作无法撤销。'),
+        content: Text(
+          '确定删除 ${_formatDate(visit.startDate)} 的就诊记录吗？本次就诊的报告分组及其关联将一并移除，但原始检查结果不会删除。此操作无法撤销。',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -141,21 +144,28 @@ class _VisitsPageState extends ConsumerState<VisitsPage> {
                     SizedBox(
                       width: 300,
                       child: DropdownButtonFormField<String>(
-                        key: ValueKey('filter-${hospitalFilter ?? 'all'}-${items.length}'),
+                        key: ValueKey(
+                          'filter-${hospitalFilter ?? 'all'}-${items.length}',
+                        ),
                         initialValue: ids.contains(hospitalFilter)
-                            ? hospitalFilter : null,
+                            ? hospitalFilter
+                            : null,
                         decoration: const InputDecoration(
                           labelText: '按医院筛选',
                           border: OutlineInputBorder(),
                         ),
                         items: [
                           const DropdownMenuItem<String>(
-                            value: '', child: Text('全部医院'),
+                            value: '',
+                            child: Text('全部医院'),
                           ),
                           for (final h in items)
                             DropdownMenuItem<String>(
                               value: h.id,
-                              child: Text(h.name, overflow: TextOverflow.ellipsis),
+                              child: Text(
+                                h.name,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                         ],
                         onChanged: (value) => setState(() {
@@ -192,17 +202,20 @@ class _VisitsPageState extends ConsumerState<VisitsPage> {
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (e, _) => SelectableText('就诊记录读取失败：$e'),
                 data: (rows) => hospitals.when(
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (e, _) => Text('医院读取失败：$e'),
                   data: (items) {
                     final names = {for (final h in items) h.id: h.name};
                     final filtered = rows.where((v) {
-                      if (hospitalFilter != null && v.hospitalId != hospitalFilter) {
+                      if (hospitalFilter != null &&
+                          v.hospitalId != hospitalFilter) {
                         return false;
                       }
-                      final q = '${v.department ?? ''} ${v.doctor ?? ''} '
-                          '${v.diagnosis ?? ''} ${v.reason ?? ''} ${v.notes ?? ''}'
-                          .toLowerCase();
+                      final q =
+                          '${v.department ?? ''} ${v.doctor ?? ''} '
+                                  '${v.diagnosis ?? ''} ${v.reason ?? ''} ${v.notes ?? ''}'
+                              .toLowerCase();
                       return q.contains(search);
                     }).toList();
                     if (filtered.isEmpty) {
@@ -219,15 +232,24 @@ class _VisitsPageState extends ConsumerState<VisitsPage> {
                         return Card(
                           child: ListTile(
                             leading: const Icon(Icons.event_note_outlined),
-                            title: Text('${names[v.hospitalId] ?? '未知医院'} · $type'),
-                            subtitle: Text([
-                              period,
-                              if (v.department?.isNotEmpty == true) '科室：${v.department}',
-                              if (v.doctor?.isNotEmpty == true) '医生：${v.doctor}',
-                              if (v.diagnosis?.isNotEmpty == true) '诊断：${v.diagnosis}',
-                              if (v.reason?.isNotEmpty == true) '就诊原因：${v.reason}',
-                              if (v.notes?.isNotEmpty == true) '备注：${v.notes}',
-                            ].join('\n')),
+                            title: Text(
+                              '${names[v.hospitalId] ?? '未知医院'} · $type',
+                            ),
+                            subtitle: Text(
+                              [
+                                period,
+                                if (v.department?.isNotEmpty == true)
+                                  '科室：${v.department}',
+                                if (v.doctor?.isNotEmpty == true)
+                                  '医生：${v.doctor}',
+                                if (v.diagnosis?.isNotEmpty == true)
+                                  '诊断：${v.diagnosis}',
+                                if (v.reason?.isNotEmpty == true)
+                                  '就诊原因：${v.reason}',
+                                if (v.notes?.isNotEmpty == true)
+                                  '备注：${v.notes}',
+                              ].join('\n'),
+                            ),
                             isThreeLine: true,
                             trailing: Wrap(
                               spacing: 4,
@@ -237,14 +259,17 @@ class _VisitsPageState extends ConsumerState<VisitsPage> {
                                   icon: const Icon(Icons.folder_copy_outlined),
                                   onPressed: () => Navigator.of(context).push(
                                     MaterialPageRoute<void>(
-                                      builder: (_) => VisitReportsPage(visit: v),
+                                      builder: (_) =>
+                                          VisitReportsPage(visit: v),
                                     ),
                                   ),
                                 ),
                                 IconButton(
                                   tooltip: '编辑',
                                   icon: const Icon(Icons.edit_outlined),
-                                  onPressed: busy ? null : () => editVisit(items, v),
+                                  onPressed: busy
+                                      ? null
+                                      : () => editVisit(items, v),
                                 ),
                                 IconButton(
                                   tooltip: '删除',
@@ -270,9 +295,15 @@ class _VisitsPageState extends ConsumerState<VisitsPage> {
 
 class _VisitFormValues {
   const _VisitFormValues({
-    required this.hospitalId, required this.visitType, required this.startDate,
-    this.endDate, required this.department, required this.doctor,
-    required this.reason, required this.diagnosis, required this.notes,
+    required this.hospitalId,
+    required this.visitType,
+    required this.startDate,
+    this.endDate,
+    required this.department,
+    required this.doctor,
+    required this.reason,
+    required this.diagnosis,
+    required this.notes,
   });
   final String hospitalId;
   final String visitType;
@@ -286,7 +317,11 @@ class _VisitFormValues {
 }
 
 class _VisitDialog extends StatefulWidget {
-  const _VisitDialog({required this.hospitals, this.original, this.initialHospitalId});
+  const _VisitDialog({
+    required this.hospitals,
+    this.original,
+    this.initialHospitalId,
+  });
   final List<Hospital> hospitals;
   final Visit? original;
   final String? initialHospitalId;
@@ -310,7 +345,8 @@ class _VisitDialogState extends State<_VisitDialog> {
     super.initState();
     final ids = widget.hospitals.map((h) => h.id).toSet();
     hospitalId = ids.contains(widget.initialHospitalId)
-        ? widget.initialHospitalId! : widget.hospitals.first.id;
+        ? widget.initialHospitalId!
+        : widget.hospitals.first.id;
     visitType = widget.original?.visitType ?? 'outpatient';
     startDate = widget.original?.startDate ?? DateTime.now();
     endDate = widget.original?.endDate;
@@ -323,8 +359,11 @@ class _VisitDialogState extends State<_VisitDialog> {
 
   @override
   void dispose() {
-    department.dispose(); doctor.dispose(); reason.dispose();
-    diagnosis.dispose(); notes.dispose();
+    department.dispose();
+    doctor.dispose();
+    reason.dispose();
+    diagnosis.dispose();
+    notes.dispose();
     super.dispose();
   }
 
@@ -348,22 +387,24 @@ class _VisitDialogState extends State<_VisitDialog> {
 
   void save() {
     if (endDate != null && endDate!.isBefore(startDate)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('结束日期不能早于开始日期')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('结束日期不能早于开始日期')));
       return;
     }
-    Navigator.pop(context, _VisitFormValues(
-      hospitalId: hospitalId,
-      visitType: visitType,
-      startDate: startDate,
-      endDate: endDate,
-      department: department.text,
-      doctor: doctor.text,
-      reason: reason.text,
-      diagnosis: diagnosis.text,
-      notes: notes.text,
-    ));
+    Navigator.pop(
+      context,
+      _VisitFormValues(
+        hospitalId: hospitalId,
+        visitType: visitType,
+        startDate: startDate,
+        endDate: endDate,
+        department: department.text,
+        doctor: doctor.text,
+        reason: reason.text,
+        diagnosis: diagnosis.text,
+        notes: notes.text,
+      ),
+    );
   }
 
   @override
@@ -378,11 +419,19 @@ class _VisitDialogState extends State<_VisitDialog> {
             children: [
               DropdownButtonFormField<String>(
                 initialValue: hospitalId,
-                decoration: const InputDecoration(labelText: '医院', border: OutlineInputBorder()),
+                decoration: const InputDecoration(
+                  labelText: '医院',
+                  border: OutlineInputBorder(),
+                ),
                 isExpanded: true,
-                items: widget.hospitals.map((h) => DropdownMenuItem<String>(
-                  value: h.id, child: Text(h.name, overflow: TextOverflow.ellipsis),
-                )).toList(),
+                items: widget.hospitals
+                    .map(
+                      (h) => DropdownMenuItem<String>(
+                        value: h.id,
+                        child: Text(h.name, overflow: TextOverflow.ellipsis),
+                      ),
+                    )
+                    .toList(),
                 onChanged: (value) {
                   if (value != null) setState(() => hospitalId = value);
                 },
@@ -390,10 +439,18 @@ class _VisitDialogState extends State<_VisitDialog> {
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 initialValue: visitType,
-                decoration: const InputDecoration(labelText: '就诊类型', border: OutlineInputBorder()),
-                items: _visitTypes.entries.map((entry) => DropdownMenuItem<String>(
-                  value: entry.key, child: Text(entry.value),
-                )).toList(),
+                decoration: const InputDecoration(
+                  labelText: '就诊类型',
+                  border: OutlineInputBorder(),
+                ),
+                items: _visitTypes.entries
+                    .map(
+                      (entry) => DropdownMenuItem<String>(
+                        value: entry.key,
+                        child: Text(entry.value),
+                      ),
+                    )
+                    .toList(),
                 onChanged: (value) {
                   if (value != null) setState(() => visitType = value);
                 },
@@ -405,9 +462,11 @@ class _VisitDialogState extends State<_VisitDialog> {
                 onTap: () => pickDate(end: false),
               ),
               ListTile(
-                title: Text(endDate == null
-                    ? '结束日期：未设置（门诊通常无需填写）'
-                    : '结束日期：${_formatDate(endDate!)}'),
+                title: Text(
+                  endDate == null
+                      ? '结束日期：未设置（门诊通常无需填写）'
+                      : '结束日期：${_formatDate(endDate!)}',
+                ),
                 trailing: const Icon(Icons.calendar_month),
                 onTap: () => pickDate(end: true),
               ),
@@ -431,7 +490,8 @@ class _VisitDialogState extends State<_VisitDialog> {
                   controller: pair.$1,
                   maxLines: pair.$2 == '备注' ? 3 : 1,
                   decoration: InputDecoration(
-                    labelText: pair.$2, border: const OutlineInputBorder(),
+                    labelText: pair.$2,
+                    border: const OutlineInputBorder(),
                   ),
                 ),
               ],
@@ -440,7 +500,10 @@ class _VisitDialogState extends State<_VisitDialog> {
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('取消')),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('取消'),
+        ),
         FilledButton(onPressed: save, child: const Text('保存')),
       ],
     );

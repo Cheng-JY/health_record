@@ -80,7 +80,8 @@ class Hospitals extends Table {
 class Visits extends Table {
   TextColumn get id => text()();
   TextColumn get hospitalId => text().references(Hospitals, #id)();
-  TextColumn get visitType => text()(); // outpatient / inpatient / emergency / other
+  TextColumn get visitType =>
+      text()(); // outpatient / inpatient / emergency / other
   DateTimeColumn get startDate => dateTime()();
   DateTimeColumn get endDate => dateTime().nullable()();
   TextColumn get department => text().nullable()();
@@ -118,7 +119,16 @@ class ReportResultLinks extends Table {
 }
 
 @DriftDatabase(
-  tables: [LabCategories, LabTests, LabResults, ImportedLabResults, Hospitals, Visits, VisitReports, ReportResultLinks],
+  tables: [
+    LabCategories,
+    LabTests,
+    LabResults,
+    ImportedLabResults,
+    Hospitals,
+    Visits,
+    VisitReports,
+    ReportResultLinks,
+  ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase()
