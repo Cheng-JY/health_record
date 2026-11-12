@@ -2789,6 +2789,1403 @@ class ImportedLabResultsCompanion extends UpdateCompanion<ImportedLabResult> {
   }
 }
 
+class $VisitsTable extends Visits with TableInfo<$VisitsTable, Visit> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $VisitsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _hospitalIdMeta = const VerificationMeta(
+    'hospitalId',
+  );
+  @override
+  late final GeneratedColumn<String> hospitalId = GeneratedColumn<String>(
+    'hospital_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES hospitals (id)',
+    ),
+  );
+  static const VerificationMeta _visitTypeMeta = const VerificationMeta(
+    'visitType',
+  );
+  @override
+  late final GeneratedColumn<String> visitType = GeneratedColumn<String>(
+    'visit_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _startDateMeta = const VerificationMeta(
+    'startDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> startDate = GeneratedColumn<DateTime>(
+    'start_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _endDateMeta = const VerificationMeta(
+    'endDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> endDate = GeneratedColumn<DateTime>(
+    'end_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _departmentMeta = const VerificationMeta(
+    'department',
+  );
+  @override
+  late final GeneratedColumn<String> department = GeneratedColumn<String>(
+    'department',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _doctorMeta = const VerificationMeta('doctor');
+  @override
+  late final GeneratedColumn<String> doctor = GeneratedColumn<String>(
+    'doctor',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+    'reason',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _diagnosisMeta = const VerificationMeta(
+    'diagnosis',
+  );
+  @override
+  late final GeneratedColumn<String> diagnosis = GeneratedColumn<String>(
+    'diagnosis',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    hospitalId,
+    visitType,
+    startDate,
+    endDate,
+    department,
+    doctor,
+    reason,
+    diagnosis,
+    notes,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'visits';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Visit> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('hospital_id')) {
+      context.handle(
+        _hospitalIdMeta,
+        hospitalId.isAcceptableOrUnknown(data['hospital_id']!, _hospitalIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_hospitalIdMeta);
+    }
+    if (data.containsKey('visit_type')) {
+      context.handle(
+        _visitTypeMeta,
+        visitType.isAcceptableOrUnknown(data['visit_type']!, _visitTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_visitTypeMeta);
+    }
+    if (data.containsKey('start_date')) {
+      context.handle(
+        _startDateMeta,
+        startDate.isAcceptableOrUnknown(data['start_date']!, _startDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_startDateMeta);
+    }
+    if (data.containsKey('end_date')) {
+      context.handle(
+        _endDateMeta,
+        endDate.isAcceptableOrUnknown(data['end_date']!, _endDateMeta),
+      );
+    }
+    if (data.containsKey('department')) {
+      context.handle(
+        _departmentMeta,
+        department.isAcceptableOrUnknown(data['department']!, _departmentMeta),
+      );
+    }
+    if (data.containsKey('doctor')) {
+      context.handle(
+        _doctorMeta,
+        doctor.isAcceptableOrUnknown(data['doctor']!, _doctorMeta),
+      );
+    }
+    if (data.containsKey('reason')) {
+      context.handle(
+        _reasonMeta,
+        reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta),
+      );
+    }
+    if (data.containsKey('diagnosis')) {
+      context.handle(
+        _diagnosisMeta,
+        diagnosis.isAcceptableOrUnknown(data['diagnosis']!, _diagnosisMeta),
+      );
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Visit map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Visit(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      hospitalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}hospital_id'],
+      )!,
+      visitType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}visit_type'],
+      )!,
+      startDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}start_date'],
+      )!,
+      endDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}end_date'],
+      ),
+      department: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}department'],
+      ),
+      doctor: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}doctor'],
+      ),
+      reason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason'],
+      ),
+      diagnosis: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}diagnosis'],
+      ),
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $VisitsTable createAlias(String alias) {
+    return $VisitsTable(attachedDatabase, alias);
+  }
+}
+
+class Visit extends DataClass implements Insertable<Visit> {
+  final String id;
+  final String hospitalId;
+  final String visitType;
+  final DateTime startDate;
+  final DateTime? endDate;
+  final String? department;
+  final String? doctor;
+  final String? reason;
+  final String? diagnosis;
+  final String? notes;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const Visit({
+    required this.id,
+    required this.hospitalId,
+    required this.visitType,
+    required this.startDate,
+    this.endDate,
+    this.department,
+    this.doctor,
+    this.reason,
+    this.diagnosis,
+    this.notes,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['hospital_id'] = Variable<String>(hospitalId);
+    map['visit_type'] = Variable<String>(visitType);
+    map['start_date'] = Variable<DateTime>(startDate);
+    if (!nullToAbsent || endDate != null) {
+      map['end_date'] = Variable<DateTime>(endDate);
+    }
+    if (!nullToAbsent || department != null) {
+      map['department'] = Variable<String>(department);
+    }
+    if (!nullToAbsent || doctor != null) {
+      map['doctor'] = Variable<String>(doctor);
+    }
+    if (!nullToAbsent || reason != null) {
+      map['reason'] = Variable<String>(reason);
+    }
+    if (!nullToAbsent || diagnosis != null) {
+      map['diagnosis'] = Variable<String>(diagnosis);
+    }
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  VisitsCompanion toCompanion(bool nullToAbsent) {
+    return VisitsCompanion(
+      id: Value(id),
+      hospitalId: Value(hospitalId),
+      visitType: Value(visitType),
+      startDate: Value(startDate),
+      endDate: endDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(endDate),
+      department: department == null && nullToAbsent
+          ? const Value.absent()
+          : Value(department),
+      doctor: doctor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(doctor),
+      reason: reason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reason),
+      diagnosis: diagnosis == null && nullToAbsent
+          ? const Value.absent()
+          : Value(diagnosis),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory Visit.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Visit(
+      id: serializer.fromJson<String>(json['id']),
+      hospitalId: serializer.fromJson<String>(json['hospitalId']),
+      visitType: serializer.fromJson<String>(json['visitType']),
+      startDate: serializer.fromJson<DateTime>(json['startDate']),
+      endDate: serializer.fromJson<DateTime?>(json['endDate']),
+      department: serializer.fromJson<String?>(json['department']),
+      doctor: serializer.fromJson<String?>(json['doctor']),
+      reason: serializer.fromJson<String?>(json['reason']),
+      diagnosis: serializer.fromJson<String?>(json['diagnosis']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'hospitalId': serializer.toJson<String>(hospitalId),
+      'visitType': serializer.toJson<String>(visitType),
+      'startDate': serializer.toJson<DateTime>(startDate),
+      'endDate': serializer.toJson<DateTime?>(endDate),
+      'department': serializer.toJson<String?>(department),
+      'doctor': serializer.toJson<String?>(doctor),
+      'reason': serializer.toJson<String?>(reason),
+      'diagnosis': serializer.toJson<String?>(diagnosis),
+      'notes': serializer.toJson<String?>(notes),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  Visit copyWith({
+    String? id,
+    String? hospitalId,
+    String? visitType,
+    DateTime? startDate,
+    Value<DateTime?> endDate = const Value.absent(),
+    Value<String?> department = const Value.absent(),
+    Value<String?> doctor = const Value.absent(),
+    Value<String?> reason = const Value.absent(),
+    Value<String?> diagnosis = const Value.absent(),
+    Value<String?> notes = const Value.absent(),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => Visit(
+    id: id ?? this.id,
+    hospitalId: hospitalId ?? this.hospitalId,
+    visitType: visitType ?? this.visitType,
+    startDate: startDate ?? this.startDate,
+    endDate: endDate.present ? endDate.value : this.endDate,
+    department: department.present ? department.value : this.department,
+    doctor: doctor.present ? doctor.value : this.doctor,
+    reason: reason.present ? reason.value : this.reason,
+    diagnosis: diagnosis.present ? diagnosis.value : this.diagnosis,
+    notes: notes.present ? notes.value : this.notes,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  Visit copyWithCompanion(VisitsCompanion data) {
+    return Visit(
+      id: data.id.present ? data.id.value : this.id,
+      hospitalId: data.hospitalId.present
+          ? data.hospitalId.value
+          : this.hospitalId,
+      visitType: data.visitType.present ? data.visitType.value : this.visitType,
+      startDate: data.startDate.present ? data.startDate.value : this.startDate,
+      endDate: data.endDate.present ? data.endDate.value : this.endDate,
+      department: data.department.present
+          ? data.department.value
+          : this.department,
+      doctor: data.doctor.present ? data.doctor.value : this.doctor,
+      reason: data.reason.present ? data.reason.value : this.reason,
+      diagnosis: data.diagnosis.present ? data.diagnosis.value : this.diagnosis,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Visit(')
+          ..write('id: $id, ')
+          ..write('hospitalId: $hospitalId, ')
+          ..write('visitType: $visitType, ')
+          ..write('startDate: $startDate, ')
+          ..write('endDate: $endDate, ')
+          ..write('department: $department, ')
+          ..write('doctor: $doctor, ')
+          ..write('reason: $reason, ')
+          ..write('diagnosis: $diagnosis, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    hospitalId,
+    visitType,
+    startDate,
+    endDate,
+    department,
+    doctor,
+    reason,
+    diagnosis,
+    notes,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Visit &&
+          other.id == this.id &&
+          other.hospitalId == this.hospitalId &&
+          other.visitType == this.visitType &&
+          other.startDate == this.startDate &&
+          other.endDate == this.endDate &&
+          other.department == this.department &&
+          other.doctor == this.doctor &&
+          other.reason == this.reason &&
+          other.diagnosis == this.diagnosis &&
+          other.notes == this.notes &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class VisitsCompanion extends UpdateCompanion<Visit> {
+  final Value<String> id;
+  final Value<String> hospitalId;
+  final Value<String> visitType;
+  final Value<DateTime> startDate;
+  final Value<DateTime?> endDate;
+  final Value<String?> department;
+  final Value<String?> doctor;
+  final Value<String?> reason;
+  final Value<String?> diagnosis;
+  final Value<String?> notes;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const VisitsCompanion({
+    this.id = const Value.absent(),
+    this.hospitalId = const Value.absent(),
+    this.visitType = const Value.absent(),
+    this.startDate = const Value.absent(),
+    this.endDate = const Value.absent(),
+    this.department = const Value.absent(),
+    this.doctor = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.diagnosis = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  VisitsCompanion.insert({
+    required String id,
+    required String hospitalId,
+    required String visitType,
+    required DateTime startDate,
+    this.endDate = const Value.absent(),
+    this.department = const Value.absent(),
+    this.doctor = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.diagnosis = const Value.absent(),
+    this.notes = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       hospitalId = Value(hospitalId),
+       visitType = Value(visitType),
+       startDate = Value(startDate),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<Visit> custom({
+    Expression<String>? id,
+    Expression<String>? hospitalId,
+    Expression<String>? visitType,
+    Expression<DateTime>? startDate,
+    Expression<DateTime>? endDate,
+    Expression<String>? department,
+    Expression<String>? doctor,
+    Expression<String>? reason,
+    Expression<String>? diagnosis,
+    Expression<String>? notes,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (hospitalId != null) 'hospital_id': hospitalId,
+      if (visitType != null) 'visit_type': visitType,
+      if (startDate != null) 'start_date': startDate,
+      if (endDate != null) 'end_date': endDate,
+      if (department != null) 'department': department,
+      if (doctor != null) 'doctor': doctor,
+      if (reason != null) 'reason': reason,
+      if (diagnosis != null) 'diagnosis': diagnosis,
+      if (notes != null) 'notes': notes,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  VisitsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? hospitalId,
+    Value<String>? visitType,
+    Value<DateTime>? startDate,
+    Value<DateTime?>? endDate,
+    Value<String?>? department,
+    Value<String?>? doctor,
+    Value<String?>? reason,
+    Value<String?>? diagnosis,
+    Value<String?>? notes,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return VisitsCompanion(
+      id: id ?? this.id,
+      hospitalId: hospitalId ?? this.hospitalId,
+      visitType: visitType ?? this.visitType,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      department: department ?? this.department,
+      doctor: doctor ?? this.doctor,
+      reason: reason ?? this.reason,
+      diagnosis: diagnosis ?? this.diagnosis,
+      notes: notes ?? this.notes,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (hospitalId.present) {
+      map['hospital_id'] = Variable<String>(hospitalId.value);
+    }
+    if (visitType.present) {
+      map['visit_type'] = Variable<String>(visitType.value);
+    }
+    if (startDate.present) {
+      map['start_date'] = Variable<DateTime>(startDate.value);
+    }
+    if (endDate.present) {
+      map['end_date'] = Variable<DateTime>(endDate.value);
+    }
+    if (department.present) {
+      map['department'] = Variable<String>(department.value);
+    }
+    if (doctor.present) {
+      map['doctor'] = Variable<String>(doctor.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (diagnosis.present) {
+      map['diagnosis'] = Variable<String>(diagnosis.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('VisitsCompanion(')
+          ..write('id: $id, ')
+          ..write('hospitalId: $hospitalId, ')
+          ..write('visitType: $visitType, ')
+          ..write('startDate: $startDate, ')
+          ..write('endDate: $endDate, ')
+          ..write('department: $department, ')
+          ..write('doctor: $doctor, ')
+          ..write('reason: $reason, ')
+          ..write('diagnosis: $diagnosis, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $VisitReportsTable extends VisitReports
+    with TableInfo<$VisitReportsTable, VisitReport> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $VisitReportsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _visitIdMeta = const VerificationMeta(
+    'visitId',
+  );
+  @override
+  late final GeneratedColumn<String> visitId = GeneratedColumn<String>(
+    'visit_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES visits (id)',
+    ),
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reportDateMeta = const VerificationMeta(
+    'reportDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> reportDate = GeneratedColumn<DateTime>(
+    'report_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    visitId,
+    title,
+    reportDate,
+    notes,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'visit_reports';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<VisitReport> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('visit_id')) {
+      context.handle(
+        _visitIdMeta,
+        visitId.isAcceptableOrUnknown(data['visit_id']!, _visitIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_visitIdMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('report_date')) {
+      context.handle(
+        _reportDateMeta,
+        reportDate.isAcceptableOrUnknown(data['report_date']!, _reportDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_reportDateMeta);
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  VisitReport map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return VisitReport(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      visitId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}visit_id'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      reportDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}report_date'],
+      )!,
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $VisitReportsTable createAlias(String alias) {
+    return $VisitReportsTable(attachedDatabase, alias);
+  }
+}
+
+class VisitReport extends DataClass implements Insertable<VisitReport> {
+  final String id;
+  final String visitId;
+  final String title;
+  final DateTime reportDate;
+  final String? notes;
+  final DateTime createdAt;
+  const VisitReport({
+    required this.id,
+    required this.visitId,
+    required this.title,
+    required this.reportDate,
+    this.notes,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['visit_id'] = Variable<String>(visitId);
+    map['title'] = Variable<String>(title);
+    map['report_date'] = Variable<DateTime>(reportDate);
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  VisitReportsCompanion toCompanion(bool nullToAbsent) {
+    return VisitReportsCompanion(
+      id: Value(id),
+      visitId: Value(visitId),
+      title: Value(title),
+      reportDate: Value(reportDate),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory VisitReport.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return VisitReport(
+      id: serializer.fromJson<String>(json['id']),
+      visitId: serializer.fromJson<String>(json['visitId']),
+      title: serializer.fromJson<String>(json['title']),
+      reportDate: serializer.fromJson<DateTime>(json['reportDate']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'visitId': serializer.toJson<String>(visitId),
+      'title': serializer.toJson<String>(title),
+      'reportDate': serializer.toJson<DateTime>(reportDate),
+      'notes': serializer.toJson<String?>(notes),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  VisitReport copyWith({
+    String? id,
+    String? visitId,
+    String? title,
+    DateTime? reportDate,
+    Value<String?> notes = const Value.absent(),
+    DateTime? createdAt,
+  }) => VisitReport(
+    id: id ?? this.id,
+    visitId: visitId ?? this.visitId,
+    title: title ?? this.title,
+    reportDate: reportDate ?? this.reportDate,
+    notes: notes.present ? notes.value : this.notes,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  VisitReport copyWithCompanion(VisitReportsCompanion data) {
+    return VisitReport(
+      id: data.id.present ? data.id.value : this.id,
+      visitId: data.visitId.present ? data.visitId.value : this.visitId,
+      title: data.title.present ? data.title.value : this.title,
+      reportDate: data.reportDate.present
+          ? data.reportDate.value
+          : this.reportDate,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('VisitReport(')
+          ..write('id: $id, ')
+          ..write('visitId: $visitId, ')
+          ..write('title: $title, ')
+          ..write('reportDate: $reportDate, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, visitId, title, reportDate, notes, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is VisitReport &&
+          other.id == this.id &&
+          other.visitId == this.visitId &&
+          other.title == this.title &&
+          other.reportDate == this.reportDate &&
+          other.notes == this.notes &&
+          other.createdAt == this.createdAt);
+}
+
+class VisitReportsCompanion extends UpdateCompanion<VisitReport> {
+  final Value<String> id;
+  final Value<String> visitId;
+  final Value<String> title;
+  final Value<DateTime> reportDate;
+  final Value<String?> notes;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const VisitReportsCompanion({
+    this.id = const Value.absent(),
+    this.visitId = const Value.absent(),
+    this.title = const Value.absent(),
+    this.reportDate = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  VisitReportsCompanion.insert({
+    required String id,
+    required String visitId,
+    required String title,
+    required DateTime reportDate,
+    this.notes = const Value.absent(),
+    required DateTime createdAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       visitId = Value(visitId),
+       title = Value(title),
+       reportDate = Value(reportDate),
+       createdAt = Value(createdAt);
+  static Insertable<VisitReport> custom({
+    Expression<String>? id,
+    Expression<String>? visitId,
+    Expression<String>? title,
+    Expression<DateTime>? reportDate,
+    Expression<String>? notes,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (visitId != null) 'visit_id': visitId,
+      if (title != null) 'title': title,
+      if (reportDate != null) 'report_date': reportDate,
+      if (notes != null) 'notes': notes,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  VisitReportsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? visitId,
+    Value<String>? title,
+    Value<DateTime>? reportDate,
+    Value<String?>? notes,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return VisitReportsCompanion(
+      id: id ?? this.id,
+      visitId: visitId ?? this.visitId,
+      title: title ?? this.title,
+      reportDate: reportDate ?? this.reportDate,
+      notes: notes ?? this.notes,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (visitId.present) {
+      map['visit_id'] = Variable<String>(visitId.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (reportDate.present) {
+      map['report_date'] = Variable<DateTime>(reportDate.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('VisitReportsCompanion(')
+          ..write('id: $id, ')
+          ..write('visitId: $visitId, ')
+          ..write('title: $title, ')
+          ..write('reportDate: $reportDate, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ReportResultLinksTable extends ReportResultLinks
+    with TableInfo<$ReportResultLinksTable, ReportResultLink> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ReportResultLinksTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _reportIdMeta = const VerificationMeta(
+    'reportId',
+  );
+  @override
+  late final GeneratedColumn<String> reportId = GeneratedColumn<String>(
+    'report_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES visit_reports (id)',
+    ),
+  );
+  static const VerificationMeta _sourceKindMeta = const VerificationMeta(
+    'sourceKind',
+  );
+  @override
+  late final GeneratedColumn<String> sourceKind = GeneratedColumn<String>(
+    'source_kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _resultIdMeta = const VerificationMeta(
+    'resultId',
+  );
+  @override
+  late final GeneratedColumn<String> resultId = GeneratedColumn<String>(
+    'result_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [reportId, sourceKind, resultId];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'report_result_links';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ReportResultLink> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('report_id')) {
+      context.handle(
+        _reportIdMeta,
+        reportId.isAcceptableOrUnknown(data['report_id']!, _reportIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_reportIdMeta);
+    }
+    if (data.containsKey('source_kind')) {
+      context.handle(
+        _sourceKindMeta,
+        sourceKind.isAcceptableOrUnknown(data['source_kind']!, _sourceKindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceKindMeta);
+    }
+    if (data.containsKey('result_id')) {
+      context.handle(
+        _resultIdMeta,
+        resultId.isAcceptableOrUnknown(data['result_id']!, _resultIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_resultIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {sourceKind, resultId};
+  @override
+  ReportResultLink map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ReportResultLink(
+      reportId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}report_id'],
+      )!,
+      sourceKind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_kind'],
+      )!,
+      resultId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}result_id'],
+      )!,
+    );
+  }
+
+  @override
+  $ReportResultLinksTable createAlias(String alias) {
+    return $ReportResultLinksTable(attachedDatabase, alias);
+  }
+}
+
+class ReportResultLink extends DataClass
+    implements Insertable<ReportResultLink> {
+  final String reportId;
+  final String sourceKind;
+  final String resultId;
+  const ReportResultLink({
+    required this.reportId,
+    required this.sourceKind,
+    required this.resultId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['report_id'] = Variable<String>(reportId);
+    map['source_kind'] = Variable<String>(sourceKind);
+    map['result_id'] = Variable<String>(resultId);
+    return map;
+  }
+
+  ReportResultLinksCompanion toCompanion(bool nullToAbsent) {
+    return ReportResultLinksCompanion(
+      reportId: Value(reportId),
+      sourceKind: Value(sourceKind),
+      resultId: Value(resultId),
+    );
+  }
+
+  factory ReportResultLink.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ReportResultLink(
+      reportId: serializer.fromJson<String>(json['reportId']),
+      sourceKind: serializer.fromJson<String>(json['sourceKind']),
+      resultId: serializer.fromJson<String>(json['resultId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'reportId': serializer.toJson<String>(reportId),
+      'sourceKind': serializer.toJson<String>(sourceKind),
+      'resultId': serializer.toJson<String>(resultId),
+    };
+  }
+
+  ReportResultLink copyWith({
+    String? reportId,
+    String? sourceKind,
+    String? resultId,
+  }) => ReportResultLink(
+    reportId: reportId ?? this.reportId,
+    sourceKind: sourceKind ?? this.sourceKind,
+    resultId: resultId ?? this.resultId,
+  );
+  ReportResultLink copyWithCompanion(ReportResultLinksCompanion data) {
+    return ReportResultLink(
+      reportId: data.reportId.present ? data.reportId.value : this.reportId,
+      sourceKind: data.sourceKind.present
+          ? data.sourceKind.value
+          : this.sourceKind,
+      resultId: data.resultId.present ? data.resultId.value : this.resultId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReportResultLink(')
+          ..write('reportId: $reportId, ')
+          ..write('sourceKind: $sourceKind, ')
+          ..write('resultId: $resultId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(reportId, sourceKind, resultId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ReportResultLink &&
+          other.reportId == this.reportId &&
+          other.sourceKind == this.sourceKind &&
+          other.resultId == this.resultId);
+}
+
+class ReportResultLinksCompanion extends UpdateCompanion<ReportResultLink> {
+  final Value<String> reportId;
+  final Value<String> sourceKind;
+  final Value<String> resultId;
+  final Value<int> rowid;
+  const ReportResultLinksCompanion({
+    this.reportId = const Value.absent(),
+    this.sourceKind = const Value.absent(),
+    this.resultId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ReportResultLinksCompanion.insert({
+    required String reportId,
+    required String sourceKind,
+    required String resultId,
+    this.rowid = const Value.absent(),
+  }) : reportId = Value(reportId),
+       sourceKind = Value(sourceKind),
+       resultId = Value(resultId);
+  static Insertable<ReportResultLink> custom({
+    Expression<String>? reportId,
+    Expression<String>? sourceKind,
+    Expression<String>? resultId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (reportId != null) 'report_id': reportId,
+      if (sourceKind != null) 'source_kind': sourceKind,
+      if (resultId != null) 'result_id': resultId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ReportResultLinksCompanion copyWith({
+    Value<String>? reportId,
+    Value<String>? sourceKind,
+    Value<String>? resultId,
+    Value<int>? rowid,
+  }) {
+    return ReportResultLinksCompanion(
+      reportId: reportId ?? this.reportId,
+      sourceKind: sourceKind ?? this.sourceKind,
+      resultId: resultId ?? this.resultId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (reportId.present) {
+      map['report_id'] = Variable<String>(reportId.value);
+    }
+    if (sourceKind.present) {
+      map['source_kind'] = Variable<String>(sourceKind.value);
+    }
+    if (resultId.present) {
+      map['result_id'] = Variable<String>(resultId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReportResultLinksCompanion(')
+          ..write('reportId: $reportId, ')
+          ..write('sourceKind: $sourceKind, ')
+          ..write('resultId: $resultId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2798,6 +4195,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $HospitalsTable hospitals = $HospitalsTable(this);
   late final $ImportedLabResultsTable importedLabResults =
       $ImportedLabResultsTable(this);
+  late final $VisitsTable visits = $VisitsTable(this);
+  late final $VisitReportsTable visitReports = $VisitReportsTable(this);
+  late final $ReportResultLinksTable reportResultLinks =
+      $ReportResultLinksTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2808,6 +4209,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     labResults,
     hospitals,
     importedLabResults,
+    visits,
+    visitReports,
+    reportResultLinks,
   ];
 }
 
@@ -3998,6 +5402,25 @@ final class $$HospitalsTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$VisitsTable, List<Visit>> _visitsRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.visits,
+    aliasName: 'hospitals__id__visits__hospital_id',
+  );
+
+  $$VisitsTableProcessedTableManager get visitsRefs {
+    final manager = $$VisitsTableTableManager(
+      $_db,
+      $_db.visits,
+    ).filter((f) => f.hospitalId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_visitsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$HospitalsTableFilterComposer
@@ -4045,6 +5468,31 @@ class $$HospitalsTableFilterComposer
           }) => $$ImportedLabResultsTableFilterComposer(
             $db: $db,
             $table: $db.importedLabResults,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> visitsRefs(
+    Expression<bool> Function($$VisitsTableFilterComposer f) f,
+  ) {
+    final $$VisitsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.visits,
+      getReferencedColumn: (t) => t.hospitalId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$VisitsTableFilterComposer(
+            $db: $db,
+            $table: $db.visits,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -4131,6 +5579,31 @@ class $$HospitalsTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> visitsRefs<T extends Object>(
+    Expression<T> Function($$VisitsTableAnnotationComposer a) f,
+  ) {
+    final $$VisitsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.visits,
+      getReferencedColumn: (t) => t.hospitalId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$VisitsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.visits,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$HospitalsTableTableManager
@@ -4146,7 +5619,7 @@ class $$HospitalsTableTableManager
           $$HospitalsTableUpdateCompanionBuilder,
           (Hospital, $$HospitalsTableReferences),
           Hospital,
-          PrefetchHooks Function({bool importedLabResultsRefs})
+          PrefetchHooks Function({bool importedLabResultsRefs, bool visitsRefs})
         > {
   $$HospitalsTableTableManager(_$AppDatabase db, $HospitalsTable table)
     : super(
@@ -4195,38 +5668,63 @@ class $$HospitalsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({importedLabResultsRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [
-                if (importedLabResultsRefs) db.importedLabResults,
-              ],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (importedLabResultsRefs)
-                    await $_getPrefetchedData<
-                      Hospital,
-                      $HospitalsTable,
-                      ImportedLabResult
-                    >(
-                      currentTable: table,
-                      referencedTable: $$HospitalsTableReferences
-                          ._importedLabResultsRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$HospitalsTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).importedLabResultsRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.hospitalId == item.id),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({importedLabResultsRefs = false, visitsRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (importedLabResultsRefs) db.importedLabResults,
+                    if (visitsRefs) db.visits,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (importedLabResultsRefs)
+                        await $_getPrefetchedData<
+                          Hospital,
+                          $HospitalsTable,
+                          ImportedLabResult
+                        >(
+                          currentTable: table,
+                          referencedTable: $$HospitalsTableReferences
+                              ._importedLabResultsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$HospitalsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).importedLabResultsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.hospitalId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (visitsRefs)
+                        await $_getPrefetchedData<
+                          Hospital,
+                          $HospitalsTable,
+                          Visit
+                        >(
+                          currentTable: table,
+                          referencedTable: $$HospitalsTableReferences
+                              ._visitsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$HospitalsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).visitsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.hospitalId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -4243,7 +5741,7 @@ typedef $$HospitalsTableProcessedTableManager =
       $$HospitalsTableUpdateCompanionBuilder,
       (Hospital, $$HospitalsTableReferences),
       Hospital,
-      PrefetchHooks Function({bool importedLabResultsRefs})
+      PrefetchHooks Function({bool importedLabResultsRefs, bool visitsRefs})
     >;
 typedef $$ImportedLabResultsTableCreateCompanionBuilder =
     ImportedLabResultsCompanion Function({
@@ -4860,6 +6358,1273 @@ typedef $$ImportedLabResultsTableProcessedTableManager =
       ImportedLabResult,
       PrefetchHooks Function({bool hospitalId})
     >;
+typedef $$VisitsTableCreateCompanionBuilder = VisitsCompanion Function({
+  required String id,
+  required String hospitalId,
+  required String visitType,
+  required DateTime startDate,
+  Value<DateTime?> endDate,
+  Value<String?> department,
+  Value<String?> doctor,
+  Value<String?> reason,
+  Value<String?> diagnosis,
+  Value<String?> notes,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<int> rowid,
+});
+typedef $$VisitsTableUpdateCompanionBuilder = VisitsCompanion Function({
+  Value<String> id,
+  Value<String> hospitalId,
+  Value<String> visitType,
+  Value<DateTime> startDate,
+  Value<DateTime?> endDate,
+  Value<String?> department,
+  Value<String?> doctor,
+  Value<String?> reason,
+  Value<String?> diagnosis,
+  Value<String?> notes,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<int> rowid,
+});
+
+final class $$VisitsTableReferences
+    extends BaseReferences<_$AppDatabase, $VisitsTable, Visit> {
+  $$VisitsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $HospitalsTable _hospitalIdTable(_$AppDatabase db) =>
+      db.hospitals.createAlias('visits__hospital_id__hospitals__id');
+
+  $$HospitalsTableProcessedTableManager get hospitalId {
+    final $_column = $_itemColumn<String>('hospital_id')!;
+
+    final manager = $$HospitalsTableTableManager(
+      $_db,
+      $_db.hospitals,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_hospitalIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$VisitReportsTable, List<VisitReport>>
+  _visitReportsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.visitReports,
+    aliasName: 'visits__id__visit_reports__visit_id',
+  );
+
+  $$VisitReportsTableProcessedTableManager get visitReportsRefs {
+    final manager = $$VisitReportsTableTableManager(
+      $_db,
+      $_db.visitReports,
+    ).filter((f) => f.visitId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_visitReportsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$VisitsTableFilterComposer
+    extends Composer<_$AppDatabase, $VisitsTable> {
+  $$VisitsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get visitType => $composableBuilder(
+    column: $table.visitType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get startDate => $composableBuilder(
+    column: $table.startDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get endDate => $composableBuilder(
+    column: $table.endDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get department => $composableBuilder(
+    column: $table.department,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get doctor => $composableBuilder(
+    column: $table.doctor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get diagnosis => $composableBuilder(
+    column: $table.diagnosis,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$HospitalsTableFilterComposer get hospitalId {
+    final $$HospitalsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.hospitalId,
+      referencedTable: $db.hospitals,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HospitalsTableFilterComposer(
+            $db: $db,
+            $table: $db.hospitals,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> visitReportsRefs(
+    Expression<bool> Function($$VisitReportsTableFilterComposer f) f,
+  ) {
+    final $$VisitReportsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.visitReports,
+      getReferencedColumn: (t) => t.visitId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$VisitReportsTableFilterComposer(
+            $db: $db,
+            $table: $db.visitReports,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$VisitsTableOrderingComposer
+    extends Composer<_$AppDatabase, $VisitsTable> {
+  $$VisitsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get visitType => $composableBuilder(
+    column: $table.visitType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get startDate => $composableBuilder(
+    column: $table.startDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get endDate => $composableBuilder(
+    column: $table.endDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get department => $composableBuilder(
+    column: $table.department,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get doctor => $composableBuilder(
+    column: $table.doctor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get diagnosis => $composableBuilder(
+    column: $table.diagnosis,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$HospitalsTableOrderingComposer get hospitalId {
+    final $$HospitalsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.hospitalId,
+      referencedTable: $db.hospitals,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HospitalsTableOrderingComposer(
+            $db: $db,
+            $table: $db.hospitals,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$VisitsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $VisitsTable> {
+  $$VisitsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get visitType =>
+      $composableBuilder(column: $table.visitType, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get startDate =>
+      $composableBuilder(column: $table.startDate, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get endDate =>
+      $composableBuilder(column: $table.endDate, builder: (column) => column);
+
+  GeneratedColumn<String> get department => $composableBuilder(
+    column: $table.department,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get doctor =>
+      $composableBuilder(column: $table.doctor, builder: (column) => column);
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  GeneratedColumn<String> get diagnosis =>
+      $composableBuilder(column: $table.diagnosis, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  $$HospitalsTableAnnotationComposer get hospitalId {
+    final $$HospitalsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.hospitalId,
+      referencedTable: $db.hospitals,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$HospitalsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.hospitals,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> visitReportsRefs<T extends Object>(
+    Expression<T> Function($$VisitReportsTableAnnotationComposer a) f,
+  ) {
+    final $$VisitReportsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.visitReports,
+      getReferencedColumn: (t) => t.visitId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$VisitReportsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.visitReports,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$VisitsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $VisitsTable,
+          Visit,
+          $$VisitsTableFilterComposer,
+          $$VisitsTableOrderingComposer,
+          $$VisitsTableAnnotationComposer,
+          $$VisitsTableCreateCompanionBuilder,
+          $$VisitsTableUpdateCompanionBuilder,
+          (Visit, $$VisitsTableReferences),
+          Visit,
+          PrefetchHooks Function({bool hospitalId, bool visitReportsRefs})
+        > {
+  $$VisitsTableTableManager(_$AppDatabase db, $VisitsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$VisitsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$VisitsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$VisitsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> hospitalId = const Value.absent(),
+                Value<String> visitType = const Value.absent(),
+                Value<DateTime> startDate = const Value.absent(),
+                Value<DateTime?> endDate = const Value.absent(),
+                Value<String?> department = const Value.absent(),
+                Value<String?> doctor = const Value.absent(),
+                Value<String?> reason = const Value.absent(),
+                Value<String?> diagnosis = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => VisitsCompanion(
+                id: id,
+                hospitalId: hospitalId,
+                visitType: visitType,
+                startDate: startDate,
+                endDate: endDate,
+                department: department,
+                doctor: doctor,
+                reason: reason,
+                diagnosis: diagnosis,
+                notes: notes,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String hospitalId,
+                required String visitType,
+                required DateTime startDate,
+                Value<DateTime?> endDate = const Value.absent(),
+                Value<String?> department = const Value.absent(),
+                Value<String?> doctor = const Value.absent(),
+                Value<String?> reason = const Value.absent(),
+                Value<String?> diagnosis = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => VisitsCompanion.insert(
+                id: id,
+                hospitalId: hospitalId,
+                visitType: visitType,
+                startDate: startDate,
+                endDate: endDate,
+                department: department,
+                doctor: doctor,
+                reason: reason,
+                diagnosis: diagnosis,
+                notes: notes,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$VisitsTable, Visit>(table),
+                  $$VisitsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({hospitalId = false, visitReportsRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (visitReportsRefs) db.visitReports,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (hospitalId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.hospitalId,
+                            referencedTable: $$VisitsTableReferences
+                                ._hospitalIdTable(db),
+                            referencedColumn: $$VisitsTableReferences
+                                ._hospitalIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (visitReportsRefs)
+                        await $_getPrefetchedData<
+                          Visit,
+                          $VisitsTable,
+                          VisitReport
+                        >(
+                          currentTable: table,
+                          referencedTable: $$VisitsTableReferences
+                              ._visitReportsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$VisitsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).visitReportsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.visitId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$VisitsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $VisitsTable,
+      Visit,
+      $$VisitsTableFilterComposer,
+      $$VisitsTableOrderingComposer,
+      $$VisitsTableAnnotationComposer,
+      $$VisitsTableCreateCompanionBuilder,
+      $$VisitsTableUpdateCompanionBuilder,
+      (Visit, $$VisitsTableReferences),
+      Visit,
+      PrefetchHooks Function({bool hospitalId, bool visitReportsRefs})
+    >;
+typedef $$VisitReportsTableCreateCompanionBuilder =
+    VisitReportsCompanion Function({
+      required String id,
+      required String visitId,
+      required String title,
+      required DateTime reportDate,
+      Value<String?> notes,
+      required DateTime createdAt,
+      Value<int> rowid,
+    });
+typedef $$VisitReportsTableUpdateCompanionBuilder =
+    VisitReportsCompanion Function({
+      Value<String> id,
+      Value<String> visitId,
+      Value<String> title,
+      Value<DateTime> reportDate,
+      Value<String?> notes,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+final class $$VisitReportsTableReferences
+    extends BaseReferences<_$AppDatabase, $VisitReportsTable, VisitReport> {
+  $$VisitReportsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $VisitsTable _visitIdTable(_$AppDatabase db) =>
+      db.visits.createAlias('visit_reports__visit_id__visits__id');
+
+  $$VisitsTableProcessedTableManager get visitId {
+    final $_column = $_itemColumn<String>('visit_id')!;
+
+    final manager = $$VisitsTableTableManager(
+      $_db,
+      $_db.visits,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_visitIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$ReportResultLinksTable, List<ReportResultLink>>
+  _reportResultLinksRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.reportResultLinks,
+        aliasName: 'visit_reports__id__report_result_links__report_id',
+      );
+
+  $$ReportResultLinksTableProcessedTableManager get reportResultLinksRefs {
+    final manager = $$ReportResultLinksTableTableManager(
+      $_db,
+      $_db.reportResultLinks,
+    ).filter((f) => f.reportId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _reportResultLinksRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$VisitReportsTableFilterComposer
+    extends Composer<_$AppDatabase, $VisitReportsTable> {
+  $$VisitReportsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get reportDate => $composableBuilder(
+    column: $table.reportDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$VisitsTableFilterComposer get visitId {
+    final $$VisitsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.visitId,
+      referencedTable: $db.visits,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$VisitsTableFilterComposer(
+            $db: $db,
+            $table: $db.visits,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> reportResultLinksRefs(
+    Expression<bool> Function($$ReportResultLinksTableFilterComposer f) f,
+  ) {
+    final $$ReportResultLinksTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.reportResultLinks,
+      getReferencedColumn: (t) => t.reportId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReportResultLinksTableFilterComposer(
+            $db: $db,
+            $table: $db.reportResultLinks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$VisitReportsTableOrderingComposer
+    extends Composer<_$AppDatabase, $VisitReportsTable> {
+  $$VisitReportsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get reportDate => $composableBuilder(
+    column: $table.reportDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$VisitsTableOrderingComposer get visitId {
+    final $$VisitsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.visitId,
+      referencedTable: $db.visits,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$VisitsTableOrderingComposer(
+            $db: $db,
+            $table: $db.visits,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$VisitReportsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $VisitReportsTable> {
+  $$VisitReportsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get reportDate => $composableBuilder(
+    column: $table.reportDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$VisitsTableAnnotationComposer get visitId {
+    final $$VisitsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.visitId,
+      referencedTable: $db.visits,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$VisitsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.visits,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> reportResultLinksRefs<T extends Object>(
+    Expression<T> Function($$ReportResultLinksTableAnnotationComposer a) f,
+  ) {
+    final $$ReportResultLinksTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.reportResultLinks,
+          getReferencedColumn: (t) => t.reportId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ReportResultLinksTableAnnotationComposer(
+                $db: $db,
+                $table: $db.reportResultLinks,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$VisitReportsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $VisitReportsTable,
+          VisitReport,
+          $$VisitReportsTableFilterComposer,
+          $$VisitReportsTableOrderingComposer,
+          $$VisitReportsTableAnnotationComposer,
+          $$VisitReportsTableCreateCompanionBuilder,
+          $$VisitReportsTableUpdateCompanionBuilder,
+          (VisitReport, $$VisitReportsTableReferences),
+          VisitReport,
+          PrefetchHooks Function({bool visitId, bool reportResultLinksRefs})
+        > {
+  $$VisitReportsTableTableManager(_$AppDatabase db, $VisitReportsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$VisitReportsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$VisitReportsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$VisitReportsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> visitId = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<DateTime> reportDate = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => VisitReportsCompanion(
+                id: id,
+                visitId: visitId,
+                title: title,
+                reportDate: reportDate,
+                notes: notes,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String visitId,
+                required String title,
+                required DateTime reportDate,
+                Value<String?> notes = const Value.absent(),
+                required DateTime createdAt,
+                Value<int> rowid = const Value.absent(),
+              }) => VisitReportsCompanion.insert(
+                id: id,
+                visitId: visitId,
+                title: title,
+                reportDate: reportDate,
+                notes: notes,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$VisitReportsTable, VisitReport>(table),
+                  $$VisitReportsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({visitId = false, reportResultLinksRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (reportResultLinksRefs) db.reportResultLinks,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (visitId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.visitId,
+                            referencedTable: $$VisitReportsTableReferences
+                                ._visitIdTable(db),
+                            referencedColumn: $$VisitReportsTableReferences
+                                ._visitIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (reportResultLinksRefs)
+                        await $_getPrefetchedData<
+                          VisitReport,
+                          $VisitReportsTable,
+                          ReportResultLink
+                        >(
+                          currentTable: table,
+                          referencedTable: $$VisitReportsTableReferences
+                              ._reportResultLinksRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$VisitReportsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).reportResultLinksRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.reportId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$VisitReportsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $VisitReportsTable,
+      VisitReport,
+      $$VisitReportsTableFilterComposer,
+      $$VisitReportsTableOrderingComposer,
+      $$VisitReportsTableAnnotationComposer,
+      $$VisitReportsTableCreateCompanionBuilder,
+      $$VisitReportsTableUpdateCompanionBuilder,
+      (VisitReport, $$VisitReportsTableReferences),
+      VisitReport,
+      PrefetchHooks Function({bool visitId, bool reportResultLinksRefs})
+    >;
+typedef $$ReportResultLinksTableCreateCompanionBuilder =
+    ReportResultLinksCompanion Function({
+      required String reportId,
+      required String sourceKind,
+      required String resultId,
+      Value<int> rowid,
+    });
+typedef $$ReportResultLinksTableUpdateCompanionBuilder =
+    ReportResultLinksCompanion Function({
+      Value<String> reportId,
+      Value<String> sourceKind,
+      Value<String> resultId,
+      Value<int> rowid,
+    });
+
+final class $$ReportResultLinksTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $ReportResultLinksTable,
+          ReportResultLink
+        > {
+  $$ReportResultLinksTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $VisitReportsTable _reportIdTable(_$AppDatabase db) => db.visitReports
+      .createAlias('report_result_links__report_id__visit_reports__id');
+
+  $$VisitReportsTableProcessedTableManager get reportId {
+    final $_column = $_itemColumn<String>('report_id')!;
+
+    final manager = $$VisitReportsTableTableManager(
+      $_db,
+      $_db.visitReports,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_reportIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ReportResultLinksTableFilterComposer
+    extends Composer<_$AppDatabase, $ReportResultLinksTable> {
+  $$ReportResultLinksTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get sourceKind => $composableBuilder(
+    column: $table.sourceKind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get resultId => $composableBuilder(
+    column: $table.resultId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$VisitReportsTableFilterComposer get reportId {
+    final $$VisitReportsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.reportId,
+      referencedTable: $db.visitReports,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$VisitReportsTableFilterComposer(
+            $db: $db,
+            $table: $db.visitReports,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ReportResultLinksTableOrderingComposer
+    extends Composer<_$AppDatabase, $ReportResultLinksTable> {
+  $$ReportResultLinksTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get sourceKind => $composableBuilder(
+    column: $table.sourceKind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get resultId => $composableBuilder(
+    column: $table.resultId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$VisitReportsTableOrderingComposer get reportId {
+    final $$VisitReportsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.reportId,
+      referencedTable: $db.visitReports,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$VisitReportsTableOrderingComposer(
+            $db: $db,
+            $table: $db.visitReports,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ReportResultLinksTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ReportResultLinksTable> {
+  $$ReportResultLinksTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get sourceKind => $composableBuilder(
+    column: $table.sourceKind,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get resultId =>
+      $composableBuilder(column: $table.resultId, builder: (column) => column);
+
+  $$VisitReportsTableAnnotationComposer get reportId {
+    final $$VisitReportsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.reportId,
+      referencedTable: $db.visitReports,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$VisitReportsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.visitReports,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ReportResultLinksTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ReportResultLinksTable,
+          ReportResultLink,
+          $$ReportResultLinksTableFilterComposer,
+          $$ReportResultLinksTableOrderingComposer,
+          $$ReportResultLinksTableAnnotationComposer,
+          $$ReportResultLinksTableCreateCompanionBuilder,
+          $$ReportResultLinksTableUpdateCompanionBuilder,
+          (ReportResultLink, $$ReportResultLinksTableReferences),
+          ReportResultLink,
+          PrefetchHooks Function({bool reportId})
+        > {
+  $$ReportResultLinksTableTableManager(
+    _$AppDatabase db,
+    $ReportResultLinksTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ReportResultLinksTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ReportResultLinksTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ReportResultLinksTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> reportId = const Value.absent(),
+                Value<String> sourceKind = const Value.absent(),
+                Value<String> resultId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ReportResultLinksCompanion(
+                reportId: reportId,
+                sourceKind: sourceKind,
+                resultId: resultId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String reportId,
+                required String sourceKind,
+                required String resultId,
+                Value<int> rowid = const Value.absent(),
+              }) => ReportResultLinksCompanion.insert(
+                reportId: reportId,
+                sourceKind: sourceKind,
+                resultId: resultId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ReportResultLinksTable, ReportResultLink>(table),
+                  $$ReportResultLinksTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({reportId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (reportId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.reportId,
+                        referencedTable: $$ReportResultLinksTableReferences
+                            ._reportIdTable(db),
+                        referencedColumn: $$ReportResultLinksTableReferences
+                            ._reportIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ReportResultLinksTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ReportResultLinksTable,
+      ReportResultLink,
+      $$ReportResultLinksTableFilterComposer,
+      $$ReportResultLinksTableOrderingComposer,
+      $$ReportResultLinksTableAnnotationComposer,
+      $$ReportResultLinksTableCreateCompanionBuilder,
+      $$ReportResultLinksTableUpdateCompanionBuilder,
+      (ReportResultLink, $$ReportResultLinksTableReferences),
+      ReportResultLink,
+      PrefetchHooks Function({bool reportId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4874,4 +7639,10 @@ class $AppDatabaseManager {
       $$HospitalsTableTableManager(_db, _db.hospitals);
   $$ImportedLabResultsTableTableManager get importedLabResults =>
       $$ImportedLabResultsTableTableManager(_db, _db.importedLabResults);
+  $$VisitsTableTableManager get visits =>
+      $$VisitsTableTableManager(_db, _db.visits);
+  $$VisitReportsTableTableManager get visitReports =>
+      $$VisitReportsTableTableManager(_db, _db.visitReports);
+  $$ReportResultLinksTableTableManager get reportResultLinks =>
+      $$ReportResultLinksTableTableManager(_db, _db.reportResultLinks);
 }
