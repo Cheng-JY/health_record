@@ -118,6 +118,37 @@ class ReportResultLinks extends Table {
   Set<Column> get primaryKey => {sourceKind, resultId};
 }
 
+/// Drug catalog item. Retain it when a prescription ends for audit/history.
+class Medications extends Table {
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  TextColumn get strength => text().nullable()(); // e.g. "500 mg/tablet"
+  TextColumn get form => text().nullable()(); // tablet / capsule / injection
+  TextColumn get purpose => text().nullable()();
+  TextColumn get notes => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+  DateTimeColumn get archivedAt => dateTime().nullable()();
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// A historical, date-bounded medication plan. Never overwrite old doses.
+class MedicationPlans extends Table {
+  TextColumn get id => text()();
+  TextColumn get medicationId => text().references(Medications, #id)();
+  TextColumn get dose => text()(); // "1片", "500 mg", etc.
+  TextColumn get frequency => text()(); // "每日", "每周一次", "按需", etc.
+  TextColumn get times => text().nullable()(); // "08:00,20:00"
+  DateTimeColumn get startDate => dateTime()();
+  DateTimeColumn get endDate => dateTime().nullable()();
+  TextColumn get changeReason => text().nullable()();
+  TextColumn get instructions => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 @DriftDatabase(
   tables: [
     LabCategories,
@@ -128,6 +159,8 @@ class ReportResultLinks extends Table {
     Visits,
     VisitReports,
     ReportResultLinks,
+    Medications,
+    MedicationPlans,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -143,7 +176,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -200,6 +233,12 @@ class AppDatabase extends _$AppDatabase {
       if (from < 6) {
         await m.createTable(visitReports);
         await m.createTable(reportResultLinks);
+      }
+      // v6 -> v7: medication catalog and immutable dose-plan history.
+      // Existing labs, hospitals, visits and reports stay unchanged.
+      if (from < 7) {
+        await m.createTable(medications);
+        await m.createTable(medicationPlans);
       }
     },
 

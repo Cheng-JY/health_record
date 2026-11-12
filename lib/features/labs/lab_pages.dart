@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../main.dart';
 import '../../core/database/app_database.dart';
 import '../csv_import/csv_import_page.dart';
+import '../medications/medications_page.dart';
 
 String dateText(DateTime d) => DateFormat('yyyy-MM-dd').format(d);
 
@@ -95,6 +96,61 @@ class DashboardPage extends ConsumerWidget {
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),
+
+        const SizedBox(height: 20),
+
+        // 用药管理入口：仅跳转到现有 MedicationsPage，不修改数据库。
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.medication_outlined,
+                      size: 28,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '用药管理',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '查看当前服药计划与剂量调整历史',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const MedicationsPage(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.medication_outlined),
+                    label: const Text('进入用药管理'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
 
         const SizedBox(height: 20),
 
