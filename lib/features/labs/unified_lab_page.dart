@@ -251,6 +251,7 @@ class _UnifiedLabPageState extends ConsumerState<UnifiedLabPage> {
                       MaterialPageRoute<void>(
                         builder: (_) => _UnifiedDetailPage(
                           group: group,
+                          allGroups: groups.values.toList(),
                           hospitalFilter: selectedHospital,
                         ),
                       ),
@@ -265,20 +266,112 @@ class _UnifiedLabPageState extends ConsumerState<UnifiedLabPage> {
   }
 }
 
-class _UnifiedDetailPage extends ConsumerWidget {
-  const _UnifiedDetailPage({required this.group, required this.hospitalFilter});
+class _UnifiedDetailPage extends ConsumerStatefulWidget {
+  const _UnifiedDetailPage({
+    required this.group,
+    required this.allGroups,
+    required this.hospitalFilter,
+  });
+
   final _IndicatorGroup group;
+  final List<_IndicatorGroup> allGroups;
   final String hospitalFilter;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_UnifiedDetailPage> createState() => _UnifiedDetailPageState();
+}
+
+class _UnifiedDetailPageState extends ConsumerState<_UnifiedDetailPage> {
+  late String selectedCategory;
+  late String selectedIndicatorKey;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedCategory = widget.group.category;
+    selectedIndicatorKey = widget.group.key;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final categoryOptions =
+        widget.allGroups.map((group) => group.category).toSet().toList()
+          ..sort();
+
+    final indicators =
+        widget.allGroups
+            .where((group) => group.category == selectedCategory)
+            .toList()
+          ..sort((a, b) => a.title.compareTo(b.title));
+
+    final group = indicators.any((item) => item.key == selectedIndicatorKey)
+        ? indicators.firstWhere((item) => item.key == selectedIndicatorKey)
+        : indicators.first;
     final sorted = [...group.entries]..sort((a, b) => b.date.compareTo(a.date));
+
     return Scaffold(
       appBar: AppBar(title: Text(group.title)),
       body: ListView(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: DropdownButtonFormField<String>(
+              key: ValueKey('detail-category-$selectedCategory'),
+              initialValue: selectedCategory,
+              isExpanded: true,
+              decoration: const InputDecoration(
+                labelText: '检查分类',
+                border: OutlineInputBorder(),
+              ),
+              items: [
+                for (final category in categoryOptions)
+                  DropdownMenuItem(
+                    value: category,
+                    child: Text(category, overflow: TextOverflow.ellipsis),
+                  ),
+              ],
+              onChanged: (value) {
+                if (value == null || value == selectedCategory) return;
+                setState(() {
+                  selectedCategory = value;
+                  final first =
+                      widget.allGroups
+                          .where((item) => item.category == value)
+                          .toList()
+                        ..sort((a, b) => a.title.compareTo(b.title));
+                  selectedIndicatorKey = first.first.key;
+                });
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+            child: DropdownButtonFormField<String>(
+              key: ValueKey(
+                'detail-indicator-$selectedCategory-$selectedIndicatorKey',
+              ),
+              initialValue: selectedIndicatorKey,
+              isExpanded: true,
+              decoration: const InputDecoration(
+                labelText: '检查指标',
+                border: OutlineInputBorder(),
+              ),
+              items: [
+                for (final item in indicators)
+                  DropdownMenuItem(
+                    value: item.key,
+                    child: Text(item.title, overflow: TextOverflow.ellipsis),
+                  ),
+              ],
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() => selectedIndicatorKey = value);
+                }
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             child: Text(
               '${group.category} · 共 ${sorted.length} 条',
               style: Theme.of(context).textTheme.titleMedium,
@@ -287,8 +380,9 @@ class _UnifiedDetailPage extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             child: UnifiedTrendsPage(
+              key: ValueKey('detail-trend-${group.key}'),
               indicatorKey: group.key,
-              hospitalFilter: hospitalFilter,
+              hospitalFilter: widget.hospitalFilter,
               embedded: true,
             ),
           ),
