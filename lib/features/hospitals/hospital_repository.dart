@@ -134,6 +134,12 @@ class HospitalRepository {
       if (linked.isNotEmpty) {
         throw StateError('这家医院关联了 ${linked.length} 条记录（包括已软删除记录），不能直接删除。');
       }
+      final visits = await (db.select(
+        db.visits,
+      )..where((v) => v.hospitalId.equals(id))).get();
+      if (visits.isNotEmpty) {
+        throw StateError('这家医院关联了 ${visits.length} 次就诊，不能直接删除。');
+      }
       await (db.delete(db.hospitals)..where((h) => h.id.equals(id))).go();
     });
   }
@@ -194,6 +200,9 @@ class HospitalRepository {
           await (db.update(db.importedLabResults)
                 ..where((r) => r.hospitalId.equals(sourceId)))
               .write(ImportedLabResultsCompanion(hospitalId: Value(targetId)));
+      // Move visits as well before deleting source hospital.
+      await (db.update(db.visits)..where((v) => v.hospitalId.equals(sourceId)))
+          .write(VisitsCompanion(hospitalId: Value(targetId)));
       await (db.delete(db.hospitals)..where((h) => h.id.equals(sourceId))).go();
       return moved;
     });

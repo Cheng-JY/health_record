@@ -5,6 +5,7 @@ import '../../core/database/app_database.dart';
 import '../../main.dart';
 import 'hospital_repository.dart';
 import 'hospital_tools_page.dart';
+import '../visits/visits_page.dart';
 
 final hospitalManagementRepositoryProvider = Provider<HospitalRepository>(
   (ref) => HospitalRepository(ref.watch(databaseProvider)),
@@ -176,6 +177,17 @@ class _HospitalsPageState extends ConsumerState<HospitalsPage> {
               icon: const Icon(Icons.settings_suggest_outlined),
               label: const Text('批量分配 / 合并医院'),
             ),
+            OutlinedButton.icon(
+              onPressed: busy
+                  ? null
+                  : () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const VisitsPage(),
+                      ),
+                    ),
+              icon: const Icon(Icons.event_note_outlined),
+              label: const Text('就诊管理'),
+            ),
             FilledButton.icon(
               onPressed: busy ? null : () => _editHospital(),
               icon: const Icon(Icons.add),
@@ -221,6 +233,17 @@ class _HospitalsPageState extends ConsumerState<HospitalsPage> {
                       trailing: Wrap(
                         spacing: 4,
                         children: [
+                          IconButton(
+                            tooltip: '查看该医院就诊记录',
+                            onPressed: () => Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => VisitsPage(
+                                  initialHospitalId: summary.hospital.id,
+                                ),
+                              ),
+                            ),
+                            icon: const Icon(Icons.event_note_outlined),
+                          ),
                           IconButton(
                             tooltip: '编辑医院',
                             onPressed: busy

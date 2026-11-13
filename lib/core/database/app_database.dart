@@ -76,8 +76,35 @@ class Hospitals extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+/// A distinct outpatient, inpatient or emergency encounter at a hospital.
+class Visits extends Table {
+  TextColumn get id => text()();
+  TextColumn get hospitalId => text().references(Hospitals, #id)();
+  TextColumn get visitType =>
+      text()(); // outpatient / inpatient / emergency / other
+  DateTimeColumn get startDate => dateTime()();
+  DateTimeColumn get endDate => dateTime().nullable()();
+  TextColumn get department => text().nullable()();
+  TextColumn get doctor => text().nullable()();
+  TextColumn get reason => text().nullable()();
+  TextColumn get diagnosis => text().nullable()();
+  TextColumn get notes => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 @DriftDatabase(
-  tables: [LabCategories, LabTests, LabResults, ImportedLabResults, Hospitals],
+  tables: [
+    LabCategories,
+    LabTests,
+    LabResults,
+    ImportedLabResults,
+    Hospitals,
+    Visits,
+  ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase()
@@ -92,10 +119,11 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (m) async => m.createAll(),
     onUpgrade: (m, from, to) async {
       // v1 -> v2 / v3
       if (from < 2) {
@@ -137,6 +165,11 @@ class AppDatabase extends _$AppDatabase {
           'ADD COLUMN hospital_id TEXT '
           'REFERENCES hospitals(id)',
         );
+      }
+
+      // v4 -> v5: visit records. Does not alter existing lab or hospital rows.
+      if (from < 5) {
+        await m.createTable(visits);
       }
     },
 
@@ -229,15 +262,6 @@ class AppDatabase extends _$AppDatabase {
     await (update(importedLabResults)..where((t) => t.id.equals(id))).write(
       ImportedLabResultsCompanion(deletedAt: Value(DateTime.now())),
     );
-  }
-
-  Future<void> checkHospitalDatabase() async {
-    final version = await customSelect('PRAGMA user_version').getSingle();
-
-    final tables = await customSelect(
-      "SELECT name FROM sqlite_master "
-      "WHERE type = 'table' AND name = 'hospitals'",
-    ).get();
   }
 
   Stream<List<ImportedLabResult>> watchImportedResults() =>
