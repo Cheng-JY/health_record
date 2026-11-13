@@ -11,6 +11,7 @@ import '../labs/lab_pages.dart';
 import '../medications/medications_page.dart';
 import '../trends/unified_trends_page.dart';
 import '../visits/visits_page.dart';
+import '../symptoms/symptoms_page.dart';
 
 /// Only reads medication plans. Does not change medication history.
 final _homePlansProvider = StreamProvider<List<MedicationPlan>>(
@@ -356,6 +357,33 @@ class _HealthDashboardPageState extends ConsumerState<HealthDashboardPage> {
                       ),
                   ],
                 ),
+        ),
+        const SizedBox(height: 14),
+        _sectionTitle(context, '症状记录'),
+        Card(
+          child: Column(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.healing_outlined),
+                title: const Text('我的症状日记'),
+                subtitle: const Text('记录症状、发生时间、严重程度与备注'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _open(const SymptomsPage()),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: FilledButton.tonalIcon(
+                    onPressed: () =>
+                        _open(const SymptomsPage(openEditor: true)),
+                    icon: const Icon(Icons.add),
+                    label: const Text('记录新症状'),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 14),
         _sectionTitle(context, '快捷操作'),

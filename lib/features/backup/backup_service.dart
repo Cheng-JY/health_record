@@ -10,7 +10,7 @@ class HealthRecordBackupService {
   final AppDatabase db;
 
   static const int backupVersion = 1;
-  static const int supportedSchemaVersion = 7;
+  static const int supportedSchemaVersion = 8;
 
   // Parent tables precede children to preserve foreign-key constraints.
   static const List<String> tables = [
@@ -24,6 +24,7 @@ class HealthRecordBackupService {
     'report_result_links',
     'medications',
     'medication_plans',
+    'symptom_entries',
   ];
 
   Future<String> exportJson() async {
@@ -57,17 +58,22 @@ class HealthRecordBackupService {
     if (decoded is! Map<String, dynamic> ||
         decoded['format'] != 'health_record_local_backup' ||
         decoded['backupVersion'] != backupVersion ||
-        decoded['schemaVersion'] != supportedSchemaVersion) {
-      throw const FormatException('备份格式或数据库版本不兼容（需要 v7 备份）。');
+        (decoded['schemaVersion'] != 7 &&
+            decoded['schemaVersion'] != supportedSchemaVersion)) {
+      throw const FormatException('备份格式或数据库版本不兼容（支持 v7/v8 备份）。');
     }
     final content = decoded['tables'];
+    final version = decoded['schemaVersion'];
+    final expected = version == 7
+        ? tables.sublist(0, tables.length - 1)
+        : tables;
     if (content is! Map<String, dynamic> ||
-        content.length != tables.length ||
-        content.keys.any((name) => !tables.contains(name))) {
+        content.length != expected.length ||
+        content.keys.any((name) => !expected.contains(name))) {
       throw const FormatException('备份的数据表不完整或存在未知表。');
     }
     final counts = <String, int>{};
-    for (final name in tables) {
+    for (final name in expected) {
       final rows = content[name];
       if (rows is! List || rows.any((e) => e is! Map<String, dynamic>)) {
         throw FormatException('表 $name 的记录格式不正确。');
@@ -88,6 +94,10 @@ class HealthRecordBackupService {
     }
     final decoded = jsonDecode(jsonText) as Map<String, dynamic>;
     final data = decoded['tables'] as Map<String, dynamic>;
+    // v7 snapshots predate symptoms. Restore all existing v7 tables and
+    // initialize the new symptom table as empty. The user confirms replace.
+    final importedTables = <String, dynamic>{...data};
+    importedTables.putIfAbsent('symptom_entries', () => <dynamic>[]);
 
     // Validate every column name against this installed database schema.
     final allowedColumns = <String, Set<String>>{};
@@ -95,7 +105,7 @@ class HealthRecordBackupService {
       final fields = await db.customSelect('PRAGMA table_info("$name")').get();
       if (fields.isEmpty) throw StateError('数据库缺少表 $name');
       allowedColumns[name] = fields.map((r) => r.read<String>('name')).toSet();
-      for (final raw in data[name] as List) {
+      for (final raw in importedTables[name] as List) {
         final row = raw as Map<String, dynamic>;
         if (row.isEmpty ||
             row.keys.any((k) => !allowedColumns[name]!.contains(k))) {
@@ -116,7 +126,7 @@ class HealthRecordBackupService {
         await db.customStatement('DELETE FROM "$name"');
       }
       for (final name in tables) {
-        for (final raw in data[name] as List) {
+        for (final raw in importedTables[name] as List) {
           final row = raw as Map<String, dynamic>;
           final columns = row.keys.toList();
           final quotedColumns = columns.map((c) => '"$c"').join(', ');

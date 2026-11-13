@@ -164,6 +164,18 @@ class MedicationPlans extends Table {
   ],
 )
 class AppDatabase extends _$AppDatabase {
+  static const _createSymptomsSql = '''
+    CREATE TABLE IF NOT EXISTS symptom_entries (
+      id TEXT NOT NULL PRIMARY KEY,
+      symptom TEXT NOT NULL,
+      severity INTEGER NOT NULL CHECK (severity BETWEEN 1 AND 10),
+      occurred_at TEXT NOT NULL,
+      notes TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  ''';
+
   AppDatabase()
     : super(
         driftDatabase(
@@ -176,11 +188,14 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-    onCreate: (m) async => m.createAll(),
+    onCreate: (m) async {
+      await m.createAll();
+      await customStatement(_createSymptomsSql);
+    },
     onUpgrade: (m, from, to) async {
       // v1 -> v2 / v3
       if (from < 2) {
@@ -240,9 +255,14 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(medications);
         await m.createTable(medicationPlans);
       }
+      // v7 -> v8: symptoms only; existing clinical data remains unchanged.
+      if (from < 8) {
+        await customStatement(_createSymptomsSql);
+      }
     },
 
     beforeOpen: (details) async {
+      await customStatement(_createSymptomsSql);
       // 检查医院表是否存在
       final tables = await customSelect(
         "SELECT name FROM sqlite_master "
