@@ -96,6 +96,59 @@ class Visits extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+/// A report belongs to one visit. This is report metadata, not the PDF itself.
+class VisitReports extends Table {
+  TextColumn get id => text()();
+  TextColumn get visitId => text().references(Visits, #id)();
+  TextColumn get title => text()();
+  DateTimeColumn get reportDate => dateTime()();
+  TextColumn get notes => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// A lab result may belong to at most one report, regardless of source.
+/// Existing lab tables remain untouched. The repository validates target IDs.
+class ReportResultLinks extends Table {
+  TextColumn get reportId => text().references(VisitReports, #id)();
+  TextColumn get sourceKind => text()(); // 'csv' or 'manual'
+  TextColumn get resultId => text()();
+  @override
+  Set<Column> get primaryKey => {sourceKind, resultId};
+}
+
+/// Drug catalog item. Retain it when a prescription ends for audit/history.
+class Medications extends Table {
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  TextColumn get strength => text().nullable()(); // e.g. "500 mg/tablet"
+  TextColumn get form => text().nullable()(); // tablet / capsule / injection
+  TextColumn get purpose => text().nullable()();
+  TextColumn get notes => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+  DateTimeColumn get archivedAt => dateTime().nullable()();
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// A historical, date-bounded medication plan. Never overwrite old doses.
+class MedicationPlans extends Table {
+  TextColumn get id => text()();
+  TextColumn get medicationId => text().references(Medications, #id)();
+  TextColumn get dose => text()(); // "1片", "500 mg", etc.
+  TextColumn get frequency => text()(); // "每日", "每周一次", "按需", etc.
+  TextColumn get times => text().nullable()(); // "08:00,20:00"
+  DateTimeColumn get startDate => dateTime()();
+  DateTimeColumn get endDate => dateTime().nullable()();
+  TextColumn get changeReason => text().nullable()();
+  TextColumn get instructions => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 @DriftDatabase(
   tables: [
     LabCategories,
@@ -104,6 +157,10 @@ class Visits extends Table {
     ImportedLabResults,
     Hospitals,
     Visits,
+    VisitReports,
+    ReportResultLinks,
+    Medications,
+    MedicationPlans,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -119,10 +176,11 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (m) async => m.createAll(),
     onCreate: (m) async => m.createAll(),
     onUpgrade: (m, from, to) async {
       // v1 -> v2 / v3
@@ -170,6 +228,18 @@ class AppDatabase extends _$AppDatabase {
       // v4 -> v5: visit records. Does not alter existing lab or hospital rows.
       if (from < 5) {
         await m.createTable(visits);
+      }
+      // v5 -> v6: report metadata and explicit result-to-report links.
+      // No existing CSV or manual result is deleted or rewritten.
+      if (from < 6) {
+        await m.createTable(visitReports);
+        await m.createTable(reportResultLinks);
+      }
+      // v6 -> v7: medication catalog and immutable dose-plan history.
+      // Existing labs, hospitals, visits and reports stay unchanged.
+      if (from < 7) {
+        await m.createTable(medications);
+        await m.createTable(medicationPlans);
       }
     },
 

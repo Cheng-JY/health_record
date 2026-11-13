@@ -52,6 +52,28 @@ class VisitRepository {
             ),
           );
     } else {
+      // Keep linked CSV results consistent with the visit's hospital.
+      final old = await (db.select(
+        db.visits,
+      )..where((v) => v.id.equals(id))).getSingleOrNull();
+      if (old == null) throw StateError('要编辑的就诊记录不存在');
+      if (old.hospitalId != hospitalId) {
+        final reports = await (db.select(
+          db.visitReports,
+        )..where((r) => r.visitId.equals(id))).get();
+        for (final report in reports) {
+          final linkedCsv =
+              await (db.select(db.reportResultLinks)..where(
+                    (l) =>
+                        l.reportId.equals(report.id) &
+                        l.sourceKind.equals('csv'),
+                  ))
+                  .get();
+          if (linkedCsv.isNotEmpty) {
+            throw StateError('本次就诊已有 CSV 检查结果关联，请先解除相关报告关联，再修改医院');
+          }
+        }
+      }
       final affected =
           await (db.update(db.visits)..where((v) => v.id.equals(id))).write(
             VisitsCompanion(
@@ -72,6 +94,19 @@ class VisitRepository {
   }
 
   Future<void> deleteVisit(String id) async {
-    await (db.delete(db.visits)..where((v) => v.id.equals(id))).go();
+    await db.transaction(() async {
+      final reports = await (db.select(
+        db.visitReports,
+      )..where((r) => r.visitId.equals(id))).get();
+      for (final report in reports) {
+        await (db.delete(
+          db.reportResultLinks,
+        )..where((l) => l.reportId.equals(report.id))).go();
+      }
+      await (db.delete(
+        db.visitReports,
+      )..where((r) => r.visitId.equals(id))).go();
+      await (db.delete(db.visits)..where((v) => v.id.equals(id))).go();
+    });
   }
 }
