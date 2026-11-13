@@ -9,6 +9,7 @@ import 'features/hospitals/hospitals_page.dart';
 import 'features/backup/backup_page.dart';
 import 'features/settings/settings_page.dart';
 import 'features/settings/plot_settings.dart';
+import 'features/home/health_dashboard_page.dart';
 
 final databaseProvider = Provider<AppDatabase>((ref) {
   final db = AppDatabase();
@@ -114,7 +115,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         data: (_) => IndexedStack(
           index: index,
           children: const [
-            DashboardPage(),
+            HealthDashboardPage(),
             UnifiedLabPage(),
             HospitalsPage(),
             SettingsPage(),
