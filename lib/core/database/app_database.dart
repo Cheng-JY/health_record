@@ -181,7 +181,6 @@ class AppDatabase extends _$AppDatabase {
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) async => m.createAll(),
-    onCreate: (m) async => m.createAll(),
     onUpgrade: (m, from, to) async {
       // v1 -> v2 / v3
       if (from < 2) {
