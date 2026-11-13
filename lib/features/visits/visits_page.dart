@@ -251,19 +251,14 @@ class _VisitsPageState extends ConsumerState<VisitsPage> {
                               ].join('\n'),
                             ),
                             isThreeLine: true,
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => VisitReportsPage(visit: v),
+                              ),
+                            ),
                             trailing: Wrap(
                               spacing: 4,
                               children: [
-                                IconButton(
-                                  tooltip: '本次检查报告与结果',
-                                  icon: const Icon(Icons.folder_copy_outlined),
-                                  onPressed: () => Navigator.of(context).push(
-                                    MaterialPageRoute<void>(
-                                      builder: (_) =>
-                                          VisitReportsPage(visit: v),
-                                    ),
-                                  ),
-                                ),
                                 IconButton(
                                   tooltip: '编辑',
                                   icon: const Icon(Icons.edit_outlined),

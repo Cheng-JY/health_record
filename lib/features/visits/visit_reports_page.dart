@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../core/database/app_database.dart';
 import '../../main.dart';
 import 'visit_report_repository.dart';
+import '../trends/unified_trends_page.dart';
 
 final visitReportRepositoryProvider = Provider<VisitReportRepository>(
   (ref) => VisitReportRepository(ref.watch(databaseProvider)),
@@ -355,18 +356,21 @@ class _VisitReportsPageState extends ConsumerState<VisitReportsPage> {
     final csv = ref.watch(reportCsvProvider);
     final manual = ref.watch(reportManualProvider);
     final tests = ref.watch(reportTestsProvider);
+    final categories = ref.watch(categoriesProvider);
     final err =
         reports.asError?.error ??
         links.asError?.error ??
         csv.asError?.error ??
         manual.asError?.error ??
-        tests.asError?.error;
+        tests.asError?.error ??
+        categories.asError?.error;
     final loading =
         reports.asData == null ||
         links.asData == null ||
         csv.asData == null ||
         manual.asData == null ||
-        tests.asData == null;
+        tests.asData == null ||
+        categories.asData == null;
     if (err != null) {
       return Scaffold(
         appBar: AppBar(title: const Text('本次检查报告')),
@@ -407,6 +411,44 @@ class _VisitReportsPageState extends ConsumerState<VisitReportsPage> {
             for (final link in links.requireValue)
               '${link.sourceKind}:${link.resultId}',
           };
+    // Preserve each result's indicator identity so tapping a linked result
+    // can open its *full historical trend*, not only this visit's sample.
+    final csvById = loading
+        ? <String, ImportedLabResult>{}
+        : {for (final r in csv.requireValue) r.id: r};
+    final manualById = loading
+        ? <String, LabResult>{}
+        : {for (final r in manual.requireValue) r.id: r};
+    final testsById = loading
+        ? <String, LabTest>{}
+        : {for (final t in tests.requireValue) t.id: t};
+    final categoryNames = loading
+        ? <String, String>{}
+        : {for (final c in categories.requireValue) c.id: c.nameZh};
+
+    String? trendKeyFor(ReportResultLink link) {
+      if (link.sourceKind == 'csv') {
+        final result = csvById[link.resultId];
+        if (result == null) return null;
+        final code = result.indicatorCode.trim().toUpperCase();
+        return code.isNotEmpty
+            ? 'code:$code'
+            : 'name:${result.category.trim()}:${result.indicatorNameCn.trim()}';
+      }
+      if (link.sourceKind == 'manual') {
+        final result = manualById[link.resultId];
+        if (result == null) return null;
+        final test = testsById[result.testId];
+        if (test == null) return null;
+        final code = test.code.trim().toUpperCase();
+        final category = categoryNames[test.categoryId] ?? '';
+        return code.isNotEmpty
+            ? 'code:$code'
+            : 'name:${category.trim()}:${test.nameZh.trim()}';
+      }
+      return null;
+    }
+
     final byKey = {for (final row in rows) row.key: row};
     final available = rows
         .where(
@@ -488,8 +530,39 @@ class _VisitReportsPageState extends ConsumerState<VisitReportsPage> {
                                       .map((link) {
                                         final row =
                                             byKey['${link.sourceKind}:${link.resultId}'];
+                                        final indicatorKey = trendKeyFor(link);
                                         return ListTile(
                                           dense: true,
+                                          onTap:
+                                              indicatorKey == null ||
+                                                  row == null
+                                              ? null
+                                              : () => Navigator.of(context).push(
+                                                  MaterialPageRoute<void>(
+                                                    builder: (_) => Scaffold(
+                                                      appBar: AppBar(
+                                                        title: Text(
+                                                          '${row.title} · 趋势',
+                                                        ),
+                                                      ),
+                                                      body: SingleChildScrollView(
+                                                        padding:
+                                                            const EdgeInsets.all(
+                                                              16,
+                                                            ),
+                                                        child:
+                                                            UnifiedTrendsPage(
+                                                              indicatorKey:
+                                                                  indicatorKey,
+                                                              // Show all visits to form a longitudinal trend.
+                                                              hospitalFilter:
+                                                                  'all',
+                                                              embedded: true,
+                                                            ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
                                           title: Text(
                                             row?.title ?? '(检查结果已被删除)',
                                           ),
@@ -499,7 +572,7 @@ class _VisitReportsPageState extends ConsumerState<VisitReportsPage> {
                                                 : '${_date(row.date)} · ${row.value}',
                                           ),
                                           trailing: IconButton(
-                                            tooltip: '解除关联',
+                                            tooltip: '解除关联（点击指标名称可查看趋势）',
                                             icon: const Icon(Icons.link_off),
                                             onPressed: busy || row == null
                                                 ? null

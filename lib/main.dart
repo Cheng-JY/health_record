@@ -8,6 +8,8 @@ import 'features/labs/unified_lab_page.dart';
 import 'features/csv_import/csv_import_page.dart';
 import 'features/hospitals/hospitals_page.dart';
 import 'features/backup/backup_page.dart';
+import 'features/settings/settings_page.dart';
+import 'features/settings/plot_settings.dart';
 
 final databaseProvider = Provider<AppDatabase>((ref) {
   final db = AppDatabase();
@@ -33,7 +35,14 @@ final testResultsProvider = StreamProvider.family<List<LabResult>, String>(
   (ref, id) => ref.watch(labRepositoryProvider).byTest(id),
 );
 
-void main() => runApp(const ProviderScope(child: HealthRecordApp()));
+final appNavigatorKey = GlobalKey<NavigatorState>();
+final selectedMainTab = ValueNotifier<int>(0);
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await plotSettings.load();
+  runApp(const ProviderScope(child: HealthRecordApp()));
+}
 
 class HealthRecordApp extends StatelessWidget {
   const HealthRecordApp({super.key});
@@ -45,6 +54,8 @@ class HealthRecordApp extends StatelessWidget {
       colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
       useMaterial3: true,
     ),
+    navigatorKey: appNavigatorKey,
+    builder: (context, child) => _MainNavigationShell(child: child!),
     home: const HomeScreen(),
   );
 }
@@ -56,7 +67,24 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  int index = 0;
+  int index = selectedMainTab.value;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedMainTab.addListener(_syncMainTab);
+  }
+
+  void _syncMainTab() {
+    if (mounted) setState(() => index = selectedMainTab.value);
+  }
+
+  @override
+  void dispose() {
+    selectedMainTab.removeListener(_syncMainTab);
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final init = ref.watch(initProvider);
@@ -83,27 +111,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             UnifiedLabPage(),
             CsvImportPage(),
             HospitalsPage(),
+            SettingsPage(),
           ],
         ),
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: index,
-        onDestinationSelected: (value) => setState(() => index = value),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            label: '首页',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.biotech_outlined),
-            label: '检查结果',
-          ),
-          NavigationDestination(icon: Icon(Icons.upload_file), label: 'CSV 导入'),
-          NavigationDestination(
-            icon: Icon(Icons.local_hospital_outlined),
-            label: '医院',
-          ),
-        ],
       ),
       floatingActionButton: index == 1 && init.hasValue
           ? FloatingActionButton.extended(
@@ -113,6 +123,52 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               icon: const Icon(Icons.add),
             )
           : null,
+    );
+  }
+}
+
+/// This wraps the MaterialApp Navigator, keeping the main menu visible even
+/// when secondary pages are opened with Navigator.push.
+class _MainNavigationShell extends StatelessWidget {
+  const _MainNavigationShell({required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<int>(
+      valueListenable: selectedMainTab,
+      builder: (context, selected, _) => Scaffold(
+        body: child,
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: selected,
+          onDestinationSelected: (index) {
+            selectedMainTab.value = index;
+            appNavigatorKey.currentState?.popUntil((route) => route.isFirst);
+          },
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.dashboard_outlined),
+              label: '首页',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.biotech_outlined),
+              label: '检查结果',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.upload_file),
+              label: 'CSV 导入',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.local_hospital_outlined),
+              label: '医院',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.settings_outlined),
+              label: '设置',
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

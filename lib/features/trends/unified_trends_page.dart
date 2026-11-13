@@ -8,9 +8,9 @@ import 'package:intl/intl.dart';
 import '../../main.dart';
 import '../csv_import/csv_import_page.dart';
 import '../hospitals/hospitals_page.dart';
+import '../settings/plot_settings.dart';
 
 // A plotting replacement is never written back to the database.
-enum _LessThanRule { threshold, half, custom }
 
 class _ResultValue {
   const _ResultValue(this.number, {this.censored = false});
@@ -61,7 +61,7 @@ class _PlottedPoint {
 // Never parse qualitative results such as positive / negative into a number.
 _ResultValue _parseValue(
   _TrendRecord record,
-  _LessThanRule rule,
+  PlotLessThanRule rule,
   double factor,
 ) {
   final raw = record.rawValue
@@ -87,9 +87,9 @@ _ResultValue _parseValue(
   final op = match.group(1)!;
   double plotted = threshold;
   if (op.startsWith('<')) {
-    if (rule == _LessThanRule.half) {
+    if (rule == PlotLessThanRule.half) {
       plotted = threshold / 2;
-    } else if (rule == _LessThanRule.custom) {
+    } else if (rule == PlotLessThanRule.custom) {
       plotted = threshold * factor;
     }
   }
@@ -154,10 +154,18 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
     super.initState();
     selectedHospital = widget.hospitalFilter;
     selectedKey = widget.indicatorKey;
+    plotSettings.addListener(_settingsChanged);
   }
 
-  _LessThanRule lessThanRule = _LessThanRule.threshold;
-  double customFactor = 0.95;
+  void _settingsChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    plotSettings.removeListener(_settingsChanged);
+    super.dispose();
+  }
 
   String _key(String code, String name, String category) {
     final normalized = code.trim().toUpperCase();
@@ -170,6 +178,8 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final lessThanRule = plotSettings.value.rule;
+    final customFactor = plotSettings.value.factor;
     final manual = ref.watch(resultsProvider);
     final csv = ref.watch(importedProvider);
     final tests = ref.watch(testsProvider);
@@ -449,63 +459,9 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
             ),
             const SizedBox(height: 12),
           ],
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '小于号结果的绘图规则',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField<_LessThanRule>(
-                    key: ValueKey('rule-$lessThanRule'),
-                    initialValue: lessThanRule,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                    ),
-                    items: const [
-                      DropdownMenuItem(
-                        value: _LessThanRule.threshold,
-                        child: Text('取阈值：<3 → 3'),
-                      ),
-                      DropdownMenuItem(
-                        value: _LessThanRule.half,
-                        child: Text('取一半：<3 → 1.5'),
-                      ),
-                      DropdownMenuItem(
-                        value: _LessThanRule.custom,
-                        child: Text('自定义比例：<3 → 3 × 系数'),
-                      ),
-                    ],
-                    onChanged: (v) {
-                      if (v != null) setState(() => lessThanRule = v);
-                    },
-                  ),
-                  if (lessThanRule == _LessThanRule.custom) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      '系数：${customFactor.toStringAsFixed(2)}（<3 → ${(3 * customFactor).toStringAsFixed(2)}）',
-                    ),
-                    Slider(
-                      value: customFactor,
-                      min: 0.05,
-                      max: 1,
-                      divisions: 19,
-                      label: customFactor.toStringAsFixed(2),
-                      onChanged: (v) => setState(() => customFactor = v),
-                    ),
-                  ],
-                  const SizedBox(height: 6),
-                  const Text(
-                    '注意：<、≤、>、≥ 是区间结果，不是精确测量值。这里只替换绘图位置，原始记录保留。',
-                    style: TextStyle(fontSize: 12),
-                  ),
-                ],
-              ),
-            ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: Text('界限值的绘图规则可在底部「设置」页面统一调整；原始检测值不会改变。'),
           ),
           const SizedBox(height: 14),
           Text(
