@@ -8,7 +8,7 @@ import 'features/labs/unified_lab_page.dart';
 import 'features/csv_import/csv_import_page.dart';
 import 'features/trends/unified_trends_page.dart';
 import 'features/hospitals/hospitals_page.dart';
-
+import 'features/backup/backup_page.dart';
 
 final databaseProvider = Provider<AppDatabase>((ref) {
   final db = AppDatabase();
@@ -62,7 +62,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final init = ref.watch(initProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('HealthRecord')),
+      appBar: AppBar(
+        title: const Text('HealthRecord'),
+        actions: [
+          IconButton(
+            tooltip: '本地备份与恢复',
+            icon: const Icon(Icons.backup_outlined),
+            onPressed: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute<void>(builder: (_) => const BackupPage())),
+          ),
+        ],
+      ),
       body: init.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('初始化数据库失败：$e')),
