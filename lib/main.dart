@@ -5,7 +5,6 @@ import 'core/database/app_database.dart';
 import 'features/labs/lab_repository.dart';
 import 'features/labs/lab_pages.dart';
 import 'features/labs/unified_lab_page.dart';
-import 'features/csv_import/csv_import_page.dart';
 import 'features/hospitals/hospitals_page.dart';
 import 'features/backup/backup_page.dart';
 import 'features/settings/settings_page.dart';
@@ -54,9 +53,17 @@ class HealthRecordApp extends StatelessWidget {
       colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
       useMaterial3: true,
     ),
-    navigatorKey: appNavigatorKey,
-    builder: (context, child) => _MainNavigationShell(child: child!),
-    home: const HomeScreen(),
+    // Keep the global navigation shell inside MaterialApp's own Navigator.
+    // Nested Navigator owns detail routes, so the bottom menu stays visible.
+    home: _MainNavigationShell(
+      child: Navigator(
+        key: appNavigatorKey,
+        onGenerateRoute: (settings) => MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => const HomeScreen(),
+        ),
+      ),
+    ),
   );
 }
 
@@ -109,7 +116,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           children: const [
             DashboardPage(),
             UnifiedLabPage(),
-            CsvImportPage(),
             HospitalsPage(),
             SettingsPage(),
           ],
@@ -153,10 +159,6 @@ class _MainNavigationShell extends StatelessWidget {
             NavigationDestination(
               icon: Icon(Icons.biotech_outlined),
               label: '检查结果',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.upload_file),
-              label: 'CSV 导入',
             ),
             NavigationDestination(
               icon: Icon(Icons.local_hospital_outlined),

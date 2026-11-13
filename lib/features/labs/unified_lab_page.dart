@@ -156,6 +156,24 @@ class _UnifiedLabPageState extends ConsumerState<UnifiedLabPage> {
           ),
         ),
         Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: FilledButton.icon(
+              icon: const Icon(Icons.upload_file_outlined),
+              label: const Text('CSV 导入'),
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => Scaffold(
+                    appBar: AppBar(title: const Text('CSV 检查报告导入')),
+                    body: const CsvImportPage(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: DropdownButtonFormField<String>(
             key: ValueKey('hospital-$selectedHospital-${hospitalList.length}'),
