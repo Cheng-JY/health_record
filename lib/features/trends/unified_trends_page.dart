@@ -134,6 +134,7 @@ class UnifiedTrendsPage extends ConsumerStatefulWidget {
 }
 
 class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
+  String? selectedCategory;
   String? selectedKey;
   String? selectedUnit;
   String selectedHospital = 'all';
@@ -202,8 +203,12 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
       for (final c in categories.requireValue) c.id: c.nameZh,
     };
     final series = <String, _TrendSeries>{};
+    // An indicator can belong to more than one imported category.
+    final indicatorCategories = <String, Set<String>>{};
 
-    void add(String key, String label, _TrendRecord record) {
+    void add(String key, String label, String category, _TrendRecord record) {
+      final cleanCategory = category.trim().isEmpty ? '未分类' : category.trim();
+      indicatorCategories.putIfAbsent(key, () => <String>{}).add(cleanCategory);
       series.putIfAbsent(key, () => _TrendSeries(label)).records.add(record);
     }
 
@@ -214,6 +219,7 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
       add(
         _key(t.code, t.nameZh, cat),
         '${t.nameZh} (${t.code})',
+        cat,
         _TrendRecord(
           date: r.measuredAt,
           rawValue: r.valueNumeric.toString(),
@@ -236,6 +242,7 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
       add(
         _key(code, r.indicatorNameCn, r.category),
         code.isEmpty ? r.indicatorNameCn : '${r.indicatorNameCn} ($code)',
+        r.category,
         _TrendRecord(
           date: r.sampleDate,
           rawValue: r.rawValue,
@@ -249,7 +256,21 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
 
     final keys = series.keys.toList()
       ..sort((a, b) => series[a]!.label.compareTo(series[b]!.label));
-    final preferred = keys.where(
+    final categoryOptions =
+        indicatorCategories.values
+            .expand((categories) => categories)
+            .toSet()
+            .toList()
+          ..sort();
+    final category = categoryOptions.contains(selectedCategory)
+        ? selectedCategory
+        : (categoryOptions.isEmpty ? null : categoryOptions.first);
+    final categoryKeys = category == null
+        ? <String>[]
+        : keys
+              .where((k) => indicatorCategories[k]?.contains(category) ?? false)
+              .toList();
+    final preferred = categoryKeys.where(
       (k) =>
           series[k]!.records
               .where(
@@ -259,11 +280,11 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
               .length >=
           2,
     );
-    final key = series.containsKey(selectedKey)
+    final key = categoryKeys.contains(selectedKey)
         ? selectedKey
         : (preferred.isNotEmpty
               ? preferred.first
-              : (keys.isEmpty ? null : keys.first));
+              : (categoryKeys.isEmpty ? null : categoryKeys.first));
     final group = key == null ? null : series[key];
     final units = group == null
         ? <String>[]
@@ -324,16 +345,39 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
           ],
           onChanged: (v) => setState(() {
             selectedHospital = v ?? 'all';
+            selectedCategory = null;
             selectedKey = null;
             selectedUnit = null;
           }),
         ),
         const SizedBox(height: 16),
-        if (key == null) ...[
+        if (category == null) ...[
           const Text('当前医院没有可显示的趋势记录。'),
         ] else ...[
           DropdownButtonFormField<String>(
-            key: ValueKey('indicator-$key'),
+            key: ValueKey('category-$selected-$category'),
+            initialValue: category,
+            isExpanded: true,
+            decoration: const InputDecoration(
+              labelText: '指标分类',
+              border: OutlineInputBorder(),
+            ),
+            items: [
+              for (final c in categoryOptions)
+                DropdownMenuItem(
+                  value: c,
+                  child: Text(c, overflow: TextOverflow.ellipsis),
+                ),
+            ],
+            onChanged: (v) => setState(() {
+              selectedCategory = v;
+              selectedKey = null;
+              selectedUnit = null;
+            }),
+          ),
+          const SizedBox(height: 12),
+          DropdownButtonFormField<String>(
+            key: ValueKey('indicator-$category-$key'),
             initialValue: key,
             isExpanded: true,
             decoration: const InputDecoration(
@@ -341,7 +385,7 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
               border: OutlineInputBorder(),
             ),
             items: [
-              for (final k in keys)
+              for (final k in categoryKeys)
                 DropdownMenuItem(
                   value: k,
                   child: Text(
