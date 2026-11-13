@@ -224,26 +224,18 @@ class _HospitalsPageState extends ConsumerState<HospitalsPage> {
                         '有效检查 ${summary.activeResultCount} 条 · '
                         '全部关联 ${summary.allResultCount} 条',
                       ),
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) =>
-                              HospitalResultsPage(hospital: summary.hospital),
-                        ),
-                      ),
-                      trailing: Wrap(
-                        spacing: 4,
-                        children: [
-                          IconButton(
-                            tooltip: '查看该医院就诊记录',
-                            onPressed: () => Navigator.of(context).push(
+                      onTap: busy
+                          ? null
+                          : () => Navigator.of(context).push(
                               MaterialPageRoute<void>(
                                 builder: (_) => VisitsPage(
                                   initialHospitalId: summary.hospital.id,
                                 ),
                               ),
                             ),
-                            icon: const Icon(Icons.event_note_outlined),
-                          ),
+                      trailing: Wrap(
+                        spacing: 4,
+                        children: [
                           IconButton(
                             tooltip: '编辑医院',
                             onPressed: busy
