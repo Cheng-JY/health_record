@@ -121,14 +121,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ],
         ),
       ),
-      floatingActionButton: index == 1 && init.hasValue
-          ? FloatingActionButton.extended(
-              onPressed: () => Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (_) => const LabFormPage())),
-              label: const Text('录入结果'),
-              icon: const Icon(Icons.add),
-            )
-          : null,
     );
   }
 }

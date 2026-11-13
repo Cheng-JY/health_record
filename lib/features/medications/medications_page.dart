@@ -174,7 +174,11 @@ class MedicationDetailsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final repo = ref.watch(medicationRepositoryProvider);
-    final currentMedication = ref.watch(medicationsProvider).asData?.value
+    final currentMedication =
+        ref
+            .watch(medicationsProvider)
+            .asData
+            ?.value
             .where((m) => m.id == medication.id)
             .firstOrNull ??
         medication;
@@ -204,8 +208,10 @@ class MedicationDetailsPage extends ConsumerWidget {
               Row(
                 children: [
                   Expanded(
-                    child: Text('药物资料',
-                        style: Theme.of(context).textTheme.titleLarge),
+                    child: Text(
+                      '药物资料',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                   ),
                   OutlinedButton.icon(
                     onPressed: () => _openMedicationDetailsEditor(
@@ -221,7 +227,8 @@ class MedicationDetailsPage extends ConsumerWidget {
               const SizedBox(height: 8),
               Text('名称：${currentMedication.name}'),
               Text('用途：${currentMedication.purpose ?? '未填写'}'),
-              if (currentMedication.notes != null) Text('备注：${currentMedication.notes}'),
+              if (currentMedication.notes != null)
+                Text('备注：${currentMedication.notes}'),
               const SizedBox(height: 16),
               Text('今天的服药方案', style: Theme.of(context).textTheme.titleLarge),
               Card(
@@ -322,7 +329,12 @@ class MedicationDetailsPage extends ConsumerWidget {
                         if (action == 'edit') {
                           await _editHistoryPlan(context, repo, p);
                         } else if (action == 'delete') {
-                          await _deleteHistoryPlan(context, repo, p, plans.length);
+                          await _deleteHistoryPlan(
+                            context,
+                            repo,
+                            p,
+                            plans.length,
+                          );
                         }
                       },
                       itemBuilder: (_) => const [
@@ -396,8 +408,12 @@ Future<void> _editHistoryPlan(
                       Expanded(
                         child: TextField(
                           controller: dose,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          decoration: const InputDecoration(labelText: '每次总剂量 *'),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          decoration: const InputDecoration(
+                            labelText: '每次总剂量 *',
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -408,11 +424,16 @@ Future<void> _editHistoryPlan(
                           isExpanded: true,
                           decoration: const InputDecoration(labelText: '单位'),
                           items: _doseUnitOptions
-                              .map((v) => DropdownMenuItem(value: v, child: Text(v)))
+                              .map(
+                                (v) =>
+                                    DropdownMenuItem(value: v, child: Text(v)),
+                              )
                               .toList(),
-                          onChanged: working ? null : (v) {
-                            if (v != null) setDialogState(() => unit = v);
-                          },
+                          onChanged: working
+                              ? null
+                              : (v) {
+                                  if (v != null) setDialogState(() => unit = v);
+                                },
                         ),
                       ),
                     ],
@@ -425,22 +446,27 @@ Future<void> _editHistoryPlan(
                     items: _dailyFrequencyOptions
                         .map((v) => DropdownMenuItem(value: v, child: Text(v)))
                         .toList(),
-                    onChanged: working ? null : (v) {
-                      if (v != null) setDialogState(() => frequency = v);
-                    },
+                    onChanged: working
+                        ? null
+                        : (v) {
+                            if (v != null) setDialogState(() => frequency = v);
+                          },
                   ),
                   const SizedBox(height: 8),
                   TextButton.icon(
-                    onPressed: working ? null : () async {
-                      final picked = await showDatePicker(
-                        context: ctx,
-                        initialDate: start,
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime(2100),
-                      );
-                      if (!ctx.mounted) return;
-                      if (picked != null) setDialogState(() => start = picked);
-                    },
+                    onPressed: working
+                        ? null
+                        : () async {
+                            final picked = await showDatePicker(
+                              context: ctx,
+                              initialDate: start,
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2100),
+                            );
+                            if (!ctx.mounted) return;
+                            if (picked != null)
+                              setDialogState(() => start = picked);
+                          },
                     icon: const Icon(Icons.event_outlined),
                     label: Text('开始日期：${_date(start)}'),
                   ),
@@ -448,19 +474,23 @@ Future<void> _editHistoryPlan(
                     children: [
                       Expanded(
                         child: TextButton.icon(
-                          onPressed: working ? null : () async {
-                            final suggested = end != null && !end!.isBefore(start)
-                                ? end!
-                                : start;
-                            final picked = await showDatePicker(
-                              context: ctx,
-                              initialDate: suggested,
-                              firstDate: DateTime(2000),
-                              lastDate: DateTime(2100),
-                            );
-                            if (!ctx.mounted) return;
-                            if (picked != null) setDialogState(() => end = picked);
-                          },
+                          onPressed: working
+                              ? null
+                              : () async {
+                                  final suggested =
+                                      end != null && !end!.isBefore(start)
+                                      ? end!
+                                      : start;
+                                  final picked = await showDatePicker(
+                                    context: ctx,
+                                    initialDate: suggested,
+                                    firstDate: DateTime(2000),
+                                    lastDate: DateTime(2100),
+                                  );
+                                  if (!ctx.mounted) return;
+                                  if (picked != null)
+                                    setDialogState(() => end = picked);
+                                },
                           icon: const Icon(Icons.event_available_outlined),
                           label: Text('结束日期：${_date(end)}'),
                         ),
@@ -468,7 +498,9 @@ Future<void> _editHistoryPlan(
                       if (end != null)
                         IconButton(
                           tooltip: '设为持续中',
-                          onPressed: working ? null : () => setDialogState(() => end = null),
+                          onPressed: working
+                              ? null
+                              : () => setDialogState(() => end = null),
                           icon: const Icon(Icons.clear),
                         ),
                     ],
@@ -491,28 +523,31 @@ Future<void> _editHistoryPlan(
               child: const Text('取消'),
             ),
             FilledButton(
-              onPressed: working ? null : () async {
-                setDialogState(() => working = true);
-                try {
-                  await repo.updatePlan(
-                    planId: plan.id,
-                    medicationId: plan.medicationId,
-                    dose: _validatedDose(dose.text, unit),
-                    frequency: frequency,
-                    startDate: start,
-                    endDate: end,
-                    changeReason: reason.text,
-                    instructions: instructions.text,
-                  );
-                  if (ctx.mounted) Navigator.of(ctx).pop();
-                } catch (e) {
-                  if (ctx.mounted) _error(ctx, e);
-                } finally {
-                  if (ctx.mounted && ModalRoute.of(ctx)?.isCurrent == true) {
-                    setDialogState(() => working = false);
-                  }
-                }
-              },
+              onPressed: working
+                  ? null
+                  : () async {
+                      setDialogState(() => working = true);
+                      try {
+                        await repo.updatePlan(
+                          planId: plan.id,
+                          medicationId: plan.medicationId,
+                          dose: _validatedDose(dose.text, unit),
+                          frequency: frequency,
+                          startDate: start,
+                          endDate: end,
+                          changeReason: reason.text,
+                          instructions: instructions.text,
+                        );
+                        if (ctx.mounted) Navigator.of(ctx).pop();
+                      } catch (e) {
+                        if (ctx.mounted) _error(ctx, e);
+                      } finally {
+                        if (ctx.mounted &&
+                            ModalRoute.of(ctx)?.isCurrent == true) {
+                          setDialogState(() => working = false);
+                        }
+                      }
+                    },
               child: const Text('保存修改'),
             ),
           ],
@@ -557,9 +592,9 @@ Future<void> _deleteHistoryPlan(
   try {
     await repo.deletePlan(planId: plan.id, medicationId: plan.medicationId);
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('历史记录已删除；请检查剩余方案的日期是否连续')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('历史记录已删除；请检查剩余方案的日期是否连续')));
     }
   } catch (e) {
     if (context.mounted) _error(context, e);
@@ -710,7 +745,8 @@ Future<void> _openMedicationEditor(BuildContext context, WidgetRef ref) async {
                         } catch (e) {
                           if (ctx.mounted) _error(ctx, e);
                         } finally {
-                          if (ctx.mounted && ModalRoute.of(ctx)?.isCurrent == true) {
+                          if (ctx.mounted &&
+                              ModalRoute.of(ctx)?.isCurrent == true) {
                             setDialogState(() => working = false);
                           }
                         }
@@ -762,7 +798,9 @@ Future<void> _openPlanEditor(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('可选择过去或未来的任意日期；前一段持续中方案会自动截止到新方案开始前一天。其他日期重叠会阻止保存。'),
+                  const Text(
+                    '可选择过去或未来的任意日期；前一段持续中方案会自动截止到新方案开始前一天。其他日期重叠会阻止保存。',
+                  ),
                   if (previous != null &&
                       previous.dose.trim().isNotEmpty &&
                       previousDose.amount.isEmpty)
@@ -854,14 +892,13 @@ Future<void> _openPlanEditor(
                   ),
                   TextButton.icon(
                     icon: const Icon(Icons.event_outlined),
-                    label: Text(end == null
-                        ? '结束日期：持续中'
-                        : '结束日期：${_date(end)}'),
+                    label: Text(
+                      end == null ? '结束日期：持续中' : '结束日期：${_date(end)}',
+                    ),
                     onPressed: working
                         ? null
                         : () async {
-                            final initial = end != null &&
-                                    !end!.isBefore(start)
+                            final initial = end != null && !end!.isBefore(start)
                                 ? end!
                                 : start;
                             final picked = await showDatePicker(
@@ -919,9 +956,10 @@ Future<void> _openPlanEditor(
                       } catch (e) {
                         if (ctx.mounted) _error(ctx, e);
                       } finally {
-                        if (ctx.mounted && ModalRoute.of(ctx)?.isCurrent == true) {
-                    setDialogState(() => working = false);
-                  }
+                        if (ctx.mounted &&
+                            ModalRoute.of(ctx)?.isCurrent == true) {
+                          setDialogState(() => working = false);
+                        }
                       }
                     },
               child: const Text('保存新方案'),
@@ -947,55 +985,56 @@ Future<void> _openMedicationDetailsEditor(
   final purpose = TextEditingController(text: medication.purpose ?? '');
   final notes = TextEditingController(text: medication.notes ?? '');
   try {
-    final result = await _showEditorDialog<({String name, String purpose, String notes})>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('编辑药物资料'),
-        content: SizedBox(
-          width: 460,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: name,
-                  decoration: const InputDecoration(labelText: '药物名称 *'),
+    final result =
+        await _showEditorDialog<({String name, String purpose, String notes})>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('编辑药物资料'),
+            content: SizedBox(
+              width: 460,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: name,
+                      decoration: const InputDecoration(labelText: '药物名称 *'),
+                    ),
+                    TextField(
+                      controller: purpose,
+                      decoration: const InputDecoration(labelText: '用途／适应证'),
+                    ),
+                    TextField(
+                      controller: notes,
+                      maxLines: 3,
+                      decoration: const InputDecoration(labelText: '备注'),
+                    ),
+                  ],
                 ),
-                TextField(
-                  controller: purpose,
-                  decoration: const InputDecoration(labelText: '用途／适应证'),
-                ),
-                TextField(
-                  controller: notes,
-                  maxLines: 3,
-                  decoration: const InputDecoration(labelText: '备注'),
-                ),
-              ],
+              ),
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('取消'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  if (name.text.trim().isEmpty) {
+                    _error(ctx, '药物名称不能为空');
+                    return;
+                  }
+                  Navigator.of(ctx).pop((
+                    name: name.text.trim(),
+                    purpose: purpose.text.trim(),
+                    notes: notes.text.trim(),
+                  ));
+                },
+                child: const Text('保存'),
+              ),
+            ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('取消'),
-          ),
-          FilledButton(
-            onPressed: () {
-              if (name.text.trim().isEmpty) {
-                _error(ctx, '药物名称不能为空');
-                return;
-              }
-              Navigator.of(ctx).pop((
-                name: name.text.trim(),
-                purpose: purpose.text.trim(),
-                notes: notes.text.trim(),
-              ));
-            },
-            child: const Text('保存'),
-          ),
-        ],
-      ),
-    );
+        );
     if (result == null) return;
     await repo.updateMedication(
       medication: medication,
@@ -1006,9 +1045,8 @@ Future<void> _openMedicationDetailsEditor(
       form: medication.form,
     );
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('药物资料已更新')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('药物资料已更新')));
     }
   } catch (e) {
     if (context.mounted) _error(context, e);

@@ -149,28 +149,45 @@ class _UnifiedLabPageState extends ConsumerState<UnifiedLabPage> {
     return ListView(
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 18, 16, 10),
-          child: Text(
-            '检查结果 · 共 $total 条（手动 ${filteredManual.length} / CSV ${filteredCsv.length}）',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: FilledButton.icon(
-              icon: const Icon(Icons.upload_file_outlined),
-              label: const Text('CSV 导入'),
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => Scaffold(
-                    appBar: AppBar(title: const Text('CSV 检查报告导入')),
-                    body: const CsvImportPage(),
-                  ),
-                ),
+          padding: const EdgeInsets.fromLTRB(16, 18, 16, 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('检查结果', style: Theme.of(context).textTheme.headlineSmall),
+              const SizedBox(height: 4),
+              Text(
+                '共 $total 条 · 手动 ${filteredManual.length} 条 · CSV ${filteredCsv.length} 条',
+                style: Theme.of(context).textTheme.bodySmall,
               ),
-            ),
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  FilledButton.icon(
+                    icon: const Icon(Icons.edit_note_outlined),
+                    label: const Text('手动录入'),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const LabFormPage(),
+                      ),
+                    ),
+                  ),
+                  FilledButton.icon(
+                    icon: const Icon(Icons.upload_file_outlined),
+                    label: const Text('CSV 导入'),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => Scaffold(
+                          appBar: AppBar(title: const Text('CSV 检查报告导入')),
+                          body: const CsvImportPage(),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
         Padding(
@@ -213,7 +230,7 @@ class _UnifiedLabPageState extends ConsumerState<UnifiedLabPage> {
             margin: const EdgeInsets.fromLTRB(8, 6, 8, 0),
             child: ExpansionTile(
               key: PageStorageKey('lab-category-$category'),
-              initiallyExpanded: true,
+              initiallyExpanded: false,
               title: Text(
                 category,
                 style: Theme.of(context).textTheme.titleLarge,
