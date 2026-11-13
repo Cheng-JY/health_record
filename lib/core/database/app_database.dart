@@ -176,6 +176,16 @@ class AppDatabase extends _$AppDatabase {
     )
   ''';
 
+  static const _createSymptomPhotosSql = '''
+    CREATE TABLE IF NOT EXISTS symptom_photos (
+      id TEXT NOT NULL PRIMARY KEY,
+      symptom_id TEXT NOT NULL REFERENCES symptom_entries(id) ON DELETE CASCADE,
+      mime_type TEXT NOT NULL,
+      image_base64 TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    )
+  ''';
+
   AppDatabase()
     : super(
         driftDatabase(
@@ -188,13 +198,14 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) async {
       await m.createAll();
       await customStatement(_createSymptomsSql);
+      await customStatement(_createSymptomPhotosSql);
     },
     onUpgrade: (m, from, to) async {
       // v1 -> v2 / v3
@@ -259,10 +270,15 @@ class AppDatabase extends _$AppDatabase {
       if (from < 8) {
         await customStatement(_createSymptomsSql);
       }
+      // v8 -> v9: symptom photos; existing entries remain untouched.
+      if (from < 9) {
+        await customStatement(_createSymptomPhotosSql);
+      }
     },
 
     beforeOpen: (details) async {
       await customStatement(_createSymptomsSql);
+      await customStatement(_createSymptomPhotosSql);
       // 检查医院表是否存在
       final tables = await customSelect(
         "SELECT name FROM sqlite_master "

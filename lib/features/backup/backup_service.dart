@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import '../../core/database/app_database.dart';
 
-/// A portable JSON snapshot of the app's complete v7 business database.
+/// A portable JSON snapshot of the app's complete v9 business database.
 /// Import REPLACES local data. It never uploads data over the network.
 class HealthRecordBackupService {
   HealthRecordBackupService(this.db);
@@ -10,7 +10,7 @@ class HealthRecordBackupService {
   final AppDatabase db;
 
   static const int backupVersion = 1;
-  static const int supportedSchemaVersion = 8;
+  static const int supportedSchemaVersion = 9;
 
   // Parent tables precede children to preserve foreign-key constraints.
   static const List<String> tables = [
@@ -25,6 +25,7 @@ class HealthRecordBackupService {
     'medications',
     'medication_plans',
     'symptom_entries',
+    'symptom_photos',
   ];
 
   Future<String> exportJson() async {
@@ -59,12 +60,15 @@ class HealthRecordBackupService {
         decoded['format'] != 'health_record_local_backup' ||
         decoded['backupVersion'] != backupVersion ||
         (decoded['schemaVersion'] != 7 &&
+            decoded['schemaVersion'] != 8 &&
             decoded['schemaVersion'] != supportedSchemaVersion)) {
-      throw const FormatException('备份格式或数据库版本不兼容（支持 v7/v8 备份）。');
+      throw const FormatException('备份格式或数据库版本不兼容（支持 v7/v8/v9 备份）。');
     }
     final content = decoded['tables'];
     final version = decoded['schemaVersion'];
     final expected = version == 7
+        ? tables.sublist(0, tables.length - 2)
+        : version == 8
         ? tables.sublist(0, tables.length - 1)
         : tables;
     if (content is! Map<String, dynamic> ||
@@ -90,7 +94,7 @@ class HealthRecordBackupService {
     // No destructive write happens until complete structural validation.
     inspect(jsonText);
     if (db.schemaVersion != supportedSchemaVersion) {
-      throw StateError('当前应用数据库不是 v7，不能恢复此备份。');
+      throw StateError('当前应用数据库不是 v9，不能恢复此备份。');
     }
     final decoded = jsonDecode(jsonText) as Map<String, dynamic>;
     final data = decoded['tables'] as Map<String, dynamic>;
@@ -98,6 +102,7 @@ class HealthRecordBackupService {
     // initialize the new symptom table as empty. The user confirms replace.
     final importedTables = <String, dynamic>{...data};
     importedTables.putIfAbsent('symptom_entries', () => <dynamic>[]);
+    importedTables.putIfAbsent('symptom_photos', () => <dynamic>[]);
 
     // Validate every column name against this installed database schema.
     final allowedColumns = <String, Set<String>>{};
