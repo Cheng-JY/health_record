@@ -127,7 +127,17 @@ _Reference _referenceFromText(String raw) {
 }
 
 class UnifiedTrendsPage extends ConsumerStatefulWidget {
-  const UnifiedTrendsPage({super.key});
+  const UnifiedTrendsPage({
+    super.key,
+    this.indicatorKey,
+    this.hospitalFilter = 'all',
+    this.embedded = false,
+  });
+
+  /// Identifies the same code/name group used in UnifiedLabPage.
+  final String? indicatorKey;
+  final String hospitalFilter;
+  final bool embedded;
 
   @override
   ConsumerState<UnifiedTrendsPage> createState() => _UnifiedTrendsPageState();
@@ -138,6 +148,14 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
   String? selectedKey;
   String? selectedUnit;
   String selectedHospital = 'all';
+
+  @override
+  void initState() {
+    super.initState();
+    selectedHospital = widget.hospitalFilter;
+    selectedKey = widget.indicatorKey;
+  }
+
   _LessThanRule lessThanRule = _LessThanRule.threshold;
   double customFactor = 0.95;
 
@@ -280,7 +298,9 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
               .length >=
           2,
     );
-    final key = categoryKeys.contains(selectedKey)
+    final key = widget.embedded
+        ? (series.containsKey(widget.indicatorKey) ? widget.indicatorKey : null)
+        : categoryKeys.contains(selectedKey)
         ? selectedKey
         : (preferred.isNotEmpty
               ? preferred.first
@@ -315,90 +335,100 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
         : null;
 
     return ListView(
-      padding: const EdgeInsets.all(16),
+      shrinkWrap: widget.embedded,
+      physics: widget.embedded ? const NeverScrollableScrollPhysics() : null,
+      padding: widget.embedded ? EdgeInsets.zero : const EdgeInsets.all(16),
       children: [
-        Text('检查指标趋势', style: Theme.of(context).textTheme.headlineSmall),
-        const SizedBox(height: 8),
-        const Text('合并查看手动录入和 CSV 数据。不同单位分别显示；原始结果不会被修改。'),
-        const SizedBox(height: 16),
-        DropdownButtonFormField<String>(
-          key: ValueKey('hospital-$selected-${hospitalList.length}'),
-          initialValue: selected,
-          decoration: const InputDecoration(
-            labelText: '筛选医院',
-            border: OutlineInputBorder(),
-          ),
-          items: [
-            const DropdownMenuItem(value: 'all', child: Text('所有医院 / 全部来源')),
-            const DropdownMenuItem(
-              value: 'unassigned',
-              child: Text('未指定医院（含手动记录）'),
-            ),
-            for (final item in hospitalList)
-              DropdownMenuItem(
-                value: item.hospital.id,
-                child: Text(
-                  item.hospital.name,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-          ],
-          onChanged: (v) => setState(() {
-            selectedHospital = v ?? 'all';
-            selectedCategory = null;
-            selectedKey = null;
-            selectedUnit = null;
-          }),
-        ),
-        const SizedBox(height: 16),
-        if (category == null) ...[
-          const Text('当前医院没有可显示的趋势记录。'),
+        if (!widget.embedded) ...[
+          Text('检查指标趋势', style: Theme.of(context).textTheme.headlineSmall),
+          const SizedBox(height: 8),
+          const Text('合并查看手动录入和 CSV 数据。不同单位分别显示；原始结果不会被修改。'),
+          const SizedBox(height: 16),
         ] else ...[
+          Text('趋势图', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 10),
+        ],
+        if (!widget.embedded)
           DropdownButtonFormField<String>(
-            key: ValueKey('category-$selected-$category'),
-            initialValue: category,
-            isExpanded: true,
+            key: ValueKey('hospital-$selected-${hospitalList.length}'),
+            initialValue: selected,
             decoration: const InputDecoration(
-              labelText: '指标分类',
+              labelText: '筛选医院',
               border: OutlineInputBorder(),
             ),
             items: [
-              for (final c in categoryOptions)
+              const DropdownMenuItem(value: 'all', child: Text('所有医院 / 全部来源')),
+              const DropdownMenuItem(
+                value: 'unassigned',
+                child: Text('未指定医院（含手动记录）'),
+              ),
+              for (final item in hospitalList)
                 DropdownMenuItem(
-                  value: c,
-                  child: Text(c, overflow: TextOverflow.ellipsis),
-                ),
-            ],
-            onChanged: (v) => setState(() {
-              selectedCategory = v;
-              selectedKey = null;
-              selectedUnit = null;
-            }),
-          ),
-          const SizedBox(height: 12),
-          DropdownButtonFormField<String>(
-            key: ValueKey('indicator-$category-$key'),
-            initialValue: key,
-            isExpanded: true,
-            decoration: const InputDecoration(
-              labelText: '检查指标',
-              border: OutlineInputBorder(),
-            ),
-            items: [
-              for (final k in categoryKeys)
-                DropdownMenuItem(
-                  value: k,
+                  value: item.hospital.id,
                   child: Text(
-                    series[k]!.label,
+                    item.hospital.name,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
             ],
             onChanged: (v) => setState(() {
-              selectedKey = v;
+              selectedHospital = v ?? 'all';
+              selectedCategory = null;
+              selectedKey = null;
               selectedUnit = null;
             }),
           ),
+        if (!widget.embedded) const SizedBox(height: 16),
+        if (widget.embedded ? key == null : category == null) ...[
+          const Text('该指标当前没有可显示的趋势记录。'),
+        ] else ...[
+          if (!widget.embedded)
+            DropdownButtonFormField<String>(
+              key: ValueKey('category-$selected-$category'),
+              initialValue: category,
+              isExpanded: true,
+              decoration: const InputDecoration(
+                labelText: '指标分类',
+                border: OutlineInputBorder(),
+              ),
+              items: [
+                for (final c in categoryOptions)
+                  DropdownMenuItem(
+                    value: c,
+                    child: Text(c, overflow: TextOverflow.ellipsis),
+                  ),
+              ],
+              onChanged: (v) => setState(() {
+                selectedCategory = v;
+                selectedKey = null;
+                selectedUnit = null;
+              }),
+            ),
+          const SizedBox(height: 12),
+          if (!widget.embedded)
+            DropdownButtonFormField<String>(
+              key: ValueKey('indicator-$category-$key'),
+              initialValue: key,
+              isExpanded: true,
+              decoration: const InputDecoration(
+                labelText: '检查指标',
+                border: OutlineInputBorder(),
+              ),
+              items: [
+                for (final k in categoryKeys)
+                  DropdownMenuItem(
+                    value: k,
+                    child: Text(
+                      series[k]!.label,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+              ],
+              onChanged: (v) => setState(() {
+                selectedKey = v;
+                selectedUnit = null;
+              }),
+            ),
           const SizedBox(height: 12),
           if (units.length > 1) ...[
             DropdownButtonFormField<String>(
@@ -509,9 +539,11 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
                 '图中参考范围：${chartReference.original.isEmpty ? "按记录上下限" : chartReference.original} ${unit ?? ""}',
               ),
             ),
-          const SizedBox(height: 18),
-          Text('历史记录', style: Theme.of(context).textTheme.titleLarge),
-          for (final p in plotted.reversed)
+          if (!widget.embedded) const SizedBox(height: 18),
+          if (!widget.embedded)
+            Text('历史记录', style: Theme.of(context).textTheme.titleLarge),
+          for (final p
+              in widget.embedded ? <_PlottedPoint>[] : plotted.reversed)
             ListTile(
               dense: true,
               title: Text(

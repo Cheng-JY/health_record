@@ -6,7 +6,6 @@ import 'features/labs/lab_repository.dart';
 import 'features/labs/lab_pages.dart';
 import 'features/labs/unified_lab_page.dart';
 import 'features/csv_import/csv_import_page.dart';
-import 'features/trends/unified_trends_page.dart';
 import 'features/hospitals/hospitals_page.dart';
 import 'features/backup/backup_page.dart';
 
@@ -82,7 +81,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           children: const [
             DashboardPage(),
             UnifiedLabPage(),
-            UnifiedTrendsPage(),
             CsvImportPage(),
             HospitalsPage(),
           ],
@@ -100,7 +98,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             icon: Icon(Icons.biotech_outlined),
             label: '检查结果',
           ),
-          NavigationDestination(icon: Icon(Icons.show_chart), label: '趋势'),
           NavigationDestination(icon: Icon(Icons.upload_file), label: 'CSV 导入'),
           NavigationDestination(
             icon: Icon(Icons.local_hospital_outlined),

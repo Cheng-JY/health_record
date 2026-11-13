@@ -8,6 +8,7 @@ import '../csv_import/csv_import_page.dart';
 import '../hospitals/hospitals_page.dart';
 import 'lab_pages.dart';
 import 'csv_result_edit_page.dart';
+import '../trends/unified_trends_page.dart';
 
 /// Presentation-only merge: no copying or rewriting of medical records.
 /// CSV values remain in ImportedLabResults, manual values remain in LabResults.
@@ -28,7 +29,8 @@ class _ResultItem {
 }
 
 class _IndicatorGroup {
-  _IndicatorGroup(this.title, this.category, this.manualTest);
+  _IndicatorGroup(this.key, this.title, this.category, this.manualTest);
+  final String key;
   String title;
   String category;
   LabTest? manualTest;
@@ -106,7 +108,7 @@ class _UnifiedLabPageState extends ConsumerState<UnifiedLabPage> {
       final key = keyFor(test.code, test.nameZh, category);
       final group = groups.putIfAbsent(
         key,
-        () => _IndicatorGroup(test.nameZh, category, test),
+        () => _IndicatorGroup(key, test.nameZh, category, test),
       );
       group.manualTest ??= test;
       group.entries.add(_ResultItem.manual(result, test.nameZh, category));
@@ -123,7 +125,7 @@ class _UnifiedLabPageState extends ConsumerState<UnifiedLabPage> {
       );
       final group = groups.putIfAbsent(
         key,
-        () => _IndicatorGroup(result.indicatorNameCn, category, null),
+        () => _IndicatorGroup(key, result.indicatorNameCn, category, null),
       );
       group.entries.add(
         _ResultItem.csv(result, result.indicatorNameCn, category),
@@ -188,28 +190,40 @@ class _UnifiedLabPageState extends ConsumerState<UnifiedLabPage> {
             padding: EdgeInsets.all(24),
             child: Text('暂无检查结果，请先手动录入或导入 CSV。'),
           ),
-        for (final category in names) ...[
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 18, 16, 6),
-            child: Text(
-              category,
-              style: Theme.of(context).textTheme.titleLarge,
+        for (final category in names)
+          Card(
+            margin: const EdgeInsets.fromLTRB(8, 6, 8, 0),
+            child: ExpansionTile(
+              key: PageStorageKey('lab-category-$category'),
+              initiallyExpanded: true,
+              title: Text(
+                category,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              subtitle: Text(
+                '${byCategory[category]!.length} 个指标',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              children: [
+                for (final group in byCategory[category]!)
+                  ListTile(
+                    title: Text(group.title),
+                    subtitle: Text(
+                      '最新：${DateFormat('yyyy-MM-dd').format(group.entries.map((e) => e.date).reduce((a, b) => a.isAfter(b) ? a : b))}',
+                    ),
+                    trailing: Text('${group.entries.length} 条'),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => _UnifiedDetailPage(
+                          group: group,
+                          hospitalFilter: selectedHospital,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
-          for (final group in byCategory[category]!)
-            ListTile(
-              title: Text(group.title),
-              subtitle: Text(
-                '最新：${DateFormat('yyyy-MM-dd').format(group.entries.map((e) => e.date).reduce((a, b) => a.isAfter(b) ? a : b))}',
-              ),
-              trailing: Text('${group.entries.length} 条'),
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => _UnifiedDetailPage(group: group),
-                ),
-              ),
-            ),
-        ],
         const SizedBox(height: 60),
       ],
     );
@@ -217,8 +231,9 @@ class _UnifiedLabPageState extends ConsumerState<UnifiedLabPage> {
 }
 
 class _UnifiedDetailPage extends ConsumerWidget {
-  const _UnifiedDetailPage({required this.group});
+  const _UnifiedDetailPage({required this.group, required this.hospitalFilter});
   final _IndicatorGroup group;
+  final String hospitalFilter;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -232,6 +247,21 @@ class _UnifiedDetailPage extends ConsumerWidget {
             child: Text(
               '${group.category} · 共 ${sorted.length} 条',
               style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: UnifiedTrendsPage(
+              indicatorKey: group.key,
+              hospitalFilter: hospitalFilter,
+              embedded: true,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+            child: Text(
+              '检查历史记录',
+              style: Theme.of(context).textTheme.titleLarge,
             ),
           ),
           for (final item in sorted)
