@@ -142,27 +142,44 @@ class _VisitReportsPageState extends ConsumerState<VisitReportsPage> {
     VisitReport report,
     List<LinkableLabResult> available,
   ) async {
+    // Matching uses the report date and the result sample date (day only).
+    // The report may be linked to results from other dates by turning off the filter.
+    final reportDate = _date(report.reportDate);
     final selected = <String>{};
     String search = '';
+    bool sameDateOnly = true;
+
     final result = await showDialog<Set<String>>(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) {
-          final filtered = available
-              .where(
-                (r) => '${r.title} ${r.value} ${_date(r.date)}'
-                    .toLowerCase()
-                    .contains(search.toLowerCase()),
-              )
-              .toList();
+          final query = search.trim().toLowerCase();
+          final filtered = available.where((r) {
+            if (sameDateOnly && _date(r.date) != reportDate) return false;
+            if (query.isEmpty) return true;
+            return '${r.title} ${r.value} ${_date(r.date)}'
+                .toLowerCase()
+                .contains(query);
+          }).toList();
+
+          // Never discard selections when searching or changing the date filter.
+          final filteredKeys = filtered.map((r) => r.key).toSet();
+          final selectedInFilter = filteredKeys
+              .where((key) => selected.contains(key))
+              .length;
+
           return AlertDialog(
             title: Text('关联检查结果 · ${report.title}'),
             content: SizedBox(
               width: 650,
-              height: 470,
+              height: 500,
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text('只显示同医院的 CSV 结果及尚未关联的手动记录。手动记录目前没有医院字段，请自行核对来源。'),
+                  const Text(
+                    '只显示同医院的 CSV 结果及尚未关联的手动记录。'
+                    '手动记录没有医院字段，请自行核对来源。',
+                  ),
                   const SizedBox(height: 8),
                   TextField(
                     decoration: const InputDecoration(
@@ -172,29 +189,79 @@ class _VisitReportsPageState extends ConsumerState<VisitReportsPage> {
                     ),
                     onChanged: (v) => setDialogState(() => search = v),
                   ),
-                  const SizedBox(height: 8),
-                  Text('可选 ${filtered.length} 条 · 已勾选 ${selected.length} 条'),
+                  CheckboxListTile(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    controlAffinity: ListTileControlAffinity.leading,
+                    title: Text('仅显示同采样日期（$reportDate）'),
+                    value: sameDateOnly,
+                    onChanged: (value) =>
+                        setDialogState(() => sameDateOnly = value ?? true),
+                  ),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed:
+                            filtered.isEmpty ||
+                                selectedInFilter == filtered.length
+                            ? null
+                            : () => setDialogState(
+                                () => selected.addAll(filteredKeys),
+                              ),
+                        icon: const Icon(Icons.select_all),
+                        label: const Text('全选当前结果'),
+                      ),
+                      TextButton.icon(
+                        onPressed: selectedInFilter == 0
+                            ? null
+                            : () => setDialogState(
+                                () => selected.removeAll(filteredKeys),
+                              ),
+                        icon: const Icon(Icons.deselect),
+                        label: const Text('取消全选'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '可选 ${available.length} 条 · 当前筛选 ${filtered.length} 条 · '
+                    '当前已选 $selectedInFilter 条 · 总共已选 ${selected.length} 条',
+                  ),
+                  const SizedBox(height: 6),
                   Expanded(
-                    child: ListView.builder(
-                      itemCount: filtered.length,
-                      itemBuilder: (ctx, i) {
-                        final r = filtered[i];
-                        return CheckboxListTile(
-                          value: selected.contains(r.key),
-                          title: Text('${r.title} · ${r.value}'),
-                          subtitle: Text(
-                            '${r.kind == 'csv' ? 'CSV' : '手动'} · ${_date(r.date)}',
+                    child: filtered.isEmpty
+                        ? Center(
+                            child: Text(
+                              sameDateOnly
+                                  ? '报告日期 $reportDate 没有可关联的检查结果。'
+                                        '可关闭日期筛选，查看其他日期。'
+                                  : '没有符合搜索条件的检查结果。',
+                              textAlign: TextAlign.center,
+                            ),
+                          )
+                        : ListView.builder(
+                            itemCount: filtered.length,
+                            itemBuilder: (ctx, i) {
+                              final r = filtered[i];
+                              return CheckboxListTile(
+                                value: selected.contains(r.key),
+                                title: Text('${r.title} · ${r.value}'),
+                                subtitle: Text(
+                                  '${r.kind == 'csv' ? 'CSV' : '手动'} · '
+                                  '${_date(r.date)}',
+                                ),
+                                onChanged: (checked) => setDialogState(() {
+                                  if (checked == true) {
+                                    selected.add(r.key);
+                                  } else {
+                                    selected.remove(r.key);
+                                  }
+                                }),
+                              );
+                            },
                           ),
-                          onChanged: (checked) => setDialogState(() {
-                            if (checked == true) {
-                              selected.add(r.key);
-                            } else {
-                              selected.remove(r.key);
-                            }
-                          }),
-                        );
-                      },
-                    ),
                   ),
                 ],
               ),
@@ -207,8 +274,8 @@ class _VisitReportsPageState extends ConsumerState<VisitReportsPage> {
               FilledButton(
                 onPressed: selected.isEmpty
                     ? null
-                    : () => Navigator.pop(ctx, selected),
-                child: const Text('关联所选记录'),
+                    : () => Navigator.pop(ctx, Set<String>.of(selected)),
+                child: Text('关联所选记录（${selected.length}）'),
               ),
             ],
           );
