@@ -1,5 +1,9 @@
 import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
+
 import '../../core/database/app_database.dart';
 
 /// A portable JSON snapshot of the app's complete v10 business database.
@@ -10,6 +14,8 @@ class HealthRecordBackupService {
   final AppDatabase db;
 
   static const int backupVersion = 1;
+  static const int syncProtocolVersion = 1;
+  static const String _deviceIdKey = 'healthrecord_local_device_id_v1';
   static const int supportedSchemaVersion = 10;
 
   // Parent tables precede children to preserve foreign-key constraints.
@@ -35,6 +41,14 @@ class HealthRecordBackupService {
       throw StateError('暂不支持数据库版本 ${db.schemaVersion} 的备份，请升级备份功能。');
     }
 
+    // Stable device identity lives in preferences, separate from medical records.
+    final preferences = SharedPreferencesAsync();
+    var deviceId = await preferences.getString(_deviceIdKey);
+    if (deviceId == null || deviceId.isEmpty) {
+      deviceId = const Uuid().v4();
+      await preferences.setString(_deviceIdKey, deviceId);
+    }
+    final snapshotId = const Uuid().v4();
     return db.transaction(() async {
       final contents = <String, Object?>{};
       for (final table in tables) {
@@ -46,6 +60,14 @@ class HealthRecordBackupService {
         'backupVersion': backupVersion,
         'schemaVersion': supportedSchemaVersion,
         'exportedAt': DateTime.now().toUtc().toIso8601String(),
+        // Optional, forward-compatible local-first sync manifest.
+        'syncProtocolVersion': syncProtocolVersion,
+        'deviceId': deviceId,
+        'snapshotId': snapshotId,
+        'hashAlgorithm': 'sha256',
+        'tablesSha256': sha256
+            .convert(utf8.encode(jsonEncode(contents)))
+            .toString(),
         'tables': contents,
       });
     });
@@ -66,6 +88,22 @@ class HealthRecordBackupService {
             decoded['schemaVersion'] != 9 &&
             decoded['schemaVersion'] != supportedSchemaVersion)) {
       throw const FormatException('备份格式或数据库版本不兼容（支持 v7/v8/v9/v10 备份）。');
+    }
+    // Older exports have no digest and remain supported unchanged.
+    final suppliedHash = decoded['tablesSha256'];
+    if (suppliedHash != null) {
+      if (decoded['hashAlgorithm'] != 'sha256' ||
+          suppliedHash is! String ||
+          !RegExp(r'^[a-f0-9]{64}$').hasMatch(suppliedHash)) {
+        throw const FormatException('备份校验信息格式不正确。');
+      }
+      final tablesValue = decoded['tables'];
+      final actualHash = sha256
+          .convert(utf8.encode(jsonEncode(tablesValue)))
+          .toString();
+      if (suppliedHash != actualHash) {
+        throw const FormatException('备份校验失败：文件可能被修改或损坏。');
+      }
     }
     final content = decoded['tables'];
     final version = decoded['schemaVersion'];

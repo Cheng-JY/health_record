@@ -4,6 +4,7 @@ import 'dart:html' as html;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../main.dart';
 import 'backup_service.dart';
@@ -17,6 +18,19 @@ class BackupPage extends ConsumerStatefulWidget {
 
 class _BackupPageState extends ConsumerState<BackupPage> {
   bool working = false;
+  static const _lastExportKey = 'healthrecord_last_backup_download_started_v1';
+  String? lastExport;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCheckpoint();
+  }
+
+  Future<void> _loadCheckpoint() async {
+    final saved = await SharedPreferencesAsync().getString(_lastExportKey);
+    if (mounted) setState(() => lastExport = saved);
+  }
 
   void _message(String text) {
     if (!mounted) return;
@@ -41,7 +55,10 @@ class _BackupPageState extends ConsumerState<BackupPage> {
       } finally {
         html.Url.revokeObjectUrl(url);
       }
-      _message('备份下载已发起，请确认浏览器已保存文件。');
+      final checkpoint = DateTime.now().toLocal().toIso8601String();
+      await SharedPreferencesAsync().setString(_lastExportKey, checkpoint);
+      if (mounted) setState(() => lastExport = checkpoint);
+      _message('已发起备份下载。请检查下载目录，确认文件实际保存。');
     } catch (e) {
       _message('导出失败：$e');
     } finally {
@@ -143,6 +160,31 @@ class _BackupPageState extends ConsumerState<BackupPage> {
         const Text('备份将包括检查结果、医院、就诊、报告关联及完整用药历史。'),
         const SizedBox(height: 8),
         const Text('文件仅下载到你的设备，不上传到服务器。JSON 是明文格式，请妥善保管。'),
+        const SizedBox(height: 12),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '本地数据安全状态',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 6),
+                const Text('日常记录保存在当前浏览器的本地 SQLite 数据库。清除网站数据可能导致丢失。'),
+                const SizedBox(height: 6),
+                Text(
+                  lastExport == null
+                      ? '尚未从此浏览器记录过备份下载。'
+                      : '最近发起备份下载：$lastExport',
+                ),
+                const SizedBox(height: 6),
+                const Text('导出的 JSON 带有 SHA-256 数据校验和稳定设备标识；它不会自动上传或同步到手机。'),
+              ],
+            ),
+          ),
+        ),
         const SizedBox(height: 18),
         FilledButton.icon(
           onPressed: working ? null : _export,
