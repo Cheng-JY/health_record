@@ -186,6 +186,38 @@ class AppDatabase extends _$AppDatabase {
     )
   ''';
 
+  // Inventory is stored in simple SQL tables; no Drift model regeneration needed.
+  static const _createInventoryBatchesSql = '''
+    CREATE TABLE IF NOT EXISTS medication_inventory_batches (
+      id TEXT NOT NULL PRIMARY KEY,
+      medication_id TEXT NOT NULL REFERENCES medications(id),
+      brand TEXT NOT NULL,
+      batch_no TEXT NOT NULL,
+      form TEXT NOT NULL,
+      strength REAL NOT NULL CHECK(strength > 0),
+      strength_unit TEXT NOT NULL,
+      pack_size INTEGER NOT NULL CHECK(pack_size > 0),
+      purchased_boxes INTEGER NOT NULL CHECK(purchased_boxes >= 0),
+      parts_per_unit INTEGER NOT NULL CHECK(parts_per_unit IN (1,2,4,8)),
+      split_status TEXT NOT NULL CHECK(split_status IN ('yes','no','unknown')),
+      remaining_parts INTEGER NOT NULL CHECK(remaining_parts >= 0),
+      daily_parts INTEGER CHECK(daily_parts > 0),
+      expiry_date TEXT,
+      created_at TEXT NOT NULL
+    )
+  ''';
+
+  static const _createInventoryMovementsSql = '''
+    CREATE TABLE IF NOT EXISTS medication_inventory_movements (
+      id TEXT NOT NULL PRIMARY KEY,
+      batch_id TEXT NOT NULL REFERENCES medication_inventory_batches(id),
+      delta_parts INTEGER NOT NULL,
+      kind TEXT NOT NULL,
+      note TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    )
+  ''';
+
   AppDatabase()
     : super(
         driftDatabase(
@@ -198,7 +230,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -206,6 +238,8 @@ class AppDatabase extends _$AppDatabase {
       await m.createAll();
       await customStatement(_createSymptomsSql);
       await customStatement(_createSymptomPhotosSql);
+      await customStatement(_createInventoryBatchesSql);
+      await customStatement(_createInventoryMovementsSql);
     },
     onUpgrade: (m, from, to) async {
       // v1 -> v2 / v3
@@ -274,11 +308,17 @@ class AppDatabase extends _$AppDatabase {
       if (from < 9) {
         await customStatement(_createSymptomPhotosSql);
       }
+      if (from < 10) {
+        await customStatement(_createInventoryBatchesSql);
+        await customStatement(_createInventoryMovementsSql);
+      }
     },
 
     beforeOpen: (details) async {
       await customStatement(_createSymptomsSql);
       await customStatement(_createSymptomPhotosSql);
+      await customStatement(_createInventoryBatchesSql);
+      await customStatement(_createInventoryMovementsSql);
       // 检查医院表是否存在
       final tables = await customSelect(
         "SELECT name FROM sqlite_master "

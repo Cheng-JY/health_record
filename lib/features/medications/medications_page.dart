@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/database/app_database.dart';
 import '../../main.dart';
 import 'medication_repository.dart';
+import 'inventory_page.dart';
 
 final medicationRepositoryProvider = Provider<MedicationRepository>(
   (ref) => MedicationRepository(ref.watch(databaseProvider)),
@@ -113,6 +114,20 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage> {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.inventory_2_outlined),
+                  title: const Text('药品库存管理'),
+                  subtitle: const Text('查看剩余天数、管理包装与购入批次'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const MedicationInventoryPage(),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
               TextField(
                 decoration: const InputDecoration(
                   prefixIcon: Icon(Icons.search),
