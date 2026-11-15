@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:html' as html;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 
@@ -10,6 +13,8 @@ import 'features/backup/backup_page.dart';
 import 'features/settings/settings_page.dart';
 import 'features/settings/plot_settings.dart';
 import 'features/home/health_dashboard_page.dart';
+import 'features/sync/sync_page.dart';
+import 'features/sync/sync_engine.dart';
 
 final databaseProvider = Provider<AppDatabase>((ref) {
   final db = AppDatabase();
@@ -76,11 +81,26 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   int index = selectedMainTab.value;
+  Timer? _syncTimer;
 
   @override
   void initState() {
     super.initState();
     selectedMainTab.addListener(_syncMainTab);
+    _syncTimer = Timer.periodic(const Duration(seconds: 45), (_) => _runSync());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _runSync());
+  }
+
+  Future<void> _runSync() async {
+    if (!mounted) return;
+    try {
+      await ref.read(initProvider.future);
+      if (!mounted) return;
+      final result = await HealthSyncEngine.run(ref.read(databaseProvider));
+      if (mounted && result.reload) html.window.location.reload();
+    } catch (_) {
+      // Transient network/database errors are shown on the sync settings page.
+    }
   }
 
   void _syncMainTab() {
@@ -89,6 +109,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   void dispose() {
+    _syncTimer?.cancel();
     selectedMainTab.removeListener(_syncMainTab);
     super.dispose();
   }
@@ -100,6 +121,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       appBar: AppBar(
         title: const Text('HealthRecord'),
         actions: [
+          IconButton(
+            tooltip: 'Mac 与 iPhone 同步',
+            icon: const Icon(Icons.sync_outlined),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const HealthSyncPage()),
+            ),
+          ),
           IconButton(
             tooltip: '本地备份与恢复',
             icon: const Icon(Icons.backup_outlined),
