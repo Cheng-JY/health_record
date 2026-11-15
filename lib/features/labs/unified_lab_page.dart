@@ -28,6 +28,102 @@ class _ResultItem {
   String get source => imported == null ? '手动录入' : 'CSV 导入';
 }
 
+// LAB_DISPLAY_CATEGORY_V2 — only change UI grouping, never stored lab data.
+String _labDisplayCategoryV2(String sourceCategory, String indicatorName) {
+  final name = indicatorName.trim();
+  final category = sourceCategory.trim().isEmpty
+      ? '未分类'
+      : sourceCategory.trim();
+
+  // Explicit urine collection and volume measurements belong to urine testing.
+  if (name == '尿液收集时间' || name == '尿量') return '尿液检查';
+
+  // These names usually denote blood chemistry in the current mixed grouping.
+  // A *clearly urine-specific* label remains distinguishable by its name.
+  if ((name == '尿素' || name == '尿酸') &&
+      (category.contains('血液') ||
+          category.contains('临床化学') ||
+          category.contains('尿液、蛋白与免疫') ||
+          category == '蛋白、免疫与电解质')) {
+    return '血液学与临床化学';
+  }
+
+  // Move explicitly urine-labelled indicators. Do not accidentally move
+  // blood urea (尿素) or uric acid (尿酸), including when their names have suffixes.
+  final urineName =
+      name.startsWith('尿') && !name.startsWith('尿素') && !name.startsWith('尿酸');
+  if (urineName || category == '尿液检查' && name != '尿素' && name != '尿酸') {
+    return '尿液检查';
+  }
+
+  // The old combined group also contained complements and electrolytes.
+  if (category == '尿液、蛋白与免疫') return '蛋白、免疫与电解质';
+  return category;
+}
+
+// LAB_CBC_URINE_GROUPING_V3
+// Display-only grouping. Never rewrite source CSV categories or result values.
+String _labVisibleCategory(String original, String title) {
+  final category = original.trim();
+  final name = title.trim();
+  final compact = name.replaceAll(RegExp(r'\s+'), '');
+
+  // Serum urea / uric acid belong to chemistry unless specimen proves otherwise.
+  // Do not infer urine specimen merely from the Chinese character 尿.
+  if (compact == '尿素' ||
+      compact == '尿酸' ||
+      compact == '尿素氮' ||
+      compact == '血尿素' ||
+      compact == '血尿酸' ||
+      compact == '血尿素氮') {
+    return '血液学与临床化学';
+  }
+
+  // Urinalysis and urine collection go into one large group.
+  if (category == '尿液检查' ||
+      category == '尿液与相关检验' ||
+      category == '尿液相关检验' ||
+      category == '尿常规') {
+    return '尿液检查';
+  }
+  final urineName =
+      compact.startsWith('尿') ||
+      compact.startsWith('24小时尿') ||
+      compact.startsWith('24h尿');
+  if (urineName) return '尿液检查';
+
+  // Typical CBC parameters, but never urine-cell counts.
+  const cbcTerms = <String>[
+    '白细胞',
+    '红细胞',
+    '血红蛋白',
+    '血小板',
+    '血细胞比容',
+    '红细胞压积',
+    '平均红细胞',
+    '红细胞平均',
+    '红细胞分布宽度',
+    '中性粒细胞',
+    '淋巴细胞',
+    '单核细胞',
+    '嗜酸性粒细胞',
+    '嗜碱性粒细胞',
+    '网织红细胞',
+    '血小板压积',
+    '血小板分布宽度',
+    '平均血小板',
+  ];
+  if (category == '血常规' || cbcTerms.any((term) => compact.contains(term))) {
+    return '血常规';
+  }
+
+  // Legacy mixed import group: keep non-urine analytes visible separately.
+  if (category == '尿液、蛋白与免疫' || category == '蛋白、免疫与电解质') {
+    return '蛋白、免疫与电解质';
+  }
+  return category.isEmpty ? '未分类' : category;
+}
+
 class _IndicatorGroup {
   _IndicatorGroup(this.key, this.title, this.category, this.manualTest);
   final String key;
@@ -108,7 +204,12 @@ class _UnifiedLabPageState extends ConsumerState<UnifiedLabPage> {
       final key = keyFor(test.code, test.nameZh, category);
       final group = groups.putIfAbsent(
         key,
-        () => _IndicatorGroup(key, test.nameZh, category, test),
+        () => _IndicatorGroup(
+          key,
+          test.nameZh,
+          _labDisplayCategoryV2(category, test.nameZh),
+          test,
+        ),
       );
       group.manualTest ??= test;
       group.entries.add(_ResultItem.manual(result, test.nameZh, category));
@@ -125,11 +226,21 @@ class _UnifiedLabPageState extends ConsumerState<UnifiedLabPage> {
       );
       final group = groups.putIfAbsent(
         key,
-        () => _IndicatorGroup(key, result.indicatorNameCn, category, null),
+        () => _IndicatorGroup(
+          key,
+          result.indicatorNameCn,
+          _labDisplayCategoryV2(category, result.indicatorNameCn),
+          null,
+        ),
       );
       group.entries.add(
         _ResultItem.csv(result, result.indicatorNameCn, category),
       );
+    }
+
+    // Normalize only presentation categories; raw records stay unchanged.
+    for (final group in groups.values) {
+      group.category = _labVisibleCategory(group.category, group.title);
     }
 
     final byCategory = <String, List<_IndicatorGroup>>{};
@@ -137,7 +248,12 @@ class _UnifiedLabPageState extends ConsumerState<UnifiedLabPage> {
       // Keep CSV category as supplied, unless an existing manual item defines it.
       byCategory.putIfAbsent(group.category, () => []).add(group);
     }
-    final names = byCategory.keys.toList()..sort();
+    final names = byCategory.keys.toList()
+      ..sort((a, b) {
+        if (a == '血常规') return b == '血常规' ? 0 : -1;
+        if (b == '血常规') return 1;
+        return a.compareTo(b);
+      });
     for (final category in names) {
       byCategory[category]!.sort((a, b) => a.title.compareTo(b.title));
     }

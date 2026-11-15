@@ -95,6 +95,10 @@ class VisitRepository {
 
   Future<void> deleteVisit(String id) async {
     await db.transaction(() async {
+      await db.customStatement(
+        'DELETE FROM visit_pdf_attachments WHERE visit_id = ?',
+        [id],
+      );
       final reports = await (db.select(
         db.visitReports,
       )..where((r) => r.visitId.equals(id))).get();

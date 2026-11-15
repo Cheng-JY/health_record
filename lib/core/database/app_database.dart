@@ -218,6 +218,20 @@ class AppDatabase extends _$AppDatabase {
     )
   ''';
 
+  static const _createVisitPdfsSql = '''
+    CREATE TABLE IF NOT EXISTS visit_pdf_attachments (
+      id TEXT NOT NULL PRIMARY KEY,
+      visit_id TEXT NOT NULL REFERENCES visits(id),
+      file_name TEXT NOT NULL,
+      title TEXT NOT NULL,
+      note TEXT NOT NULL,
+      size_bytes INTEGER NOT NULL CHECK(size_bytes > 0),
+      pdf_base64 TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  ''';
+
   AppDatabase()
     : super(
         driftDatabase(
@@ -230,12 +244,13 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) async {
       await m.createAll();
+      await customStatement(_createVisitPdfsSql);
       await customStatement(_createSymptomsSql);
       await customStatement(_createSymptomPhotosSql);
       await customStatement(_createInventoryBatchesSql);
@@ -312,9 +327,13 @@ class AppDatabase extends _$AppDatabase {
         await customStatement(_createInventoryBatchesSql);
         await customStatement(_createInventoryMovementsSql);
       }
+      if (from < 11) {
+        await customStatement(_createVisitPdfsSql);
+      }
     },
 
     beforeOpen: (details) async {
+      await customStatement(_createVisitPdfsSql);
       await customStatement(_createSymptomsSql);
       await customStatement(_createSymptomPhotosSql);
       await customStatement(_createInventoryBatchesSql);

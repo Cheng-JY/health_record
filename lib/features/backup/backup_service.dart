@@ -16,7 +16,7 @@ class HealthRecordBackupService {
   static const int backupVersion = 1;
   static const int syncProtocolVersion = 1;
   static const String _deviceIdKey = 'healthrecord_local_device_id_v1';
-  static const int supportedSchemaVersion = 10;
+  static const int supportedSchemaVersion = 11;
 
   // Parent tables precede children to preserve foreign-key constraints.
   static const List<String> tables = [
@@ -34,6 +34,7 @@ class HealthRecordBackupService {
     'symptom_photos',
     'medication_inventory_batches',
     'medication_inventory_movements',
+    'visit_pdf_attachments',
   ];
 
   Future<String> exportJson() async {
@@ -86,8 +87,9 @@ class HealthRecordBackupService {
         (decoded['schemaVersion'] != 7 &&
             decoded['schemaVersion'] != 8 &&
             decoded['schemaVersion'] != 9 &&
+            decoded['schemaVersion'] != 10 &&
             decoded['schemaVersion'] != supportedSchemaVersion)) {
-      throw const FormatException('备份格式或数据库版本不兼容（支持 v7/v8/v9/v10 备份）。');
+      throw const FormatException('备份格式或数据库版本不兼容（支持 v7/v8/v9/v10/v11 备份）。');
     }
     // Older exports have no digest and remain supported unchanged.
     final suppliedHash = decoded['tablesSha256'];
@@ -108,11 +110,13 @@ class HealthRecordBackupService {
     final content = decoded['tables'];
     final version = decoded['schemaVersion'];
     final expected = version == 7
-        ? tables.sublist(0, tables.length - 4)
+        ? tables.sublist(0, tables.length - 5)
         : version == 8
-        ? tables.sublist(0, tables.length - 3)
+        ? tables.sublist(0, tables.length - 4)
         : version == 9
-        ? tables.sublist(0, tables.length - 2)
+        ? tables.sublist(0, tables.length - 3)
+        : version == 10
+        ? tables.sublist(0, tables.length - 1)
         : tables;
     if (content is! Map<String, dynamic> ||
         content.length != expected.length ||
@@ -137,7 +141,7 @@ class HealthRecordBackupService {
     // No destructive write happens until complete structural validation.
     inspect(jsonText);
     if (db.schemaVersion != supportedSchemaVersion) {
-      throw StateError('当前应用数据库不是 v10，不能恢复此备份。');
+      throw StateError('当前应用数据库不是 v11，不能恢复此备份。');
     }
     final decoded = jsonDecode(jsonText) as Map<String, dynamic>;
     final data = decoded['tables'] as Map<String, dynamic>;
@@ -154,6 +158,7 @@ class HealthRecordBackupService {
       'medication_inventory_movements',
       () => <dynamic>[],
     );
+    importedTables.putIfAbsent('visit_pdf_attachments', () => <dynamic>[]);
 
     // Validate every column name against this installed database schema.
     final allowedColumns = <String, Set<String>>{};

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../core/database/app_database.dart';
 import '../../main.dart';
 import 'visit_report_repository.dart';
+import 'visit_pdf_page.dart';
 import '../trends/unified_trends_page.dart';
 
 final visitReportRepositoryProvider = Provider<VisitReportRepository>(
@@ -472,10 +473,26 @@ class _VisitReportsPageState extends ConsumerState<VisitReportsPage> {
             const SizedBox(height: 4),
             const Text('新建报告分组，再从已有检查数据中选择记录关联。日期不要求与就诊日期完全一致。'),
             const SizedBox(height: 12),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => VisitPdfPage(visitId: widget.visit.id),
+                    ),
+                  ),
+                  icon: const Icon(Icons.picture_as_pdf_outlined),
+                  label: const Text('上传医疗文件'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
             FilledButton.icon(
               onPressed: busy ? null : addReport,
               icon: const Icon(Icons.note_add_outlined),
-              label: const Text('新增报告分组'),
+              label: const Text('整理检查指标'),
             ),
             if (busy) const LinearProgressIndicator(),
             const SizedBox(height: 12),
