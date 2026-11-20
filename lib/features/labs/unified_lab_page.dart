@@ -320,9 +320,14 @@ class _UnifiedLabPageState extends ConsumerState<UnifiedLabPage> {
           child: DropdownButtonFormField<String>(
             key: ValueKey('hospital-$selectedHospital-${hospitalList.length}'),
             initialValue: selectedHospital,
-            decoration: const InputDecoration(
-              labelText: '筛选医院',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: MedicalUiText.text(
+                context,
+                '筛选医院',
+                'Filter by hospital',
+                'Nach Krankenhaus filtern',
+              ),
+              border: const OutlineInputBorder(),
             ),
             items: [
               const DropdownMenuItem(value: 'all', child: LText('所有医院 / 全部来源')),

@@ -366,9 +366,14 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
           DropdownButtonFormField<String>(
             key: ValueKey('hospital-$selected-${hospitalList.length}'),
             initialValue: selected,
-            decoration: const InputDecoration(
-              labelText: '筛选医院',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: DisplayI18nV5.tr(
+                context,
+                '筛选医院',
+                'Filter by hospital',
+                'Nach Krankenhaus filtern',
+              ),
+              border: const OutlineInputBorder(),
             ),
             items: [
               const DropdownMenuItem(value: 'all', child: LText('所有医院 / 全部来源')),

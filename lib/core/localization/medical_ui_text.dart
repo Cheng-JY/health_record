@@ -155,11 +155,198 @@ class MedicalUiText {
     },
   };
 
+  // HEALTHRECORD_I18N_V6_1
+  static const Map<String, Map<String, String>> extraNames = {
+    "血液学与凝血": {
+      "en": "Hematology & Coagulation",
+      "de": "Hämatologie und Gerinnung",
+    },
+    "凝血功能": {"en": "Coagulation Studies", "de": "Gerinnungsdiagnostik"},
+    "凝血四项": {"en": "Coagulation Panel", "de": "Gerinnungsprofil"},
+    "凝血酶原时间": {"en": "Prothrombin Time (PT)", "de": "Prothrombinzeit (PT)"},
+    "Quick凝血酶原时间": {
+      "en": "Prothrombin Time (Quick Method)",
+      "de": "Quick-Prothrombinzeit",
+    },
+    "Quick值": {"en": "Quick Value", "de": "Quick-Wert"},
+    "凝血酶原活动度": {
+      "en": "Prothrombin Activity (Quick)",
+      "de": "Prothrombinaktivität (Quick)",
+    },
+    "凝血酶原时间活动度": {
+      "en": "Prothrombin Activity (Quick)",
+      "de": "Prothrombinaktivität (Quick)",
+    },
+    "国际标准化比值": {
+      "en": "International Normalized Ratio (INR)",
+      "de": "International Normalisierte Ratio (INR)",
+    },
+    "国际标准化比率": {
+      "en": "International Normalized Ratio (INR)",
+      "de": "International Normalisierte Ratio (INR)",
+    },
+    "部分凝血活酶时间": {
+      "en": "Activated Partial Thromboplastin Time (aPTT)",
+      "de": "Aktivierte partielle Thromboplastinzeit (aPTT)",
+    },
+    "活化部分凝血活酶时间": {
+      "en": "Activated Partial Thromboplastin Time (aPTT)",
+      "de": "Aktivierte partielle Thromboplastinzeit (aPTT)",
+    },
+    "活化部分凝血酶原时间": {
+      "en": "Activated Partial Thromboplastin Time (aPTT)",
+      "de": "Aktivierte partielle Thromboplastinzeit (aPTT)",
+    },
+    "凝血酶时间": {"en": "Thrombin Time (TT)", "de": "Thrombinzeit (TZ)"},
+    "纤维蛋白原": {"en": "Fibrinogen", "de": "Fibrinogen"},
+    "D二聚体": {"en": "D-Dimer", "de": "D-Dimer"},
+    "D-二聚体": {"en": "D-Dimer", "de": "D-Dimer"},
+    "抗凝血酶III": {"en": "Antithrombin III", "de": "Antithrombin III"},
+    "抗凝血酶Ⅲ": {"en": "Antithrombin III", "de": "Antithrombin III"},
+    "红细胞沉降率": {
+      "en": "Erythrocyte Sedimentation Rate (ESR)",
+      "de": "Blutsenkungsgeschwindigkeit (BSG)",
+    },
+    "血沉": {
+      "en": "Erythrocyte Sedimentation Rate (ESR)",
+      "de": "Blutsenkungsgeschwindigkeit (BSG)",
+    },
+    "白细胞分类": {
+      "en": "White Blood Cell Differential",
+      "de": "Differenzialblutbild",
+    },
+    "白细胞总数": {"en": "White Blood Cell Count", "de": "Leukozytenzahl"},
+    "中性粒细胞百分比": {"en": "Neutrophils (%)", "de": "Neutrophile (%)"},
+    "淋巴细胞百分比": {"en": "Lymphocytes (%)", "de": "Lymphozyten (%)"},
+    "单核细胞百分比": {"en": "Monocytes (%)", "de": "Monozyten (%)"},
+    "嗜酸性粒细胞百分比": {"en": "Eosinophils (%)", "de": "Eosinophile (%)"},
+    "嗜碱性粒细胞百分比": {"en": "Basophils (%)", "de": "Basophile (%)"},
+    "血小板分布宽度": {
+      "en": "Platelet Distribution Width (PDW)",
+      "de": "Thrombozytenverteilungsbreite (PDW)",
+    },
+    "血小板压积": {"en": "Plateletcrit (PCT)", "de": "Thrombokrit (PCT)"},
+    "大血小板比率": {
+      "en": "Platelet Large Cell Ratio (P-LCR)",
+      "de": "Anteil großer Thrombozyten (P-LCR)",
+    },
+    "丙氨酸氨基转移酶": {
+      "en": "Alanine Aminotransferase (ALT)",
+      "de": "Alanin-Aminotransferase (ALT)",
+    },
+    "天门冬氨酸氨基转移酶": {
+      "en": "Aspartate Aminotransferase (AST)",
+      "de": "Aspartat-Aminotransferase (AST)",
+    },
+    "天冬氨酸氨基转移酶": {
+      "en": "Aspartate Aminotransferase (AST)",
+      "de": "Aspartat-Aminotransferase (AST)",
+    },
+    "谷氨酰转肽酶": {
+      "en": "Gamma-Glutamyl Transferase (GGT)",
+      "de": "Gamma-Glutamyltransferase (GGT)",
+    },
+    "胆碱酯酶": {"en": "Cholinesterase", "de": "Cholinesterase"},
+    "总胆固醇": {"en": "Total Cholesterol", "de": "Gesamtcholesterin"},
+    "甘油三酯": {"en": "Triglycerides", "de": "Triglyzeride"},
+    "高密度脂蛋白胆固醇": {"en": "HDL Cholesterol", "de": "HDL-Cholesterin"},
+    "低密度脂蛋白胆固醇": {"en": "LDL Cholesterol", "de": "LDL-Cholesterin"},
+    "肌酸激酶": {"en": "Creatine Kinase (CK)", "de": "Kreatinkinase (CK)"},
+    "肌酸激酶同工酶": {
+      "en": "Creatine Kinase MB (CK-MB)",
+      "de": "Kreatinkinase-MB (CK-MB)",
+    },
+    "肌钙蛋白T": {"en": "Troponin T", "de": "Troponin T"},
+    "肌钙蛋白I": {"en": "Troponin I", "de": "Troponin I"},
+    "铁蛋白": {"en": "Ferritin", "de": "Ferritin"},
+    "转铁蛋白": {"en": "Transferrin", "de": "Transferrin"},
+    "血清铁": {"en": "Serum Iron", "de": "Serumeisen"},
+    "总铁结合力": {
+      "en": "Total Iron-Binding Capacity (TIBC)",
+      "de": "Totale Eisenbindungskapazität (TIBC)",
+    },
+    "叶酸": {"en": "Folate", "de": "Folat"},
+    "维生素B12": {"en": "Vitamin B12", "de": "Vitamin B12"},
+    "促甲状腺激素": {
+      "en": "Thyroid-Stimulating Hormone (TSH)",
+      "de": "Thyreoidea-stimulierendes Hormon (TSH)",
+    },
+    "游离三碘甲状腺原氨酸": {
+      "en": "Free Triiodothyronine (FT3)",
+      "de": "Freies Trijodthyronin (fT3)",
+    },
+    "游离甲状腺素": {"en": "Free Thyroxine (FT4)", "de": "Freies Thyroxin (fT4)"},
+    "糖化血红蛋白": {
+      "en": "Hemoglobin A1c (HbA1c)",
+      "de": "Glykosyliertes Hämoglobin (HbA1c)",
+    },
+    "血清淀粉样蛋白A": {"en": "Serum Amyloid A (SAA)", "de": "Serum-Amyloid A (SAA)"},
+    "尿微量白蛋白": {"en": "Urine Albumin", "de": "Albumin im Urin"},
+    "尿白蛋白/肌酐比值": {
+      "en": "Urine Albumin/Creatinine Ratio (ACR)",
+      "de": "Albumin/Kreatinin-Quotient im Urin (ACR)",
+    },
+    "尿微量白蛋白/肌酐比值": {
+      "en": "Urine Albumin/Creatinine Ratio (ACR)",
+      "de": "Albumin/Kreatinin-Quotient im Urin (ACR)",
+    },
+    "尿肌酐": {"en": "Urine Creatinine", "de": "Kreatinin im Urin"},
+    "尿红细胞计数": {
+      "en": "Urine Red Blood Cell Count",
+      "de": "Erythrozytenzahl im Urin",
+    },
+    "尿白细胞计数": {
+      "en": "Urine White Blood Cell Count",
+      "de": "Leukozytenzahl im Urin",
+    },
+    "尿比重": {"en": "Urine Specific Gravity", "de": "Spezifisches Uringewicht"},
+    "尿液酸碱度": {"en": "Urine pH", "de": "Urin-pH"},
+    "尿潜血": {"en": "Urine Occult Blood", "de": "Okkultes Blut im Urin"},
+    "尿沉渣": {"en": "Urine Sediment", "de": "Urinsediment"},
+    "补体总活性": {
+      "en": "Total Complement Activity (CH50)",
+      "de": "Komplement-Gesamtaktivität (CH50)",
+    },
+    "补体C1q": {"en": "Complement C1q", "de": "Komplement C1q"},
+    "抗dsDNA抗体": {"en": "Anti-dsDNA Antibodies", "de": "Anti-dsDNA-Antikörper"},
+    "抗双链DNA": {"en": "Anti-dsDNA Antibodies", "de": "Anti-dsDNA-Antikörper"},
+    "抗核抗体滴度": {"en": "ANA Titer", "de": "ANA-Titer"},
+    "抗心磷脂抗体": {
+      "en": "Anticardiolipin Antibodies",
+      "de": "Anticardiolipin-Antikörper",
+    },
+    "抗β2糖蛋白I抗体": {
+      "en": "Anti-β2 Glycoprotein I Antibodies",
+      "de": "Anti-β2-Glykoprotein-I-Antikörper",
+    },
+    "狼疮抗凝物": {"en": "Lupus Anticoagulant", "de": "Lupus-Antikoagulans"},
+    "免疫球蛋白E": {"en": "Immunoglobulin E (IgE)", "de": "Immunglobulin E (IgE)"},
+    "免疫球蛋白G4": {
+      "en": "Immunoglobulin G4 (IgG4)",
+      "de": "Immunglobulin G4 (IgG4)",
+    },
+  };
+
+  static String _normaliseTerm(String value) => value
+      .trim()
+      .replaceAll(RegExp(r'[\s　]+'), '')
+      .replaceAll('（', '(')
+      .replaceAll('）', ')');
+
   static String name(BuildContext context, String raw) {
     final language = Localizations.localeOf(context).languageCode;
     if (language == 'zh') return raw;
     // Only known exact terms are translated. Unknown terms remain original.
-    return names[raw.trim()]?[language] ?? raw;
+    final rawKey = raw.trim();
+    final exact = names[rawKey]?[language] ?? extraNames[rawKey]?[language];
+    if (exact != null) return exact;
+    final compact = _normaliseTerm(rawKey);
+    for (final entry in {...names, ...extraNames}.entries) {
+      if (_normaliseTerm(entry.key) == compact) {
+        return entry.value[language] ?? raw;
+      }
+    }
+    return raw;
   }
 
   static String text(BuildContext context, String zh, String en, String de) {

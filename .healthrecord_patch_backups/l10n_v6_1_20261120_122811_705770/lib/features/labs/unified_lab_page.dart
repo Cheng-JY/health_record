@@ -1,0 +1,641 @@
+import '../../core/localization/v6_display.dart'; // HEALTHRECORD_L10N_V6
+import '../../core/localization/medical_ui_text.dart'; // HEALTHRECORD_DYNAMIC_I18N_V3
+import '../../core/localization/ui_i18n.dart'; // HEALTHRECORD_UI_I18N_V2
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+
+import '../../core/database/app_database.dart';
+import '../../main.dart';
+import '../csv_import/csv_import_page.dart';
+import '../hospitals/hospitals_page.dart';
+import 'lab_pages.dart';
+import 'csv_result_edit_page.dart';
+import '../trends/unified_trends_page.dart';
+
+/// Presentation-only merge: no copying or rewriting of medical records.
+/// CSV values remain in ImportedLabResults, manual values remain in LabResults.
+class _ResultItem {
+  const _ResultItem.manual(this.manual, this.displayName, this.category)
+    : imported = null;
+  const _ResultItem.csv(this.imported, this.displayName, this.category)
+    : manual = null;
+
+  final LabResult? manual;
+  final ImportedLabResult? imported;
+  final String displayName;
+  final String category;
+  DateTime get date => manual?.measuredAt ?? imported!.sampleDate;
+  String get unit => manual?.unit ?? imported!.unit;
+  String get value => manual?.valueNumeric.toString() ?? imported!.rawValue;
+  String get source => imported == null ? '手动录入' : 'CSV 导入';
+}
+
+// LAB_DISPLAY_CATEGORY_V2 — only change UI grouping, never stored lab data.
+String _labDisplayCategoryV2(String sourceCategory, String indicatorName) {
+  final name = indicatorName.trim();
+  final category = sourceCategory.trim().isEmpty
+      ? '未分类'
+      : sourceCategory.trim();
+
+  // Explicit urine collection and volume measurements belong to urine testing.
+  if (name == '尿液收集时间' || name == '尿量') return '尿液检查';
+
+  // These names usually denote blood chemistry in the current mixed grouping.
+  // A *clearly urine-specific* label remains distinguishable by its name.
+  if ((name == '尿素' || name == '尿酸') &&
+      (category.contains('血液') ||
+          category.contains('临床化学') ||
+          category.contains('尿液、蛋白与免疫') ||
+          category == '蛋白、免疫与电解质')) {
+    return '血液学与临床化学';
+  }
+
+  // Move explicitly urine-labelled indicators. Do not accidentally move
+  // blood urea (尿素) or uric acid (尿酸), including when their names have suffixes.
+  final urineName =
+      name.startsWith('尿') && !name.startsWith('尿素') && !name.startsWith('尿酸');
+  if (urineName || category == '尿液检查' && name != '尿素' && name != '尿酸') {
+    return '尿液检查';
+  }
+
+  // The old combined group also contained complements and electrolytes.
+  if (category == '尿液、蛋白与免疫') return '蛋白、免疫与电解质';
+  return category;
+}
+
+// LAB_CBC_URINE_GROUPING_V3
+// Display-only grouping. Never rewrite source CSV categories or result values.
+String _labVisibleCategory(String original, String title) {
+  final category = original.trim();
+  final name = title.trim();
+  final compact = name.replaceAll(RegExp(r'\s+'), '');
+
+  // Serum urea / uric acid belong to chemistry unless specimen proves otherwise.
+  // Do not infer urine specimen merely from the Chinese character 尿.
+  if (compact == '尿素' ||
+      compact == '尿酸' ||
+      compact == '尿素氮' ||
+      compact == '血尿素' ||
+      compact == '血尿酸' ||
+      compact == '血尿素氮') {
+    return '血液学与临床化学';
+  }
+
+  // Urinalysis and urine collection go into one large group.
+  if (category == '尿液检查' ||
+      category == '尿液与相关检验' ||
+      category == '尿液相关检验' ||
+      category == '尿常规') {
+    return '尿液检查';
+  }
+  final urineName =
+      compact.startsWith('尿') ||
+      compact.startsWith('24小时尿') ||
+      compact.startsWith('24h尿');
+  if (urineName) return '尿液检查';
+
+  // Typical CBC parameters, but never urine-cell counts.
+  const cbcTerms = <String>[
+    '白细胞',
+    '红细胞',
+    '血红蛋白',
+    '血小板',
+    '血细胞比容',
+    '红细胞压积',
+    '平均红细胞',
+    '红细胞平均',
+    '红细胞分布宽度',
+    '中性粒细胞',
+    '淋巴细胞',
+    '单核细胞',
+    '嗜酸性粒细胞',
+    '嗜碱性粒细胞',
+    '网织红细胞',
+    '血小板压积',
+    '血小板分布宽度',
+    '平均血小板',
+  ];
+  if (category == '血常规' || cbcTerms.any((term) => compact.contains(term))) {
+    return '血常规';
+  }
+
+  // Legacy mixed import group: keep non-urine analytes visible separately.
+  if (category == '尿液、蛋白与免疫' || category == '蛋白、免疫与电解质') {
+    return '蛋白、免疫与电解质';
+  }
+  return category.isEmpty ? '未分类' : category;
+}
+
+class _IndicatorGroup {
+  _IndicatorGroup(this.key, this.title, this.category, this.manualTest);
+  final String key;
+  String title;
+  String category;
+  LabTest? manualTest;
+  final List<_ResultItem> entries = [];
+}
+
+class UnifiedLabPage extends ConsumerStatefulWidget {
+  const UnifiedLabPage({super.key});
+
+  @override
+  ConsumerState<UnifiedLabPage> createState() => _UnifiedLabPageState();
+}
+
+class _UnifiedLabPageState extends ConsumerState<UnifiedLabPage> {
+  String selectedHospital = 'all';
+
+  @override
+  Widget build(BuildContext context) {
+    final csv = ref.watch(importedProvider);
+    final hospitals = ref.watch(hospitalSummariesProvider);
+    final manual = ref.watch(resultsProvider);
+    final tests = ref.watch(testsProvider);
+    final categories = ref.watch(categoriesProvider);
+    if (csv.hasError ||
+        manual.hasError ||
+        tests.hasError ||
+        categories.hasError ||
+        hospitals.hasError) {
+      return Center(
+        child: SelectableText(
+          '读取失败：${csv.error ?? manual.error ?? tests.error ?? categories.error ?? hospitals.error}',
+        ),
+      );
+    }
+    if (!csv.hasValue ||
+        !manual.hasValue ||
+        !tests.hasValue ||
+        !categories.hasValue ||
+        !hospitals.hasValue) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final hospitalList = hospitals.requireValue;
+    final filteredCsv = csv.requireValue
+        .where(
+          (r) =>
+              selectedHospital == 'all' ||
+              (selectedHospital == 'unassigned'
+                  ? r.hospitalId == null
+                  : r.hospitalId == selectedHospital),
+        )
+        .toList();
+    final filteredManual =
+        selectedHospital == 'all' || selectedHospital == 'unassigned'
+        ? manual.requireValue
+        : <LabResult>[];
+    final testById = {for (final t in tests.requireValue) t.id: t};
+    final categoryById = {
+      for (final c in categories.requireValue) c.id: c.nameZh,
+    };
+    final groups = <String, _IndicatorGroup>{};
+
+    String keyFor(String code, String name, String category) {
+      final normalized = code.trim().toUpperCase();
+      // Missing code must not collapse unrelated indicators into one.
+      return normalized.isNotEmpty
+          ? 'code:$normalized'
+          : 'name:$category:${name.trim()}';
+    }
+
+    for (final result in filteredManual) {
+      final test = testById[result.testId];
+      if (test == null) continue;
+      final category = categoryById[test.categoryId] ?? '其他';
+      final key = keyFor(test.code, test.nameZh, category);
+      final group = groups.putIfAbsent(
+        key,
+        () => _IndicatorGroup(
+          key,
+          test.nameZh,
+          _labDisplayCategoryV2(category, test.nameZh),
+          test,
+        ),
+      );
+      group.manualTest ??= test;
+      group.entries.add(_ResultItem.manual(result, test.nameZh, category));
+    }
+
+    for (final result in filteredCsv) {
+      final category = result.category.trim().isEmpty
+          ? '未分类'
+          : result.category.trim();
+      final key = keyFor(
+        result.indicatorCode,
+        result.indicatorNameCn,
+        category,
+      );
+      final group = groups.putIfAbsent(
+        key,
+        () => _IndicatorGroup(
+          key,
+          result.indicatorNameCn,
+          _labDisplayCategoryV2(category, result.indicatorNameCn),
+          null,
+        ),
+      );
+      group.entries.add(
+        _ResultItem.csv(result, result.indicatorNameCn, category),
+      );
+    }
+
+    // Normalize only presentation categories; raw records stay unchanged.
+    for (final group in groups.values) {
+      group.category = _labVisibleCategory(group.category, group.title);
+    }
+
+    final byCategory = <String, List<_IndicatorGroup>>{};
+    for (final group in groups.values) {
+      // Keep CSV category as supplied, unless an existing manual item defines it.
+      byCategory.putIfAbsent(group.category, () => []).add(group);
+    }
+    final names = byCategory.keys.toList()
+      ..sort((a, b) {
+        if (a == '血常规') return b == '血常规' ? 0 : -1;
+        if (b == '血常规') return 1;
+        return a.compareTo(b);
+      });
+    for (final category in names) {
+      byCategory[category]!.sort((a, b) => a.title.compareTo(b.title));
+    }
+    final total = groups.values.fold<int>(
+      0,
+      (sum, g) => sum + g.entries.length,
+    );
+
+    return ListView(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 18, 16, 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              LText('检查结果', style: Theme.of(context).textTheme.headlineSmall),
+              const SizedBox(height: 4),
+              Text(
+                MedicalUiText.labsOverview(
+                  context,
+                  total,
+                  filteredManual.length,
+                  filteredCsv.length,
+                ),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  FilledButton.icon(
+                    icon: const Icon(Icons.edit_note_outlined),
+                    label: const LText('手动录入'),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const LabFormPage(),
+                      ),
+                    ),
+                  ),
+                  FilledButton.icon(
+                    icon: const Icon(Icons.upload_file_outlined),
+                    label: const LText('CSV 导入'),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => Scaffold(
+                          appBar: AppBar(title: const LText('CSV 检查报告导入')),
+                          body: const CsvImportPage(),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: DropdownButtonFormField<String>(
+            key: ValueKey('hospital-$selectedHospital-${hospitalList.length}'),
+            initialValue: selectedHospital,
+            decoration: const InputDecoration(
+              labelText: '筛选医院',
+              border: OutlineInputBorder(),
+            ),
+            items: [
+              const DropdownMenuItem(value: 'all', child: LText('所有医院 / 全部来源')),
+              const DropdownMenuItem(
+                value: 'unassigned',
+                child: LText('未指定医院（含手动记录）'),
+              ),
+              for (final item in hospitalList)
+                DropdownMenuItem(
+                  value: item.hospital.id,
+                  child: Text(item.hospital.name),
+                ),
+            ],
+            onChanged: (value) =>
+                setState(() => selectedHospital = value ?? 'all'),
+          ),
+        ),
+        const SizedBox(height: 12),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          child: LText('按指标代码合并显示，保留每条记录的原始来源；未自动进行单位换算。'),
+        ),
+        if (total == 0)
+          const Padding(
+            padding: EdgeInsets.all(24),
+            child: LText('暂无检查结果，请先手动录入或导入 CSV。'),
+          ),
+        for (final category in names)
+          Card(
+            margin: const EdgeInsets.fromLTRB(8, 6, 8, 0),
+            child: ExpansionTile(
+              key: PageStorageKey('lab-category-$category'),
+              initiallyExpanded: false,
+              title: Text(
+                V6Display.medical(context, category),
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              subtitle: Text(
+                MedicalUiText.countIndicators(
+                  context,
+                  byCategory[category]!.length,
+                ),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              children: [
+                for (final group in byCategory[category]!)
+                  ListTile(
+                    title: Text(V6Display.medical(context, group.title)),
+                    subtitle: Text(
+                      MedicalUiText.latest(
+                        context,
+                        DateFormat('yyyy-MM-dd').format(
+                          group.entries
+                              .map((e) => e.date)
+                              .reduce((a, b) => a.isAfter(b) ? a : b),
+                        ),
+                      ),
+                    ),
+                    trailing: Text(
+                      MedicalUiText.countRecords(context, group.entries.length),
+                    ),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => _UnifiedDetailPage(
+                          group: group,
+                          allGroups: groups.values.toList(),
+                          hospitalFilter: selectedHospital,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        const SizedBox(height: 60),
+      ],
+    );
+  }
+}
+
+class _UnifiedDetailPage extends ConsumerStatefulWidget {
+  const _UnifiedDetailPage({
+    required this.group,
+    required this.allGroups,
+    required this.hospitalFilter,
+  });
+
+  final _IndicatorGroup group;
+  final List<_IndicatorGroup> allGroups;
+  final String hospitalFilter;
+
+  @override
+  ConsumerState<_UnifiedDetailPage> createState() => _UnifiedDetailPageState();
+}
+
+class _UnifiedDetailPageState extends ConsumerState<_UnifiedDetailPage> {
+  late String selectedCategory;
+  late String selectedIndicatorKey;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedCategory = widget.group.category;
+    selectedIndicatorKey = widget.group.key;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final categoryOptions =
+        widget.allGroups.map((group) => group.category).toSet().toList()
+          ..sort();
+
+    final indicators =
+        widget.allGroups
+            .where((group) => group.category == selectedCategory)
+            .toList()
+          ..sort((a, b) => a.title.compareTo(b.title));
+
+    final group = indicators.any((item) => item.key == selectedIndicatorKey)
+        ? indicators.firstWhere((item) => item.key == selectedIndicatorKey)
+        : indicators.first;
+    final sorted = [...group.entries]..sort((a, b) => b.date.compareTo(a.date));
+
+    return Scaffold(
+      appBar: AppBar(title: Text(V6Display.medical(context, group.title))),
+      body: ListView(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: DropdownButtonFormField<String>(
+              key: ValueKey('detail-category-$selectedCategory'),
+              initialValue: selectedCategory,
+              isExpanded: true,
+              decoration: const InputDecoration(
+                labelText: '检查分类',
+                border: OutlineInputBorder(),
+              ),
+              items: [
+                for (final category in categoryOptions)
+                  DropdownMenuItem(
+                    value: category,
+                    child: Text(
+                      V6Display.medical(context, category),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+              ],
+              onChanged: (value) {
+                if (value == null || value == selectedCategory) return;
+                setState(() {
+                  selectedCategory = value;
+                  final first =
+                      widget.allGroups
+                          .where((item) => item.category == value)
+                          .toList()
+                        ..sort((a, b) => a.title.compareTo(b.title));
+                  selectedIndicatorKey = first.first.key;
+                });
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+            child: DropdownButtonFormField<String>(
+              key: ValueKey(
+                'detail-indicator-$selectedCategory-$selectedIndicatorKey',
+              ),
+              initialValue: selectedIndicatorKey,
+              isExpanded: true,
+              decoration: const InputDecoration(
+                labelText: '检查指标',
+                border: OutlineInputBorder(),
+              ),
+              items: [
+                for (final item in indicators)
+                  DropdownMenuItem(
+                    value: item.key,
+                    child: Text(
+                      V6Display.medical(context, item.title),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+              ],
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() => selectedIndicatorKey = value);
+                }
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: Text(
+              '${V6Display.medical(context, group.category)} · ${MedicalUiText.countRecords(context, sorted.length)}',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: UnifiedTrendsPage(
+              key: ValueKey('detail-trend-${group.key}'),
+              indicatorKey: group.key,
+              hospitalFilter: widget.hospitalFilter,
+              embedded: true,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+            child: LText(
+              '检查历史记录',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+          ),
+          for (final item in sorted)
+            ListTile(
+              title: Text(
+                '${item.value}${item.unit.isEmpty ? '' : ' ${item.unit}'}',
+              ),
+              subtitle: Text(
+                '${DateFormat('yyyy-MM-dd HH:mm').format(item.date)} · ${item.source}'
+                '${item.imported == null ? '' : '\n参考范围：${item.imported!.referenceRange}'
+                          '\n报告：${item.imported!.reportId}'}',
+              ),
+              isThreeLine: item.imported != null,
+              trailing: item.imported == null
+                  ? const Icon(Icons.edit_outlined)
+                  : PopupMenuButton<String>(
+                      tooltip: '修改或删除',
+                      onSelected: (action) async {
+                        final r = item.imported!;
+                        if (action == 'edit') {
+                          final changed = await Navigator.of(context)
+                              .push<bool>(
+                                MaterialPageRoute(
+                                  builder: (_) => CsvResultEditPage(result: r),
+                                ),
+                              );
+                          if (changed == true && context.mounted) {
+                            Navigator.of(context).pop();
+                          }
+                        } else if (action == 'delete') {
+                          final confirmed = await showDialog<bool>(
+                            context: context,
+                            builder: (dialogContext) => AlertDialog(
+                              title: const LText('删除导入记录？'),
+                              content: Text(
+                                '确定隐藏 ${r.indicatorNameCn} 的这条检查结果吗？原始记录仍保留在数据库。',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(dialogContext, false),
+                                  child: const LText('取消'),
+                                ),
+                                FilledButton(
+                                  onPressed: () =>
+                                      Navigator.pop(dialogContext, true),
+                                  child: const LText('删除'),
+                                ),
+                              ],
+                            ),
+                          );
+                          if (confirmed == true) {
+                            try {
+                              await ref
+                                  .read(databaseProvider)
+                                  .deleteImportedResult(r.id);
+                              if (context.mounted) Navigator.of(context).pop();
+                            } catch (error) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('删除失败：$error')),
+                                );
+                              }
+                            }
+                          }
+                        }
+                      },
+                      itemBuilder: (_) => const [
+                        PopupMenuItem(value: 'edit', child: LText('编辑')),
+                        PopupMenuItem(value: 'delete', child: LText('删除')),
+                      ],
+                    ),
+              onTap: item.manual != null
+                  ? () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => LabFormPage(existing: item.manual),
+                      ),
+                    )
+                  : () async {
+                      final changed = await Navigator.of(context).push<bool>(
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              CsvResultEditPage(result: item.imported!),
+                        ),
+                      );
+                      if (changed == true && context.mounted) {
+                        Navigator.of(context).pop();
+                      }
+                    },
+            ),
+        ],
+      ),
+      floatingActionButton: group.manualTest == null
+          ? null
+          : FloatingActionButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => LabFormPage(initialTest: group.manualTest),
+                ),
+              ),
+              child: const Icon(Icons.add),
+            ),
+    );
+  }
+}
