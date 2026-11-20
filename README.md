@@ -1,22 +1,33 @@
-# HealthRecord · 个人健康记录
+# HealthRecord
 
-HealthRecord 是一款本地优先的个人健康管理应用。你可以在同一个地方整理不同医院的检查结果、查看长期指标变化，并记录就诊、用药和日常症状。当前版本以 Flutter Web 为运行目标，界面为简体中文。
+HealthRecord is a local-first personal health management app built with Flutter. It brings together laboratory results, medical visits, medication plans, inventory, and symptom records to help you track your health over time.
 
-## 功能
+The current implementation targets Flutter Web and provides a Simplified Chinese interface.
 
-| 模块 | 支持的操作 |
+## Features
+
+| Module | Capabilities |
 | --- | --- |
-| 检查结果 | 手动录入或批量导入 CSV。导入前可预览、检查错误并选择医院，导入时会跳过重复记录。 |
-| 指标趋势 | 在同一页面查看手动录入与导入的结果，按医院筛选。不同单位分别绘图，保留原始结果与参考范围。 |
-| 医院管理 | 管理医院信息，批量为检查记录分配医院，合并重复的医院条目。 |
-| 就诊记录 | 记录就诊信息，关联已有检查结果，保存和下载就诊 PDF 附件。 |
-| 用药与库存 | 查看今日用药计划和历史方案，按药品规格与批次登记库存和库存变动。根据手动确认的每日实际消耗量估算库存可用天数。 |
-| 症状日记 | 记录症状、发生时间、严重程度、备注和照片。 |
-| 备份与恢复 | 导出完整 JSON 备份。导入时先预览，确认后替换当前浏览器中的记录。 |
+| Laboratory results | Enter results manually or import CSV files with preview, validation, hospital selection, and duplicate detection. |
+| Trend charts | View manually entered and imported results together. Filter by hospital and display different units separately while preserving original values and reference ranges. |
+| Hospital management | Manage hospital information, assign results to hospitals in batches, and merge duplicate hospital entries. |
+| Medical visits | Record visits, link existing laboratory results, and store or download PDF attachments. |
+| Medication management | View today's medication plan and maintain historical and future medication schedules. |
+| Medication inventory | Track stock by strength and batch, record inventory changes, and estimate remaining supply using a confirmed daily consumption rate. |
+| Symptom diary | Record symptoms, dates, severity, notes, and photos. |
+| Backup and restore | Export a complete JSON backup and preview a backup before restoring it to the current browser. |
 
-## 本地运行
+## Getting Started
 
-准备 Flutter SDK、Git 和 Chrome。当前仓库的 `pubspec.lock` 要求 Flutter 3.47.0 或更高版本，Dart 版本范围为 3.13.5 至 4.0.0 以下。
+### Requirements
+
+- Flutter SDK
+- Git
+- Chrome
+
+The repository's current `pubspec.lock` specifies Flutter 3.47.0 or later and Dart 3.13.5 or later within the Dart 3.x series.
+
+### Run Locally
 
 ```bash
 git clone https://github.com/Cheng-JY/health_record.git
@@ -25,33 +36,56 @@ flutter pub get
 flutter run -d chrome --web-port 8080
 ```
 
-用下面的命令构建 Web 文件。
+Use a consistent browser address and port during development to access the same browser-local data.
+
+### Build for Web
 
 ```bash
 flutter build web
 ```
 
-构建产物位于 `build/web/`。仓库的 [web/](web/) 目录包含 SQLite WebAssembly 和 Drift Worker。
+The generated files are available in `build/web/`.
 
-## 导入检查结果
+The [web/](web/) directory includes the SQLite WebAssembly binary and the Drift Worker used for browser-based storage.
 
-在「检查结果」中打开 CSV 导入，选择 UTF-8 编码、逗号分隔的文件，预览后选择所属医院并确认。保留下面的表头，每行填写一项检查结果。其中，采样日期、指标名称和结果必须填写。下面的数据仅用于演示格式。
+## Importing Laboratory Results
+
+Open the CSV import screen from the laboratory results section. Select a UTF-8 encoded, comma-separated file, review the preview, choose the associated hospital, and confirm the import.
+
+Include every column shown below. Each row represents one laboratory result. The sample date, indicator name, and result value must be filled in.
+
+The following row contains fictional demonstration data.
 
 ```csv
 report_id,sample_date,report_date,indicator_code,indicator_name_cn,value,unit,reference_range,category
 DEMO-001,2026-01-15,2026-01-15,WBC,白细胞计数,6.2,10^9/L,4.0-10.0,血常规
 ```
 
-## 数据存储与同步
+Keep the column names exactly as shown, including `indicator_name_cn`. Use a period as the decimal separator and an ISO-style date such as `2026-01-15`.
 
-- **本地存储**。默认将记录写入当前浏览器的数据库。开发时固定访问地址和端口，便于继续使用同一份数据。清除站点数据前可以先导出 JSON 备份。
-- **实验性同步**。可在 Mac 上运行随仓库提供的 [Python 同步服务](tools/healthrecord_sync/healthrecord_sync_server.py)，通过 Tailscale Serve 的私有 HTTPS 地址供 iPhone 浏览器访问。同步以完整数据库快照为单位。双方各自有改动时，自动同步会暂停。
-- **备份内容**。JSON 备份可包含检验结果、用药、症状照片和就诊 PDF。备份文件及同步服务保存的快照均为明文，请妥善保存。
+## Data Storage and Backups
 
-## 技术栈
+HealthRecord stores records locally in the current browser's database by default. Export a JSON backup before clearing site data or moving to another browser.
 
-- Flutter 与 Dart 构建 Web 界面
-- Riverpod 管理应用状态
-- Drift、SQLite 与 WebAssembly 提供本地存储
-- fl_chart 绘制检验指标趋势
-- Python 标准库提供可选的私有同步服务
+Backups include laboratory results, hospitals, visits, medication history, inventory, symptom records, photos, and visit PDF attachments.
+
+Restoring a backup replaces the records in the current browser. Review the backup preview and export your existing data before confirming a restore.
+
+JSON backups and snapshots saved by the synchronization service are stored in plaintext. Keep these files in a protected location.
+
+## Experimental Synchronization
+
+The repository includes an optional [Python synchronization service](tools/healthrecord_sync/healthrecord_sync_server.py) for a Mac-hosted setup accessible from an iPhone browser through a private Tailscale Serve HTTPS address.
+
+Synchronization transfers complete database snapshots. Automatic synchronization pauses when both devices have independent changes.
+
+The Mac must remain running with the synchronization service active. Export backups from both devices before pairing them.
+
+## Technology Stack
+
+- **Flutter and Dart** for the application interface
+- **Riverpod** for application state management
+- **Drift and SQLite** for local data persistence
+- **WebAssembly** for SQLite support in the browser
+- **fl_chart** for laboratory trend visualization
+- **Python standard library** for the optional synchronization service
