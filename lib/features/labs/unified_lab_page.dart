@@ -1,3 +1,4 @@
+import '../../core/localization/v6_display.dart'; // HEALTHRECORD_L10N_V6
 import '../../core/localization/medical_ui_text.dart'; // HEALTHRECORD_DYNAMIC_I18N_V3
 import '../../core/localization/ui_i18n.dart'; // HEALTHRECORD_UI_I18N_V2
 
@@ -356,7 +357,7 @@ class _UnifiedLabPageState extends ConsumerState<UnifiedLabPage> {
               key: PageStorageKey('lab-category-$category'),
               initiallyExpanded: false,
               title: Text(
-                MedicalUiText.name(context, category),
+                V6Display.medical(context, category),
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               subtitle: Text(
@@ -369,7 +370,7 @@ class _UnifiedLabPageState extends ConsumerState<UnifiedLabPage> {
               children: [
                 for (final group in byCategory[category]!)
                   ListTile(
-                    title: Text(MedicalUiText.name(context, group.title)),
+                    title: Text(V6Display.medical(context, group.title)),
                     subtitle: Text(
                       MedicalUiText.latest(
                         context,
@@ -446,7 +447,7 @@ class _UnifiedDetailPageState extends ConsumerState<_UnifiedDetailPage> {
     final sorted = [...group.entries]..sort((a, b) => b.date.compareTo(a.date));
 
     return Scaffold(
-      appBar: AppBar(title: Text(MedicalUiText.name(context, group.title))),
+      appBar: AppBar(title: Text(V6Display.medical(context, group.title))),
       body: ListView(
         children: [
           Padding(
@@ -464,7 +465,7 @@ class _UnifiedDetailPageState extends ConsumerState<_UnifiedDetailPage> {
                   DropdownMenuItem(
                     value: category,
                     child: Text(
-                      MedicalUiText.name(context, category),
+                      V6Display.medical(context, category),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -500,7 +501,7 @@ class _UnifiedDetailPageState extends ConsumerState<_UnifiedDetailPage> {
                   DropdownMenuItem(
                     value: item.key,
                     child: Text(
-                      MedicalUiText.name(context, item.title),
+                      V6Display.medical(context, item.title),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -515,7 +516,7 @@ class _UnifiedDetailPageState extends ConsumerState<_UnifiedDetailPage> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             child: Text(
-              '${MedicalUiText.name(context, group.category)} · ${MedicalUiText.countRecords(context, sorted.length)}',
+              '${V6Display.medical(context, group.category)} · ${MedicalUiText.countRecords(context, sorted.length)}',
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ),

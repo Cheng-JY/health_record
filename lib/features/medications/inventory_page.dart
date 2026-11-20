@@ -1,3 +1,4 @@
+import '../../core/localization/v6_display.dart'; // HEALTHRECORD_L10N_V6
 import '../../core/localization/ui_i18n.dart'; // HEALTHRECORD_UI_I18N_V2
 
 import 'package:drift/drift.dart' show QueryRow, Variable;
@@ -95,23 +96,27 @@ class MedicationInventoryPage extends ConsumerWidget {
                     return Card(
                       child: ListTile(
                         leading: const Icon(Icons.medication_outlined),
-                        title: Text(medication.name),
+                        title: Text(
+                          V6Display.medication(context, medication.name),
+                        ),
                         subtitle: Text(
-                          list.isEmpty
-                              ? '尚未登记库存'
-                              : unconfigured > 0
-                              ? '已配置批次约 $days 天；另有 $unconfigured 批待设置消耗'
-                              : '已登记 ${list.length} 批 · 按已确认的消耗规则估算',
+                          V6Display.inventorySummary(
+                            context,
+                            days,
+                            unconfigured,
+                            list.length,
+                          ),
                         ),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              list.isEmpty
-                                  ? '—'
-                                  : unconfigured > 0
-                                  ? '≥$days 天'
-                                  : '$days 天',
+                              V6Display.inventoryDays(
+                                context,
+                                days,
+                                unconfigured,
+                                list.isEmpty,
+                              ),
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
                             const Icon(Icons.chevron_right),
@@ -144,7 +149,11 @@ class _InventoryDetails extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final batches = ref.watch(_inventoryBatchesProvider);
     return Scaffold(
-      appBar: AppBar(title: Text('${medication.name} · 库存详情')),
+      appBar: AppBar(
+        title: Text(
+          '${V6Display.medication(context, medication.name)} · ${V6Display.ui(context, '库存详情')}',
+        ),
+      ),
       body: batches.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),
@@ -171,7 +180,19 @@ class _InventoryDetails extends ConsumerWidget {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          '批号：${b.batchNo.isEmpty ? '未填写' : b.batchNo} · 每盒 ${b.packSize} ${b.displayUnit}',
+                          V6Display.batchPack(
+                            context,
+                            b.batchNo.isEmpty
+                                ? V6Display.t(
+                                    context,
+                                    '未填写',
+                                    'Not specified',
+                                    'Nicht angegeben',
+                                  )
+                                : b.batchNo,
+                            b.packSize,
+                            b.displayUnit,
+                          ),
                         ),
                         Text(
                           '允许分割：${b.splitStatus == 'unknown'
@@ -181,14 +202,23 @@ class _InventoryDetails extends ConsumerWidget {
                               : '最小 1/${b.parts} ${b.displayUnit}'}',
                         ),
                         Text(
-                          '剩余：${_number(b.tablets)} ${b.displayUnit} · 预计 ${b.days == null ? '未配置消耗' : '${b.days} 天'}',
+                          V6Display.batchRemaining(
+                            context,
+                            _number(b.tablets),
+                            b.displayUnit,
+                            b.days,
+                          ),
                         ),
                         if (b.daily != null)
                           Text(
-                            '每日实际消耗：${_number(b.daily! / b.parts)} ${b.displayUnit}',
+                            V6Display.batchDaily(
+                              context,
+                              _number(b.daily! / b.parts),
+                              b.displayUnit,
+                            ),
                           ),
                         if (b.expiry != null && b.expiry!.isNotEmpty)
-                          Text('有效期：${b.expiry}'),
+                          Text(V6Display.batchExpiry(context, b.expiry!)),
                         ExpansionTile(
                           title: const LText('库存变动记录'),
                           children: [

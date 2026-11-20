@@ -1,3 +1,4 @@
+import '../../core/localization/v6_display.dart'; // HEALTHRECORD_L10N_V6
 import '../../core/localization/display_i18n_v5.dart'; // HEALTHRECORD_DISPLAY_I18N_V5
 import '../../core/localization/ui_i18n.dart'; // HEALTHRECORD_UI_I18N_V2
 
@@ -408,7 +409,10 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
                 for (final c in categoryOptions)
                   DropdownMenuItem(
                     value: c,
-                    child: Text(c, overflow: TextOverflow.ellipsis),
+                    child: Text(
+                      V6Display.medical(context, c),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
               ],
               onChanged: (v) => setState(() {
@@ -432,7 +436,7 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
                   DropdownMenuItem(
                     value: k,
                     child: Text(
-                      series[k]!.label,
+                      V6Display.medicalWithCode(context, series[k]!.label),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),

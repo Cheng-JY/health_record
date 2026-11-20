@@ -1,3 +1,4 @@
+import '../../core/localization/v6_display.dart'; // HEALTHRECORD_L10N_V6
 import '../../core/localization/ui_i18n.dart'; // HEALTHRECORD_UI_I18N_V2
 
 import 'package:flutter/material.dart';
@@ -138,13 +139,13 @@ class _HealthDashboardPageState extends ConsumerState<HealthDashboardPage> {
                       children: [
                         Expanded(
                           child: Text(
-                            row.medication.name,
+                            V6Display.medication(context, row.medication.name),
                             style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
                         ),
                         Flexible(
                           child: Text(
-                            '${row.plan.dose} · ${row.plan.frequency}',
+                            '${row.plan.dose} · ${V6Display.frequency(context, row.plan.frequency)}',
                             textAlign: TextAlign.end,
                           ),
                         ),
@@ -161,15 +162,16 @@ class _HealthDashboardPageState extends ConsumerState<HealthDashboardPage> {
             leading: const Icon(Icons.local_hospital_outlined),
             title: Text(
               latestVisit == null
-                  ? '暂无就诊记录'
-                  : (hospitalNames[latestVisit.hospitalId] ?? '就诊记录'),
+                  ? V6Display.ui(context, '暂无就诊记录')
+                  : (hospitalNames[latestVisit.hospitalId] ??
+                        V6Display.ui(context, '就诊记录')),
             ),
             subtitle: Text(
               latestVisit == null
-                  ? '点击添加或查看就诊记录'
+                  ? V6Display.ui(context, '点击添加或查看就诊记录')
                   : '${DateFormat('yyyy-MM-dd').format(latestVisit.startDate)}'
                         '${latestVisit.department?.isNotEmpty == true ? ' · ${latestVisit.department}' : ''}'
-                        '${latestVisit.reason?.isNotEmpty == true ? '\n${latestVisit.reason}' : ''}',
+                        '${latestVisit.reason?.isNotEmpty == true ? '\n${V6Display.reason(context, latestVisit.reason!)}' : ''}',
             ),
             isThreeLine: latestVisit?.reason?.isNotEmpty == true,
             trailing: const Icon(Icons.chevron_right),
@@ -214,6 +216,9 @@ class _HealthDashboardPageState extends ConsumerState<HealthDashboardPage> {
 
   Widget _sectionTitle(BuildContext context, String title) => Padding(
     padding: const EdgeInsets.only(bottom: 8),
-    child: Text(title, style: Theme.of(context).textTheme.titleMedium),
+    child: Text(
+      V6Display.ui(context, title),
+      style: Theme.of(context).textTheme.titleMedium,
+    ),
   );
 }

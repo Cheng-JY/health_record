@@ -1,3 +1,4 @@
+import '../../core/localization/v6_display.dart'; // HEALTHRECORD_L10N_V6
 import '../../core/localization/ui_i18n.dart'; // HEALTHRECORD_UI_I18N_V2
 
 import 'dart:convert';
@@ -166,7 +167,21 @@ class _SymptomsPageState extends ConsumerState<SymptomsPage> {
             context: context,
             builder: (dialogContext) => StatefulBuilder(
               builder: (dialogContext, setDialogState) => AlertDialog(
-                title: Text(original == null ? '记录新症状' : '编辑症状'),
+                title: Text(
+                  original == null
+                      ? V6Display.t(
+                          context,
+                          '记录新症状',
+                          'Record Symptom',
+                          'Symptom erfassen',
+                        )
+                      : V6Display.t(
+                          context,
+                          '编辑症状',
+                          'Edit Symptom',
+                          'Symptom bearbeiten',
+                        ),
+                ),
                 content: SizedBox(
                   width: 490,
                   child: SingleChildScrollView(
@@ -178,14 +193,31 @@ class _SymptomsPageState extends ConsumerState<SymptomsPage> {
                           controller: symptomController,
                           autofocus: true,
                           maxLength: 100,
-                          decoration: const InputDecoration(
-                            labelText: '症状名称 *',
-                            hintText: '例如：关节疼痛、疲劳、皮疹',
+                          decoration: InputDecoration(
+                            labelText: V6Display.t(
+                              context,
+                              '症状名称 *',
+                              'Symptom *',
+                              'Symptom *',
+                            ),
+                            hintText: V6Display.t(
+                              context,
+                              '例如：关节疼痛、疲劳、皮疹',
+                              'e.g. joint pain, fatigue, rash',
+                              'z. B. Gelenkschmerzen, Müdigkeit, Hautausschlag',
+                            ),
                             border: OutlineInputBorder(),
                           ),
                         ),
                         const SizedBox(height: 12),
-                        Text('严重程度：$severity / 10'),
+                        Text(
+                          V6Display.t(
+                            context,
+                            '严重程度：$severity / 10',
+                            'Severity: $severity / 10',
+                            'Schweregrad: $severity / 10',
+                          ),
+                        ),
                         Slider(
                           value: severity.toDouble(),
                           min: 1,
@@ -232,9 +264,19 @@ class _SymptomsPageState extends ConsumerState<SymptomsPage> {
                           controller: notesController,
                           maxLines: 3,
                           maxLength: 1000,
-                          decoration: const InputDecoration(
-                            labelText: '备注（可选）',
-                            hintText: '持续多久、出现位置、诱因、伴随症状等',
+                          decoration: InputDecoration(
+                            labelText: V6Display.t(
+                              context,
+                              '备注（可选）',
+                              'Notes (optional)',
+                              'Notizen (optional)',
+                            ),
+                            hintText: V6Display.t(
+                              context,
+                              '持续多久、出现位置、诱因、伴随症状等',
+                              'Duration, location, triggers and accompanying symptoms',
+                              'Dauer, Körperstelle, Auslöser und Begleitsymptome',
+                            ),
                             border: OutlineInputBorder(),
                           ),
                         ),
@@ -243,7 +285,12 @@ class _SymptomsPageState extends ConsumerState<SymptomsPage> {
                           children: [
                             Expanded(
                               child: Text(
-                                '症状照片（${photos.length}/$maxPhotos）',
+                                V6Display.t(
+                                  context,
+                                  '症状照片（${photos.length}/$maxPhotos）',
+                                  'Symptom photos (${photos.length}/$maxPhotos)',
+                                  'Symptomfotos (${photos.length}/$maxPhotos)',
+                                ),
                                 style: Theme.of(dialogContext)
                                     .textTheme
                                     .titleSmall,
