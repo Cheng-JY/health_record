@@ -1,3 +1,7 @@
+import '../../core/localization/display_i18n_v5.dart'; // HEALTHRECORD_DISPLAY_I18N_V5
+import '../../core/localization/medication_detail_i18n.dart'; // HEALTHRECORD_MED_DETAIL_I18N_V4
+import '../../core/localization/ui_i18n.dart'; // HEALTHRECORD_UI_I18N_V2
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -94,11 +98,11 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage> {
   Widget build(BuildContext context) {
     final meds = ref.watch(medicationsProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('用药管理')),
+      appBar: AppBar(title: const LText('用药管理')),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openMedicationEditor(context, ref),
         icon: const Icon(Icons.add),
-        label: const Text('添加药物'),
+        label: const LText('添加药物'),
       ),
       body: meds.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -117,8 +121,8 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage> {
               Card(
                 child: ListTile(
                   leading: const Icon(Icons.inventory_2_outlined),
-                  title: const Text('药品库存管理'),
-                  subtitle: const Text('查看剩余天数、管理包装与购入批次'),
+                  title: const LText('药品库存管理'),
+                  subtitle: const LText('查看剩余天数、管理包装与购入批次'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute<void>(
@@ -129,37 +133,55 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage> {
               ),
               const SizedBox(height: 12),
               TextField(
-                decoration: const InputDecoration(
-                  prefixIcon: Icon(Icons.search),
-                  labelText: '搜索药物名称或用途',
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.search),
+                  labelText: DisplayI18nV5.tr(
+                    context,
+                    '搜索药物名称或用途',
+                    'Search medications or purposes',
+                    'Medikamente oder Verwendungszwecke suchen',
+                  ),
                   border: OutlineInputBorder(),
                 ),
                 onChanged: (value) => setState(() => search = value),
               ),
               SwitchListTile(
-                title: const Text('显示已停用药物'),
+                title: const LText('显示已停用药物'),
                 value: showStopped,
                 onChanged: (v) => setState(() => showStopped = v),
               ),
               if (filtered.isEmpty)
                 const Padding(
                   padding: EdgeInsets.all(28),
-                  child: Center(child: Text('暂无药物记录，点击右下角添加')),
+                  child: Center(child: LText('暂无药物记录，点击右下角添加')),
                 ),
               for (final medication in filtered)
                 Card(
                   child: ListTile(
                     leading: const Icon(Icons.medication_outlined),
-                    title: Text(medication.name),
+                    title: Text(DisplayI18nV5.known(context, medication.name)),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (medication.purpose != null)
-                          Text('用途：${medication.purpose}'),
+                          Text(
+                            DisplayI18nV5.visitLabel(
+                              context,
+                              '用途',
+                              'Purpose',
+                              'Verwendungszweck',
+                              DisplayI18nV5.known(context, medication.purpose),
+                            ),
+                          ),
                         Text(
                           medication.archivedAt == null
-                              ? '药物档案：未标记停用'
-                              : '已停用（保留历史）',
+                              ? DisplayI18nV5.tr(
+                                  context,
+                                  '药物档案：未标记停用',
+                                  'Medication record: Not marked as discontinued',
+                                  'Medikamentenakte: Nicht als abgesetzt markiert',
+                                )
+                              : DisplayI18nV5.known(context, '已停用（保留历史）'),
                         ),
                       ],
                     ),
@@ -198,7 +220,11 @@ class MedicationDetailsPage extends ConsumerWidget {
             .firstOrNull ??
         medication;
     return Scaffold(
-      appBar: AppBar(title: Text(currentMedication.name)),
+      appBar: AppBar(
+        title: Text(
+          MedicationDetailI18n.drugName(context, currentMedication.name),
+        ),
+      ),
       body: StreamBuilder<List<MedicationPlan>>(
         stream: repo.watchPlans(medication.id),
         builder: (context, snapshot) {
@@ -223,7 +249,7 @@ class MedicationDetailsPage extends ConsumerWidget {
               Row(
                 children: [
                   Expanded(
-                    child: Text(
+                    child: LText(
                       '药物资料',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
@@ -235,32 +261,42 @@ class MedicationDetailsPage extends ConsumerWidget {
                       currentMedication,
                     ),
                     icon: const Icon(Icons.edit_outlined, size: 18),
-                    label: const Text('编辑资料'),
+                    label: const LText('编辑资料'),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
-              Text('名称：${currentMedication.name}'),
-              Text('用途：${currentMedication.purpose ?? '未填写'}'),
+              Text(
+                '${MedicationDetailI18n.tr(context, '名称', 'Name', 'Name')}: ${MedicationDetailI18n.drugName(context, currentMedication.name)}',
+              ),
+              Text(
+                '${MedicationDetailI18n.tr(context, '用途', 'Purpose', 'Verwendungszweck')}: ${MedicationDetailI18n.dataValue(context, currentMedication.purpose ?? '未填写')}',
+              ),
               if (currentMedication.notes != null)
-                Text('备注：${currentMedication.notes}'),
+                Text(
+                  '${MedicationDetailI18n.tr(context, '备注', 'Notes', 'Notizen')}: ${currentMedication.notes}',
+                ),
               const SizedBox(height: 16),
-              Text('今天的服药方案', style: Theme.of(context).textTheme.titleLarge),
+              LText('今天的服药方案', style: Theme.of(context).textTheme.titleLarge),
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: todayPlan == null
-                      ? const Text('今天没有生效的服药方案')
+                      ? const LText('今天没有生效的服药方案')
                       : Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '每次剂量：${todayPlan.dose}',
+                              '${MedicationDetailI18n.tr(context, '每次剂量', 'Dose per administration', 'Dosis pro Einnahme')}: ${todayPlan.dose}',
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
-                            Text('每日服用次数：${todayPlan.frequency}'),
+                            Text(
+                              '${MedicationDetailI18n.tr(context, '每日服用次数', 'Frequency', 'Einnahmehäufigkeit')}: ${MedicationDetailI18n.frequency(context, todayPlan.frequency)}',
+                            ),
                             if (todayPlan.instructions != null)
-                              Text('说明：${todayPlan.instructions}'),
+                              Text(
+                                '${MedicationDetailI18n.tr(context, '说明', 'Instructions', 'Hinweise')}: ${todayPlan.instructions}',
+                              ),
                           ],
                         ),
                 ),
@@ -274,7 +310,7 @@ class MedicationDetailsPage extends ConsumerWidget {
                       onPressed: () =>
                           _openPlanEditor(context, repo, medication.id, plans),
                       icon: const Icon(Icons.edit_calendar_outlined),
-                      label: const Text('调整每次剂量 / 频率'),
+                      label: const LText('调整每次剂量 / 频率'),
                     ),
                   if (currentMedication.archivedAt == null)
                     OutlinedButton.icon(
@@ -289,18 +325,18 @@ class MedicationDetailsPage extends ConsumerWidget {
                         final confirmed = await showDialog<bool>(
                           context: context,
                           builder: (ctx) => AlertDialog(
-                            title: const Text('确认停药记录'),
+                            title: const LText('确认停药记录'),
                             content: Text(
                               '将用药方案结束日期记为 ${_date(date)}。历史剂量保留。\n请注意，这只是记录操作，不是停药建议。',
                             ),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(ctx, false),
-                                child: const Text('取消'),
+                                child: const LText('取消'),
                               ),
                               FilledButton(
                                 onPressed: () => Navigator.pop(ctx, true),
-                                child: const Text('确认'),
+                                child: const LText('确认'),
                               ),
                             ],
                           ),
@@ -314,12 +350,12 @@ class MedicationDetailsPage extends ConsumerWidget {
                         }
                       },
                       icon: const Icon(Icons.stop_circle_outlined),
-                      label: const Text('记录停药'),
+                      label: const LText('记录停药'),
                     ),
                 ],
               ),
               const SizedBox(height: 22),
-              Text(
+              LText(
                 '每次剂量与服用次数变更历史',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
@@ -329,17 +365,26 @@ class MedicationDetailsPage extends ConsumerWidget {
               ]..sort((a, b) => b.startDate.compareTo(a.startDate))))
                 Card(
                   child: ListTile(
-                    title: Text('每次 ${p.dose} · ${p.frequency}'),
+                    title: Text(
+                      '${MedicationDetailI18n.tr(context, '每次', 'Per dose', 'Pro Einnahme')} ${p.dose} · ${MedicationDetailI18n.frequency(context, p.frequency)}',
+                    ),
                     subtitle: Text(
                       [
-                        '${_date(p.startDate)} 至 ${_date(p.endDate)}',
-                        if (p.changeReason != null) '调整原因：${p.changeReason}',
-                        if (p.instructions != null) '说明：${p.instructions}',
+                        '${MedicationDetailI18n.date(context, p.startDate)} ${MedicationDetailI18n.tr(context, '至', 'to', 'bis')} ${MedicationDetailI18n.date(context, p.endDate)}',
+                        if (p.changeReason != null)
+                          '${MedicationDetailI18n.tr(context, '调整原因', 'Reason for change', 'Grund der Anpassung')}: ${MedicationDetailI18n.dataValue(context, p.changeReason!)}',
+                        if (p.instructions != null)
+                          '${MedicationDetailI18n.tr(context, '说明', 'Instructions', 'Hinweise')}: ${p.instructions}',
                       ].join('\n'),
                     ),
                     isThreeLine: true,
                     trailing: PopupMenuButton<String>(
-                      tooltip: '管理历史方案',
+                      tooltip: MedicationDetailI18n.tr(
+                        context,
+                        '管理历史方案',
+                        'Manage regimen history',
+                        'Einnahmeverlauf verwalten',
+                      ),
                       onSelected: (action) async {
                         if (action == 'edit') {
                           await _editHistoryPlan(context, repo, p);
@@ -357,7 +402,7 @@ class MedicationDetailsPage extends ConsumerWidget {
                           value: 'edit',
                           child: ListTile(
                             leading: Icon(Icons.edit_outlined),
-                            title: Text('编辑历史'),
+                            title: LText('编辑历史'),
                             contentPadding: EdgeInsets.zero,
                           ),
                         ),
@@ -365,7 +410,7 @@ class MedicationDetailsPage extends ConsumerWidget {
                           value: 'delete',
                           child: ListTile(
                             leading: Icon(Icons.delete_outline),
-                            title: Text('删除历史'),
+                            title: LText('删除历史'),
                             contentPadding: EdgeInsets.zero,
                           ),
                         ),
@@ -406,7 +451,7 @@ Future<void> _editHistoryPlan(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text('编辑用药历史'),
+          title: const LText('编辑用药历史'),
           content: SizedBox(
             width: 480,
             child: SingleChildScrollView(
@@ -414,7 +459,9 @@ Future<void> _editHistoryPlan(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('可调整这一阶段的起止日期。结束日期留空时会自动衔接下一阶段；已有前一段持续中方案也会自动截止。'),
+                  const LText(
+                    '可调整这一阶段的起止日期。结束日期留空时会自动衔接下一阶段；已有前一段持续中方案也会自动截止。',
+                  ),
                   if (old.amount.isEmpty)
                     Text('原始剂量“${plan.dose}”无法自动拆分，请根据原记录重新填写。'),
                   const SizedBox(height: 12),
@@ -535,7 +582,7 @@ Future<void> _editHistoryPlan(
           actions: [
             TextButton(
               onPressed: working ? null : () => Navigator.of(ctx).pop(),
-              child: const Text('取消'),
+              child: const LText('取消'),
             ),
             FilledButton(
               onPressed: working
@@ -563,7 +610,7 @@ Future<void> _editHistoryPlan(
                         }
                       }
                     },
-              child: const Text('保存修改'),
+              child: const LText('保存修改'),
             ),
           ],
         ),
@@ -585,7 +632,7 @@ Future<void> _deleteHistoryPlan(
   final confirmed = await showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: const Text('删除这条用药历史？'),
+      title: const LText('删除这条用药历史？'),
       content: Text(
         '将删除 ${_date(plan.startDate)} 起的方案：每次 ${plan.dose}，${plan.frequency}。\n\n'
         '删除后不会自动修改其他方案的日期或剂量，可能使部分日期没有服药方案。此操作无法在 App 中撤销。'
@@ -594,11 +641,11 @@ Future<void> _deleteHistoryPlan(
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(ctx, false),
-          child: const Text('取消'),
+          child: const LText('取消'),
         ),
         FilledButton(
           onPressed: planCount <= 1 ? null : () => Navigator.pop(ctx, true),
-          child: const Text('确认删除'),
+          child: const LText('确认删除'),
         ),
       ],
     ),
@@ -609,7 +656,7 @@ Future<void> _deleteHistoryPlan(
     if (context.mounted) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('历史记录已删除；请检查剩余方案的日期是否连续')));
+      ).showSnackBar(const SnackBar(content: LText('历史记录已删除；请检查剩余方案的日期是否连续')));
     }
   } catch (e) {
     if (context.mounted) _error(context, e);
@@ -632,7 +679,7 @@ Future<void> _openMedicationEditor(BuildContext context, WidgetRef ref) async {
       builder: (dialogContext) => StatefulBuilder(
         builder: (ctx, setDialogState) {
           return AlertDialog(
-            title: const Text('添加药物和初始服药方案'),
+            title: const LText('添加药物和初始服药方案'),
             content: SizedBox(
               width: 480,
               child: SingleChildScrollView(
@@ -740,7 +787,7 @@ Future<void> _openMedicationEditor(BuildContext context, WidgetRef ref) async {
             actions: [
               TextButton(
                 onPressed: working ? null : () => Navigator.pop(ctx),
-                child: const Text('取消'),
+                child: const LText('取消'),
               ),
               FilledButton(
                 onPressed: working
@@ -766,7 +813,7 @@ Future<void> _openMedicationEditor(BuildContext context, WidgetRef ref) async {
                           }
                         }
                       },
-                child: const Text('保存'),
+                child: const LText('保存'),
               ),
             ],
           );
@@ -806,14 +853,14 @@ Future<void> _openPlanEditor(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text('新增历史或未来服药方案'),
+          title: const LText('新增历史或未来服药方案'),
           content: SizedBox(
             width: 480,
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
+                  const LText(
                     '可选择过去或未来的任意日期；前一段持续中方案会自动截止到新方案开始前一天。其他日期重叠会阻止保存。',
                   ),
                   if (previous != null &&
@@ -933,11 +980,11 @@ Future<void> _openPlanEditor(
                       onPressed: working
                           ? null
                           : () => setDialogState(() => end = null),
-                      child: const Text('清除结束日期（持续中）'),
+                      child: const LText('清除结束日期（持续中）'),
                     ),
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 8),
-                    child: Text(
+                    child: LText(
                       '未填写结束日期时，如果已有下一阶段，将自动截止到下一阶段开始前一天。'
                       '新增较晚方案时，前一段未填写结束日期的方案也会自动截止。'
                       '其他日期重叠会阻止保存。',
@@ -950,7 +997,7 @@ Future<void> _openPlanEditor(
           actions: [
             TextButton(
               onPressed: working ? null : () => Navigator.pop(ctx),
-              child: const Text('取消'),
+              child: const LText('取消'),
             ),
             FilledButton(
               onPressed: working
@@ -977,7 +1024,7 @@ Future<void> _openPlanEditor(
                         }
                       }
                     },
-              child: const Text('保存新方案'),
+              child: const LText('保存新方案'),
             ),
           ],
         ),
@@ -1004,7 +1051,7 @@ Future<void> _openMedicationDetailsEditor(
         await _showEditorDialog<({String name, String purpose, String notes})>(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: const Text('编辑药物资料'),
+            title: const LText('编辑药物资料'),
             content: SizedBox(
               width: 460,
               child: SingleChildScrollView(
@@ -1031,7 +1078,7 @@ Future<void> _openMedicationDetailsEditor(
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('取消'),
+                child: const LText('取消'),
               ),
               FilledButton(
                 onPressed: () {
@@ -1045,7 +1092,7 @@ Future<void> _openMedicationDetailsEditor(
                     notes: notes.text.trim(),
                   ));
                 },
-                child: const Text('保存'),
+                child: const LText('保存'),
               ),
             ],
           ),

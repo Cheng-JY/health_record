@@ -1,3 +1,5 @@
+import '../../core/localization/ui_i18n.dart'; // HEALTHRECORD_UI_I18N_V2
+
 import 'dart:html' as html;
 
 import 'package:flutter/material.dart';
@@ -69,11 +71,11 @@ class _HealthSyncPageState extends ConsumerState<HealthSyncPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Mac ↔ iPhone 同步')),
+    appBar: AppBar(title: const LText('Mac ↔ iPhone 同步')),
     body: ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        const Text('实验性自动同步（页面打开期间每45秒检查）。只有单端有变化时自动传输；两端都改动则暂停，绝不悄悄覆盖。'),
+        const LText('实验性自动同步（页面打开期间每45秒检查）。只有单端有变化时自动传输；两端都改动则暂停，绝不悄悄覆盖。'),
         const SizedBox(height: 16),
         TextField(
           controller: url,
@@ -105,15 +107,15 @@ class _HealthSyncPageState extends ConsumerState<HealthSyncPage> {
         const SizedBox(height: 16),
         SelectableText('状态：$status'),
         const SizedBox(height: 20),
-        const Text(
+        const LText(
           '重要：请先分别导出 Mac 和 iPhone 的 JSON 备份。首次配对时，如果两端已有不同医疗记录，系统不会自动合并。',
         ),
         const SizedBox(height: 8),
-        const Text(
+        const LText(
           '同步节点需要 Mac 持续开机并运行。仅通过 Tailscale Serve 私有 HTTPS 地址访问，不要使用公网 Funnel。',
         ),
         const SizedBox(height: 8),
-        const Text(
+        const LText(
           '此版本是完整快照同步，不是逐条合并；跨设备同时编辑会暂停并等待人工处理。备份在 Mac 磁盘上为明文，请启用 FileVault。',
         ),
       ],

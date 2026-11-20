@@ -1,3 +1,5 @@
+import '../../core/localization/ui_i18n.dart'; // HEALTHRECORD_UI_I18N_V2
+
 import 'package:drift/drift.dart' show QueryRow, Variable;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -51,14 +53,14 @@ class MedicationInventoryPage extends ConsumerWidget {
     final batches = ref.watch(_inventoryBatchesProvider);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('药品库存'),
+        title: const LText('药品库存'),
         actions: [
           TextButton.icon(
             onPressed: meds.hasValue && meds.requireValue.isNotEmpty
                 ? () => _addStock(context, ref, meds.requireValue)
                 : null,
             icon: const Icon(Icons.add),
-            label: const Text('新增库存'),
+            label: const LText('新增库存'),
           ),
         ],
       ),
@@ -71,9 +73,9 @@ class MedicationInventoryPage extends ConsumerWidget {
           data: (all) => ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              const Text('库存天数根据每批确认的实际每日消耗片数估算；不会自动按 mg 换算，也不会自动扣减服用量。'),
+              const LText('库存天数根据每批确认的实际每日消耗片数估算；不会自动按 mg 换算，也不会自动扣减服用量。'),
               const SizedBox(height: 12),
-              if (items.isEmpty) const Text('请先到用药管理添加药物，再登记库存。'),
+              if (items.isEmpty) const LText('请先到用药管理添加药物，再登记库存。'),
               for (final medication in items) ...[
                 Builder(
                   builder: (context) {
@@ -153,9 +155,9 @@ class _InventoryDetails extends ConsumerWidget {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              const Text('不同规格分别记账。预计天数只统计明确设置了每日实际消耗量的批次。'),
+              const LText('不同规格分别记账。预计天数只统计明确设置了每日实际消耗量的批次。'),
               const SizedBox(height: 12),
-              if (list.isEmpty) const Text('没有库存批次，请在库存首页点击「新增库存」。'),
+              if (list.isEmpty) const LText('没有库存批次，请在库存首页点击「新增库存」。'),
               for (final b in list)
                 Card(
                   child: Padding(
@@ -188,7 +190,7 @@ class _InventoryDetails extends ConsumerWidget {
                         if (b.expiry != null && b.expiry!.isNotEmpty)
                           Text('有效期：${b.expiry}'),
                         ExpansionTile(
-                          title: const Text('库存变动记录'),
+                          title: const LText('库存变动记录'),
                           children: [
                             FutureBuilder<List<QueryRow>>(
                               future: ref
@@ -228,12 +230,12 @@ class _InventoryDetails extends ConsumerWidget {
                                 onPressed: () =>
                                     _editInventoryBatch(context, ref, b),
                                 icon: const Icon(Icons.edit_outlined),
-                                label: const Text('编辑'),
+                                label: const LText('编辑'),
                               ),
                               TextButton.icon(
                                 onPressed: () => _adjustStock(context, ref, b),
                                 icon: const Icon(Icons.tune),
-                                label: const Text('使用 / 盘点'),
+                                label: const LText('使用 / 盘点'),
                               ),
                             ],
                           ),
@@ -275,7 +277,7 @@ Future<void> _addStock(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (ctx, update) => AlertDialog(
-          title: const Text('新增库存'),
+          title: const LText('新增库存'),
           content: SizedBox(
             width: 520,
             child: SingleChildScrollView(
@@ -306,8 +308,8 @@ Future<void> _addStock(
                     initialValue: form,
                     decoration: const InputDecoration(labelText: '剂型'),
                     items: const [
-                      DropdownMenuItem(value: '片剂', child: Text('片剂')),
-                      DropdownMenuItem(value: '胶囊', child: Text('胶囊')),
+                      DropdownMenuItem(value: '片剂', child: LText('片剂')),
+                      DropdownMenuItem(value: '胶囊', child: LText('胶囊')),
                     ],
                     onChanged: working
                         ? null
@@ -367,11 +369,11 @@ Future<void> _addStock(
                     ),
                   ),
                   const SizedBox(height: 10),
-                  Text('药剂能否分割？*', style: Theme.of(ctx).textTheme.titleSmall),
-                  if (form == '胶囊') const Text('胶囊默认不可拆分。'),
+                  LText('药剂能否分割？*', style: Theme.of(ctx).textTheme.titleSmall),
+                  if (form == '胶囊') const LText('胶囊默认不可拆分。'),
                   if (form != '胶囊') ...[
                     RadioListTile<String>(
-                      title: const Text('不可分割'),
+                      title: const LText('不可分割'),
                       value: 'no',
                       groupValue: splitting,
                       onChanged: working
@@ -379,7 +381,7 @@ Future<void> _addStock(
                           : (v) => update(() => splitting = v!),
                     ),
                     RadioListTile<String>(
-                      title: const Text('可以分割'),
+                      title: const LText('可以分割'),
                       value: 'yes',
                       groupValue: splitting,
                       onChanged: working
@@ -387,7 +389,7 @@ Future<void> _addStock(
                           : (v) => update(() => splitting = v!),
                     ),
                     RadioListTile<String>(
-                      title: const Text('不确定'),
+                      title: const LText('不确定'),
                       value: 'unknown',
                       groupValue: splitting,
                       onChanged: working
@@ -413,7 +415,7 @@ Future<void> _addStock(
                             : (v) => update(() => parts = v ?? 2),
                       ),
                   ],
-                  const Text('允许分割需以具体药品说明书或药师确认为准。'),
+                  const LText('允许分割需以具体药品说明书或药师确认为准。'),
                   TextField(
                     controller: daily,
                     keyboardType: const TextInputType.numberWithOptions(
@@ -453,7 +455,7 @@ Future<void> _addStock(
           actions: [
             TextButton(
               onPressed: working ? null : () => Navigator.pop(ctx),
-              child: const Text('取消'),
+              child: const LText('取消'),
             ),
             FilledButton(
               onPressed: working
@@ -558,7 +560,7 @@ Future<void> _addStock(
                         });
                       }
                     },
-              child: const Text('保存库存'),
+              child: const LText('保存库存'),
             ),
           ],
         ),
@@ -609,9 +611,12 @@ Future<void> _adjustStock(
                   initialValue: mode,
                   decoration: const InputDecoration(labelText: '操作'),
                   items: const [
-                    DropdownMenuItem(value: 'consume', child: Text('已服用 / 使用')),
-                    DropdownMenuItem(value: 'discard', child: Text('丢弃 / 过期')),
-                    DropdownMenuItem(value: 'count', child: Text('盘点：设为实际剩余')),
+                    DropdownMenuItem(
+                      value: 'consume',
+                      child: LText('已服用 / 使用'),
+                    ),
+                    DropdownMenuItem(value: 'discard', child: LText('丢弃 / 过期')),
+                    DropdownMenuItem(value: 'count', child: LText('盘点：设为实际剩余')),
                   ],
                   onChanged: saving
                       ? null
@@ -644,7 +649,7 @@ Future<void> _adjustStock(
           actions: [
             TextButton(
               onPressed: saving ? null : () => Navigator.pop(ctx),
-              child: const Text('取消'),
+              child: const LText('取消'),
             ),
             FilledButton(
               onPressed: saving
@@ -702,7 +707,7 @@ Future<void> _adjustStock(
                         });
                       }
                     },
-              child: const Text('确认'),
+              child: const LText('确认'),
             ),
           ],
         ),
@@ -744,7 +749,7 @@ Future<void> _editInventoryBatch(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (ctx, update) => AlertDialog(
-          title: const Text('编辑库存批次'),
+          title: const LText('编辑库存批次'),
           content: SizedBox(
             width: 520,
             child: SingleChildScrollView(
@@ -754,7 +759,7 @@ Future<void> _editInventoryBatch(
                 children: [
                   Text('当前剩余：${_number(batch.tablets)} ${batch.displayUnit}'),
                   const SizedBox(height: 6),
-                  const Text('剩余数量请通过「使用 / 盘点」修改；购入数量和原始流水不会被改写。'),
+                  const LText('剩余数量请通过「使用 / 盘点」修改；购入数量和原始流水不会被改写。'),
                   TextField(
                     controller: brand,
                     decoration: const InputDecoration(labelText: '品牌 / 厂家'),
@@ -763,8 +768,8 @@ Future<void> _editInventoryBatch(
                     initialValue: form,
                     decoration: const InputDecoration(labelText: '剂型'),
                     items: const [
-                      DropdownMenuItem(value: '片剂', child: Text('片剂')),
-                      DropdownMenuItem(value: '胶囊', child: Text('胶囊')),
+                      DropdownMenuItem(value: '片剂', child: LText('片剂')),
+                      DropdownMenuItem(value: '胶囊', child: LText('胶囊')),
                     ],
                     onChanged: saving
                         ? null
@@ -811,11 +816,11 @@ Future<void> _editInventoryBatch(
                     decoration: const InputDecoration(labelText: '每盒片数 *'),
                   ),
                   const SizedBox(height: 10),
-                  Text('药片是否可分割？', style: Theme.of(ctx).textTheme.titleSmall),
-                  if (form == '胶囊') const Text('胶囊不提供分片选项。'),
+                  LText('药片是否可分割？', style: Theme.of(ctx).textTheme.titleSmall),
+                  if (form == '胶囊') const LText('胶囊不提供分片选项。'),
                   if (form != '胶囊') ...[
                     RadioListTile<String>(
-                      title: const Text('不可分割'),
+                      title: const LText('不可分割'),
                       value: 'no',
                       groupValue: splitting,
                       onChanged: saving
@@ -823,7 +828,7 @@ Future<void> _editInventoryBatch(
                           : (v) => update(() => splitting = v!),
                     ),
                     RadioListTile<String>(
-                      title: const Text('可以分割'),
+                      title: const LText('可以分割'),
                       value: 'yes',
                       groupValue: splitting,
                       onChanged: saving
@@ -831,7 +836,7 @@ Future<void> _editInventoryBatch(
                           : (v) => update(() => splitting = v!),
                     ),
                     RadioListTile<String>(
-                      title: const Text('不确定'),
+                      title: const LText('不确定'),
                       value: 'unknown',
                       groupValue: splitting,
                       onChanged: saving
@@ -877,7 +882,7 @@ Future<void> _editInventoryBatch(
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text('允许分片及最小分片份数必须经药品说明书或药师确认。'),
+                  const LText('允许分片及最小分片份数必须经药品说明书或药师确认。'),
                   if (error != null)
                     Text(
                       error!,
@@ -890,7 +895,7 @@ Future<void> _editInventoryBatch(
           actions: [
             TextButton(
               onPressed: saving ? null : () => Navigator.pop(ctx),
-              child: const Text('取消'),
+              child: const LText('取消'),
             ),
             FilledButton(
               onPressed: saving
@@ -1023,7 +1028,7 @@ Future<void> _editInventoryBatch(
                           });
                       }
                     },
-              child: const Text('保存修改'),
+              child: const LText('保存修改'),
             ),
           ],
         ),

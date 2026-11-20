@@ -4,6 +4,9 @@ import 'dart:html' as html;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 
+// HEALTHRECORD_L10N_STARTER_V1
+import 'l10n/app_localizations.dart';
+import 'core/localization/app_locale.dart';
 import 'core/database/app_database.dart';
 import 'features/labs/lab_repository.dart';
 import 'features/labs/lab_pages.dart';
@@ -46,13 +49,19 @@ final selectedMainTab = ValueNotifier<int>(0);
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await plotSettings.load();
+  await appLocale.load();
   runApp(const ProviderScope(child: HealthRecordApp()));
 }
 
 class HealthRecordApp extends StatelessWidget {
   const HealthRecordApp({super.key});
   @override
-  Widget build(BuildContext context) => MaterialApp(
+  Widget build(BuildContext context) => ValueListenableBuilder<String>(
+    valueListenable: appLocale,
+    builder: (context, language, _) => MaterialApp(
+      locale: appLocale.locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
     title: 'HealthRecord',
     debugShowCheckedModeBanner: false,
     theme: ThemeData(
@@ -69,6 +78,7 @@ class HealthRecordApp extends StatelessWidget {
           builder: (_) => const HomeScreen(),
         ),
       ),
+    ),
     ),
   );
 }
@@ -119,17 +129,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final init = ref.watch(initProvider);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('HealthRecord'),
+        title: Text(AppLocalizations.of(context).appTitle),
         actions: [
           IconButton(
-            tooltip: 'Mac 与 iPhone 同步',
+            tooltip: AppLocalizations.of(context).sync,
             icon: const Icon(Icons.sync_outlined),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute<void>(builder: (_) => const HealthSyncPage()),
             ),
           ),
           IconButton(
-            tooltip: '本地备份与恢复',
+            tooltip: AppLocalizations.of(context).backup,
             icon: const Icon(Icons.backup_outlined),
             onPressed: () => Navigator.of(
               context,
@@ -172,22 +182,22 @@ class _MainNavigationShell extends StatelessWidget {
             selectedMainTab.value = index;
             appNavigatorKey.currentState?.popUntil((route) => route.isFirst);
           },
-          destinations: const [
+          destinations: [
             NavigationDestination(
               icon: Icon(Icons.dashboard_outlined),
-              label: '首页',
+              label: AppLocalizations.of(context).home,
             ),
             NavigationDestination(
               icon: Icon(Icons.biotech_outlined),
-              label: '检查结果',
+              label: AppLocalizations.of(context).labResults,
             ),
             NavigationDestination(
               icon: Icon(Icons.local_hospital_outlined),
-              label: '医院',
+              label: AppLocalizations.of(context).hospitals,
             ),
             NavigationDestination(
               icon: Icon(Icons.settings_outlined),
-              label: '设置',
+              label: AppLocalizations.of(context).settings,
             ),
           ],
         ),

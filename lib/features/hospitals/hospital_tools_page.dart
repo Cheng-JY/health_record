@@ -1,3 +1,5 @@
+import '../../core/localization/ui_i18n.dart'; // HEALTHRECORD_UI_I18N_V2
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -39,16 +41,16 @@ class _HospitalToolsPageState extends ConsumerState<HospitalToolsPage> {
     final accepted = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('确认批量分配医院'),
+        title: const LText('确认批量分配医院'),
         content: Text('将 $count 条尚未分配医院的检查记录关联到所选医院？'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('取消'),
+            child: const LText('取消'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('确认'),
+            child: const LText('确认'),
           ),
         ],
       ),
@@ -89,7 +91,7 @@ class _HospitalToolsPageState extends ConsumerState<HospitalToolsPage> {
     final accepted = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('合并医院（不可直接撤销）'),
+        title: const LText('合并医院（不可直接撤销）'),
         content: Text(
           '来源：${source.hospital.name}（${source.allResultCount} 条关联）\n'
           '目标：${target.hospital.name}\n\n'
@@ -99,11 +101,11 @@ class _HospitalToolsPageState extends ConsumerState<HospitalToolsPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('取消'),
+            child: const LText('取消'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('确认合并'),
+            child: const LText('确认合并'),
           ),
         ],
       ),
@@ -157,13 +159,13 @@ class _HospitalToolsPageState extends ConsumerState<HospitalToolsPage> {
     final summaries = ref.watch(hospitalSummariesProvider);
     final unassigned = ref.watch(unassignedImportedResultsProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('医院关联工具')),
+      appBar: AppBar(title: const LText('医院关联工具')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text('批量分配历史记录', style: Theme.of(context).textTheme.titleLarge),
+          LText('批量分配历史记录', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
-          const Text('仅列出尚未指定医院、且未删除的 CSV 记录。手动录入记录暂不支持医院关联。'),
+          const LText('仅列出尚未指定医院、且未删除的 CSV 记录。手动录入记录暂不支持医院关联。'),
           const SizedBox(height: 12),
           if (busy) const LinearProgressIndicator(),
           summaries.when(
@@ -199,13 +201,13 @@ class _HospitalToolsPageState extends ConsumerState<HospitalToolsPage> {
                                         ..clear()
                                         ..addAll(active);
                                     }),
-                              child: const Text('全选'),
+                              child: const LText('全选'),
                             ),
                             OutlinedButton(
                               onPressed: busy
                                   ? null
                                   : () => setState(selected.clear),
-                              child: const Text('清空选择'),
+                              child: const LText('清空选择'),
                             ),
                             FilledButton(
                               onPressed:
@@ -214,12 +216,12 @@ class _HospitalToolsPageState extends ConsumerState<HospitalToolsPage> {
                                       selectedCount == 0
                                   ? null
                                   : assign,
-                              child: const Text('分配所选记录'),
+                              child: const LText('分配所选记录'),
                             ),
                           ],
                         ),
                         const SizedBox(height: 8),
-                        if (rows.isEmpty) const Text('没有未指定医院的有效 CSV 记录'),
+                        if (rows.isEmpty) const LText('没有未指定医院的有效 CSV 记录'),
                         SizedBox(
                           height: rows.isEmpty ? 0 : 330,
                           child: ListView.builder(
@@ -257,9 +259,9 @@ class _HospitalToolsPageState extends ConsumerState<HospitalToolsPage> {
             ),
           ),
           const Divider(height: 40),
-          Text('合并重复医院', style: Theme.of(context).textTheme.titleLarge),
+          LText('合并重复医院', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
-          const Text('目标医院 UUID 将保留；来源医院将删除。操作前请先备份数据。'),
+          const LText('目标医院 UUID 将保留；来源医院将删除。操作前请先备份数据。'),
           const SizedBox(height: 12),
           summaries.when(
             loading: () => const LinearProgressIndicator(),
@@ -289,7 +291,7 @@ class _HospitalToolsPageState extends ConsumerState<HospitalToolsPage> {
                       ? null
                       : merge,
                   icon: const Icon(Icons.merge_type),
-                  label: const Text('合并医院'),
+                  label: const LText('合并医院'),
                 ),
               ],
             ),

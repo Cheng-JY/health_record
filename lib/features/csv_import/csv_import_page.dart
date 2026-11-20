@@ -1,3 +1,5 @@
+import '../../core/localization/ui_i18n.dart'; // HEALTHRECORD_UI_I18N_V2
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,7 +42,7 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
       final result = await showDialog<String>(
         context: context,
         builder: (dialogContext) => AlertDialog(
-          title: const Text('添加医院'),
+          title: const LText('添加医院'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -62,12 +64,12 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('取消'),
+              child: const LText('取消'),
             ),
             FilledButton(
               onPressed: () =>
                   Navigator.pop(dialogContext, nameController.text.trim()),
-              child: const Text('保存'),
+              child: const LText('保存'),
             ),
           ],
         ),
@@ -302,7 +304,7 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
         context: context,
         builder: (dialogContext) {
           return AlertDialog(
-            title: const Text('清理重复检查记录'),
+            title: const LText('清理重复检查记录'),
             content: Text(
               '发现 $duplicateCount 条重复记录。\n\n'
               '判断条件：\n'
@@ -319,13 +321,13 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
                 onPressed: () {
                   Navigator.pop(dialogContext, false);
                 },
-                child: const Text('取消'),
+                child: const LText('取消'),
               ),
               FilledButton(
                 onPressed: () {
                   Navigator.pop(dialogContext, true);
                 },
-                child: const Text('确认清理'),
+                child: const LText('确认清理'),
               ),
             ],
           );
@@ -378,11 +380,11 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
         // 1. 页面标题
         // ========================================
 
-        Text('CSV 检查报告导入', style: Theme.of(context).textTheme.headlineSmall),
+        LText('CSV 检查报告导入', style: Theme.of(context).textTheme.headlineSmall),
 
         const SizedBox(height: 8),
 
-        const Text(
+        const LText(
           '选择检查医院，然后导入 CSV 文件。'
           '检查数据将保存到本地数据库，并关联所选医院。',
         ),
@@ -398,7 +400,7 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('检查医院', style: Theme.of(context).textTheme.titleMedium),
+                LText('检查医院', style: Theme.of(context).textTheme.titleMedium),
 
                 const SizedBox(height: 12),
 
@@ -422,7 +424,7 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
                         labelText: '选择已保存的医院',
                         border: OutlineInputBorder(),
                       ),
-                      hint: const Text('请选择检查医院'),
+                      hint: const LText('请选择检查医院'),
                       items: items.map((hospital) {
                         final city = hospital.city?.trim();
 
@@ -452,7 +454,7 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
                 OutlinedButton.icon(
                   onPressed: busy ? null : addHospital,
                   icon: const Icon(Icons.add),
-                  label: const Text('添加新医院'),
+                  label: const LText('添加新医院'),
                 ),
               ],
             ),
@@ -471,7 +473,7 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
             FilledButton.icon(
               onPressed: busy ? null : choose,
               icon: const Icon(Icons.folder_open),
-              label: const Text('选择 CSV'),
+              label: const LText('选择 CSV'),
             ),
 
             FilledButton.icon(
@@ -484,7 +486,7 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
                   ? null
                   : save,
               icon: const Icon(Icons.save),
-              label: const Text('确认导入'),
+              label: const LText('确认导入'),
             ),
           ],
         ),
@@ -542,11 +544,11 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('重复记录管理', style: Theme.of(context).textTheme.titleMedium),
+                LText('重复记录管理', style: Theme.of(context).textTheme.titleMedium),
 
                 const SizedBox(height: 8),
 
-                const Text(
+                const LText(
                   '根据医院、采样时间、检查指标、结果和单位'
                   '识别历史重复记录。'
                   '不同 CSV 文件中的相同记录也会被检查。',
@@ -557,7 +559,7 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
                 OutlinedButton.icon(
                   onPressed: busy ? null : cleanupDuplicates,
                   icon: const Icon(Icons.cleaning_services_outlined),
-                  label: const Text('检查并清理重复记录'),
+                  label: const LText('检查并清理重复记录'),
                 ),
               ],
             ),
@@ -593,7 +595,7 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    const LText(
                       'CSV 解析错误',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
@@ -615,7 +617,7 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
 
           const SizedBox(height: 12),
 
-          Text('导入预览（前 30 行）', style: Theme.of(context).textTheme.titleMedium),
+          LText('导入预览（前 30 行）', style: Theme.of(context).textTheme.titleMedium),
 
           const SizedBox(height: 8),
 
@@ -623,12 +625,12 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
             scrollDirection: Axis.horizontal,
             child: DataTable(
               columns: const [
-                DataColumn(label: Text('采样时间')),
-                DataColumn(label: Text('指标代码')),
-                DataColumn(label: Text('指标名称')),
-                DataColumn(label: Text('检查结果')),
-                DataColumn(label: Text('单位')),
-                DataColumn(label: Text('参考范围')),
+                DataColumn(label: LText('采样时间')),
+                DataColumn(label: LText('指标代码')),
+                DataColumn(label: LText('指标名称')),
+                DataColumn(label: LText('检查结果')),
+                DataColumn(label: LText('单位')),
+                DataColumn(label: LText('参考范围')),
               ],
               rows: [
                 for (final row in preview!.rows.take(30))
@@ -671,7 +673,7 @@ class _CsvImportPageState extends ConsumerState<CsvImportPage> {
                 if (items.isEmpty)
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 16),
-                    child: Text('目前还没有导入检查记录。'),
+                    child: LText('目前还没有导入检查记录。'),
                   ),
 
                 for (final row in items.take(100))

@@ -1,3 +1,5 @@
+import '../../core/localization/ui_i18n.dart'; // HEALTHRECORD_UI_I18N_V2
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -33,7 +35,7 @@ class DashboardPage extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        Text('健康数据概览', style: Theme.of(context).textTheme.headlineMedium),
+        LText('健康数据概览', style: Theme.of(context).textTheme.headlineMedium),
 
         const SizedBox(height: 16),
 
@@ -41,8 +43,8 @@ class DashboardPage extends ConsumerWidget {
         Card(
           child: ListTile(
             leading: const Icon(Icons.monitor_heart_outlined),
-            title: const Text('已保存检查结果'),
-            subtitle: const Text('手动录入 + CSV 导入'),
+            title: const LText('已保存检查结果'),
+            subtitle: const LText('手动录入 + CSV 导入'),
             trailing: Text(
               countError != null ? '!' : countText(totalCount),
               style: Theme.of(context).textTheme.headlineMedium,
@@ -56,8 +58,8 @@ class DashboardPage extends ConsumerWidget {
         Card(
           child: ListTile(
             leading: const Icon(Icons.upload_file),
-            title: const Text('CSV 导入记录'),
-            subtitle: const Text('未删除的 CSV 检查结果'),
+            title: const LText('CSV 导入记录'),
+            subtitle: const LText('未删除的 CSV 检查结果'),
             trailing: Text(countText(importedCount)),
           ),
         ),
@@ -66,8 +68,8 @@ class DashboardPage extends ConsumerWidget {
         Card(
           child: ListTile(
             leading: const Icon(Icons.edit_note),
-            title: const Text('手动录入记录'),
-            subtitle: const Text('未删除的手动检查结果'),
+            title: const LText('手动录入记录'),
+            subtitle: const LText('未删除的手动检查结果'),
             trailing: Text(countText(manualCount)),
           ),
         ),
@@ -76,8 +78,8 @@ class DashboardPage extends ConsumerWidget {
         Card(
           child: ListTile(
             leading: const Icon(Icons.science_outlined),
-            title: const Text('预设检查指标'),
-            subtitle: const Text('不包含 CSV 中的其他指标'),
+            title: const LText('预设检查指标'),
+            subtitle: const LText('不包含 CSV 中的其他指标'),
             trailing: Text(
               tests.when(
                 data: (items) => '${items.length}',
@@ -118,12 +120,12 @@ class DashboardPage extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          LText(
                             '用药管理',
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                           const SizedBox(height: 4),
-                          Text(
+                          LText(
                             '查看当前服药计划与剂量调整历史',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
@@ -144,7 +146,7 @@ class DashboardPage extends ConsumerWidget {
                       );
                     },
                     icon: const Icon(Icons.medication_outlined),
-                    label: const Text('进入用药管理'),
+                    label: const LText('进入用药管理'),
                   ),
                 ),
               ],
@@ -154,7 +156,7 @@ class DashboardPage extends ConsumerWidget {
 
         const SizedBox(height: 20),
 
-        const Text(
+        const LText(
           '数据保存在本地 SQLite 数据库中。'
           '请定期备份健康记录。',
         ),
@@ -226,7 +228,7 @@ class LabDetailPage extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),
         data: (items) => items.isEmpty
-            ? const Center(child: Text('尚无记录，点击右下角录入'))
+            ? const Center(child: LText('尚无记录，点击右下角录入'))
             : ListView(
                 children: [
                   for (final item in items.reversed)
@@ -246,16 +248,16 @@ class LabDetailPage extends ConsumerWidget {
                           final confirmed = await showDialog<bool>(
                             context: context,
                             builder: (ctx) => AlertDialog(
-                              title: const Text('删除记录？'),
-                              content: const Text('该操作将隐藏这条记录。'),
+                              title: const LText('删除记录？'),
+                              content: const LText('该操作将隐藏这条记录。'),
                               actions: [
                                 TextButton(
                                   onPressed: () => Navigator.pop(ctx, false),
-                                  child: const Text('取消'),
+                                  child: const LText('取消'),
                                 ),
                                 FilledButton(
                                   onPressed: () => Navigator.pop(ctx, true),
-                                  child: const Text('删除'),
+                                  child: const LText('删除'),
                                 ),
                               ],
                             ),
@@ -473,7 +475,7 @@ class _TrendsPageState extends ConsumerState<TrendsPage> {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(child: Text('$e')),
       data: (options) {
-        if (options.isEmpty) return const Center(child: Text('暂无指标'));
+        if (options.isEmpty) return const Center(child: LText('暂无指标'));
         final id = options.any((t) => t.id == selected)
             ? selected!
             : options.first.id;
@@ -511,7 +513,7 @@ class _TrendsPageState extends ConsumerState<TrendsPage> {
                 if (items.isEmpty) {
                   return const Padding(
                     padding: EdgeInsets.all(36),
-                    child: Text('还没有这个指标的记录，请先去“检查结果”录入。'),
+                    child: LText('还没有这个指标的记录，请先去“检查结果”录入。'),
                   );
                 }
                 if (items.any((e) => e.unit != test.canonicalUnit)) {

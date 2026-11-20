@@ -1,3 +1,6 @@
+import '../../core/localization/medical_ui_text.dart'; // HEALTHRECORD_DYNAMIC_I18N_V3
+import '../../core/localization/ui_i18n.dart'; // HEALTHRECORD_UI_I18N_V2
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -61,7 +64,7 @@ class _HospitalsPageState extends ConsumerState<HospitalsPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('取消'),
+              child: const LText('取消'),
             ),
             FilledButton(
               onPressed: () {
@@ -71,7 +74,7 @@ class _HospitalsPageState extends ConsumerState<HospitalsPage> {
                   city: cityController.text.trim(),
                 ));
               },
-              child: const Text('保存'),
+              child: const LText('保存'),
             ),
           ],
         ),
@@ -106,16 +109,16 @@ class _HospitalsPageState extends ConsumerState<HospitalsPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('删除医院'),
+        title: const LText('删除医院'),
         content: Text('确认删除「${summary.hospital.name}」？该医院当前没有关联的检查记录。'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('取消'),
+            child: const LText('取消'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('确认删除'),
+            child: const LText('确认删除'),
           ),
         ],
       ),
@@ -145,9 +148,9 @@ class _HospitalsPageState extends ConsumerState<HospitalsPage> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Text('医院管理', style: Theme.of(context).textTheme.headlineSmall),
+        LText('医院管理', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 8),
-        const Text('医院 UUID 固定不变。编辑医院名称不会影响已有检查记录的关联。'),
+        const LText('医院 UUID 固定不变。编辑医院名称不会影响已有检查记录的关联。'),
         const SizedBox(height: 16),
         Wrap(
           spacing: 12,
@@ -157,9 +160,14 @@ class _HospitalsPageState extends ConsumerState<HospitalsPage> {
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 420),
               child: TextField(
-                decoration: const InputDecoration(
-                  prefixIcon: Icon(Icons.search),
-                  labelText: '搜索医院或城市',
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.search),
+                  labelText: MedicalUiText.text(
+                    context,
+                    '搜索医院或城市',
+                    'Search hospitals or cities',
+                    'Krankenhäuser oder Städte suchen',
+                  ),
                   border: OutlineInputBorder(),
                 ),
                 onChanged: (value) =>
@@ -175,7 +183,7 @@ class _HospitalsPageState extends ConsumerState<HospitalsPage> {
                       ),
                     ),
               icon: const Icon(Icons.settings_suggest_outlined),
-              label: const Text('批量分配 / 合并医院'),
+              label: const LText('批量分配 / 合并医院'),
             ),
             OutlinedButton.icon(
               onPressed: busy
@@ -186,12 +194,12 @@ class _HospitalsPageState extends ConsumerState<HospitalsPage> {
                       ),
                     ),
               icon: const Icon(Icons.event_note_outlined),
-              label: const Text('就诊管理'),
+              label: const LText('就诊管理'),
             ),
             FilledButton.icon(
               onPressed: busy ? null : () => _editHospital(),
               icon: const Icon(Icons.add),
-              label: const Text('添加医院'),
+              label: const LText('添加医院'),
             ),
           ],
         ),
@@ -209,7 +217,7 @@ class _HospitalsPageState extends ConsumerState<HospitalsPage> {
             if (filtered.isEmpty) {
               return const Padding(
                 padding: EdgeInsets.all(20),
-                child: Text('没有符合条件的医院。'),
+                child: LText('没有符合条件的医院。'),
               );
             }
             return Column(
@@ -220,9 +228,12 @@ class _HospitalsPageState extends ConsumerState<HospitalsPage> {
                       leading: const Icon(Icons.local_hospital_outlined),
                       title: Text(summary.hospital.name),
                       subtitle: Text(
-                        '${summary.hospital.city ?? "未填写城市"} · '
-                        '有效检查 ${summary.activeResultCount} 条 · '
-                        '全部关联 ${summary.allResultCount} 条',
+                        MedicalUiText.hospitalCounts(
+                          context,
+                          summary.hospital.city,
+                          summary.activeResultCount,
+                          summary.allResultCount,
+                        ),
                       ),
                       onTap: busy
                           ? null
@@ -289,7 +300,7 @@ class HospitalResultsPage extends ConsumerWidget {
           }
           final rows = snapshot.data!;
           if (rows.isEmpty) {
-            return const Center(child: Text('该医院暂无有效的 CSV 检查结果'));
+            return const Center(child: LText('该医院暂无有效的 CSV 检查结果'));
           }
           return ListView.builder(
             itemCount: rows.length,

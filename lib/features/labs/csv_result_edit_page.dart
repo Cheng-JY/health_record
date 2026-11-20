@@ -1,3 +1,5 @@
+import '../../core/localization/ui_i18n.dart'; // HEALTHRECORD_UI_I18N_V2
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -50,7 +52,7 @@ class _CsvResultEditPageState extends ConsumerState<CsvResultEditPage> {
     );
     if (selectedDate == null || value.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请填写有效日期（yyyy-MM-dd HH:mm）和结果')),
+        const SnackBar(content: LText('请填写有效日期（yyyy-MM-dd HH:mm）和结果')),
       );
       return;
     }
@@ -82,7 +84,7 @@ class _CsvResultEditPageState extends ConsumerState<CsvResultEditPage> {
   Widget build(BuildContext context) {
     final r = widget.result;
     return Scaffold(
-      appBar: AppBar(title: const Text('修改 CSV 检查结果')),
+      appBar: AppBar(title: const LText('修改 CSV 检查结果')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -135,7 +137,7 @@ class _CsvResultEditPageState extends ConsumerState<CsvResultEditPage> {
             ),
           ),
           const SizedBox(height: 16),
-          const Text('首次修改会保存原始 CSV 字段快照。修改仅影响数据库，不会改动 CSV 文件。'),
+          const LText('首次修改会保存原始 CSV 字段快照。修改仅影响数据库，不会改动 CSV 文件。'),
           const SizedBox(height: 16),
           FilledButton(
             onPressed: saving ? null : save,

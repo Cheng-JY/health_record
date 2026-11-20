@@ -1,3 +1,6 @@
+import '../../core/localization/display_i18n_v5.dart'; // HEALTHRECORD_DISPLAY_I18N_V5
+import '../../core/localization/ui_i18n.dart'; // HEALTHRECORD_UI_I18N_V2
+
 import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
@@ -350,12 +353,12 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
       padding: widget.embedded ? EdgeInsets.zero : const EdgeInsets.all(16),
       children: [
         if (!widget.embedded) ...[
-          Text('检查指标趋势', style: Theme.of(context).textTheme.headlineSmall),
+          LText('检查指标趋势', style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 8),
-          const Text('合并查看手动录入和 CSV 数据。不同单位分别显示；原始结果不会被修改。'),
+          const LText('合并查看手动录入和 CSV 数据。不同单位分别显示；原始结果不会被修改。'),
           const SizedBox(height: 16),
         ] else ...[
-          Text('趋势图', style: Theme.of(context).textTheme.titleLarge),
+          LText('趋势图', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 10),
         ],
         if (!widget.embedded)
@@ -367,10 +370,10 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
               border: OutlineInputBorder(),
             ),
             items: [
-              const DropdownMenuItem(value: 'all', child: Text('所有医院 / 全部来源')),
+              const DropdownMenuItem(value: 'all', child: LText('所有医院 / 全部来源')),
               const DropdownMenuItem(
                 value: 'unassigned',
-                child: Text('未指定医院（含手动记录）'),
+                child: LText('未指定医院（含手动记录）'),
               ),
               for (final item in hospitalList)
                 DropdownMenuItem(
@@ -390,7 +393,7 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
           ),
         if (!widget.embedded) const SizedBox(height: 16),
         if (widget.embedded ? key == null : category == null) ...[
-          const Text('该指标当前没有可显示的趋势记录。'),
+          const LText('该指标当前没有可显示的趋势记录。'),
         ] else ...[
           if (!widget.embedded)
             DropdownButtonFormField<String>(
@@ -461,16 +464,21 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
           ],
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 8),
-            child: Text('界限值的绘图规则可在底部「设置」页面统一调整；原始检测值不会改变。'),
+            child: LText('界限值的绘图规则可在底部「设置」页面统一调整；原始检测值不会改变。'),
           ),
           const SizedBox(height: 14),
           Text(
-            '数值点：${numeric.length}（含 ${numeric.where((p) => p.result.censored).length} 个界限值） · 非数值结果：${other.length}',
+            DisplayI18nV5.chartCounts(
+              context,
+              numeric.length,
+              numeric.where((p) => p.result.censored).length,
+              other.length,
+            ),
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 10),
           if (numeric.isEmpty)
-            const Text('该指标在当前单位下没有可绘图的数值结果。')
+            const LText('该指标在当前单位下没有可绘图的数值结果。')
           else
             _TrendChart(
               points: numeric,
@@ -481,37 +489,48 @@ class _UnifiedTrendsPageState extends ConsumerState<UnifiedTrendsPage> {
           if (numeric.length == 1)
             const Padding(
               padding: EdgeInsets.only(top: 8),
-              child: Text('目前只有一个可绘制数据点。'),
+              child: LText('目前只有一个可绘制数据点。'),
             ),
           if (!sameReference)
             const Padding(
               padding: EdgeInsets.only(top: 8),
-              child: Text('不同记录的参考范围不一致：图表不显示统一参考线，具体范围见各条记录。'),
+              child: LText('不同记录的参考范围不一致：图表不显示统一参考线，具体范围见各条记录。'),
             ),
           if (chartReference != null)
             Padding(
               padding: const EdgeInsets.only(top: 8),
               child: Text(
-                '图中参考范围：${chartReference.original.isEmpty ? "按记录上下限" : chartReference.original} ${unit ?? ""}',
+                DisplayI18nV5.reference(
+                  context,
+                  chartReference.original.isEmpty
+                      ? DisplayI18nV5.tr(
+                          context,
+                          '按记录上下限',
+                          'From record limits',
+                          'Aus den Befundgrenzen',
+                        )
+                      : chartReference.original,
+                  unit ?? '',
+                ),
               ),
             ),
           if (!widget.embedded) const SizedBox(height: 18),
           if (!widget.embedded)
-            Text('历史记录', style: Theme.of(context).textTheme.titleLarge),
+            LText('历史记录', style: Theme.of(context).textTheme.titleLarge),
           for (final p
               in widget.embedded ? <_PlottedPoint>[] : plotted.reversed)
             ListTile(
               dense: true,
               title: Text(
-                '${p.record.rawValue} ${p.record.unit}${p.result.censored && p.result.number != null ? "  · 绘图值 ${_formatNumber(p.result.number!)}" : ""}',
+                '${p.record.rawValue} ${p.record.unit}${p.result.censored && p.result.number != null ? "  · ${DisplayI18nV5.tr(context, '绘图值', 'Plotted value', 'Diagrammwert')} ${_formatNumber(p.result.number!)}" : ""}',
               ),
               subtitle: Text(
-                '${DateFormat('yyyy-MM-dd HH:mm').format(p.record.date)} · ${p.record.source}'
-                '${p.record.reference.original.trim().isEmpty ? "" : " · 参考范围 ${p.record.reference.original}"}',
+                '${DateFormat('yyyy-MM-dd HH:mm').format(p.record.date)} · ${DisplayI18nV5.known(context, p.record.source)}'
+                '${p.record.reference.original.trim().isEmpty ? "" : " · ${DisplayI18nV5.tr(context, '参考范围', 'Reference range', 'Referenzbereich')} ${p.record.reference.original}"}',
               ),
             ),
           const SizedBox(height: 12),
-          const Text('提示：界限值的绘图替代数值不是实际检测结果；不同医院或检测方法的参考范围可能不同。'),
+          const LText('提示：界限值的绘图替代数值不是实际检测结果；不同医院或检测方法的参考范围可能不同。'),
         ],
       ],
     );
@@ -560,7 +579,9 @@ class _TrendChart extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('数值趋势${unit.isEmpty ? "" : " ($unit)"}'),
+        Text(
+          '${DisplayI18nV5.tr(context, '数值趋势', 'Value trend', 'Werteverlauf')}${unit.isEmpty ? "" : " ($unit)"}',
+        ),
         const SizedBox(height: 8),
         SizedBox(
           height: 320,
@@ -621,7 +642,7 @@ class _TrendChart extends StatelessWidget {
                           show: true,
                           alignment: Alignment.topRight,
                           labelResolver: (_) =>
-                              '下限 ${_formatNumber(reference!.low!)}',
+                              '${DisplayI18nV5.tr(context, '下限', 'Lower limit', 'Untergrenze')} ${_formatNumber(reference!.low!)}',
                         ),
                       ),
                     if (reference?.high != null)
@@ -634,7 +655,7 @@ class _TrendChart extends StatelessWidget {
                           show: true,
                           alignment: Alignment.bottomRight,
                           labelResolver: (_) =>
-                              '上限 ${_formatNumber(reference!.high!)}',
+                              '${DisplayI18nV5.tr(context, '上限', 'Upper limit', 'Obergrenze')} ${_formatNumber(reference!.high!)}',
                         ),
                       ),
                   ],
@@ -647,11 +668,11 @@ class _TrendChart extends StatelessWidget {
                           .format(point.record.date);
                       final original = '${point.record.rawValue} $unit';
                       final estimate = point.result.censored
-                          ? '\n绘图值：${_formatNumber(s.y)} $unit（代用值）'
+                          ? '\n${DisplayI18nV5.tr(context, '绘图值', 'Plotted value', 'Diagrammwert')}: ${_formatNumber(s.y)} $unit (${DisplayI18nV5.tr(context, '代用值', 'estimated substitute', 'Ersatzwert')})'
                           : '';
                       final ref = point.record.reference.original.trim();
                       return LineTooltipItem(
-                        '$time\n原始值：$original$estimate${ref.isEmpty ? "" : "\n参考范围：$ref"}',
+                        '$time\n${DisplayI18nV5.tr(context, '原始值', 'Original value', 'Originalwert')}: $original$estimate${ref.isEmpty ? "" : "\n${DisplayI18nV5.tr(context, '参考范围', 'Reference range', 'Referenzbereich')}: $ref"}',
                         TextStyle(color: theme.colorScheme.onInverseSurface),
                       );
                     }).toList(),
@@ -684,9 +705,14 @@ class _TrendChart extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    '绿色区域：该检查报告的参考范围',
+                    DisplayI18nV5.tr(
+                      context,
+                      '绿色区域：该检查报告的参考范围',
+                      'Green area: reference range for this report',
+                      'Grüner Bereich: Referenzbereich dieses Befunds',
+                    ),
                     style: TextStyle(fontSize: 12),
                   ),
                 ),
@@ -696,7 +722,7 @@ class _TrendChart extends StatelessWidget {
         if (points.any((p) => p.result.censored))
           const Padding(
             padding: EdgeInsets.only(top: 8),
-            child: Text(
+            child: LText(
               '部分点由 < / > 等界限结果换算，仅用于显示趋势，不代表实测值。',
               style: TextStyle(fontSize: 12),
             ),

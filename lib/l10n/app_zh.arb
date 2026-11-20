@@ -1,0 +1,18 @@
+{
+  "@@locale": "zh",
+  "appTitle": "HealthRecord",
+  "home": "首页",
+  "labResults": "检查结果",
+  "hospitals": "医院",
+  "settings": "设置",
+  "language": "应用语言",
+  "systemLanguage": "跟随系统",
+  "chinese": "简体中文",
+  "english": "English",
+  "german": "Deutsch",
+  "medicationManagement": "用药管理",
+  "medicationInventory": "药品库存",
+  "addStock": "新增库存",
+  "backup": "本地备份与恢复",
+  "sync": "Mac 与 iPhone 同步"
+}

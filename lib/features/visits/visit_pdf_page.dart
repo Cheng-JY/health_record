@@ -1,3 +1,5 @@
+import '../../core/localization/ui_i18n.dart'; // HEALTHRECORD_UI_I18N_V2
+
 // Flutter Web implementation: stores PDF bytes in local SQLite as base64.
 import 'dart:convert';
 import 'dart:html' as html;
@@ -148,7 +150,7 @@ class _VisitPdfPageState extends ConsumerState<VisitPdfPage> {
       return await showDialog<(String, String)>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('PDF 名称与备注'),
+          title: const LText('PDF 名称与备注'),
           content: SizedBox(
             width: 450,
             child: SingleChildScrollView(
@@ -182,14 +184,14 @@ class _VisitPdfPageState extends ConsumerState<VisitPdfPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('取消'),
+              child: const LText('取消'),
             ),
             FilledButton(
               onPressed: () {
                 if (title.text.trim().isEmpty) return;
                 Navigator.pop(ctx, (title.text.trim(), note.text.trim()));
               },
-              child: const Text('保存'),
+              child: const LText('保存'),
             ),
           ],
         ),
@@ -261,16 +263,16 @@ class _VisitPdfPageState extends ConsumerState<VisitPdfPage> {
     final yes = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('删除 PDF 附件？'),
+        title: const LText('删除 PDF 附件？'),
         content: Text('将永久删除「${item.title}」及其本地文件内容，不影响其他就诊和检查结果。'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('取消'),
+            child: const LText('取消'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('删除'),
+            child: const LText('删除'),
           ),
         ],
       ),
@@ -290,14 +292,14 @@ class _VisitPdfPageState extends ConsumerState<VisitPdfPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('就诊 PDF 附件')),
+    appBar: AppBar(title: const LText('就诊 PDF 附件')),
     body: ListView(
       padding: const EdgeInsets.all(16),
       children: [
         Row(
           children: [
             Expanded(
-              child: Text(
+              child: LText(
                 'PDF 文件与备注',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
@@ -305,12 +307,12 @@ class _VisitPdfPageState extends ConsumerState<VisitPdfPage> {
             FilledButton.icon(
               onPressed: busy ? null : _upload,
               icon: const Icon(Icons.upload_file_outlined),
-              label: const Text('上传 PDF'),
+              label: const LText('上传 PDF'),
             ),
           ],
         ),
         const SizedBox(height: 8),
-        const Text('附件保存于当前浏览器的 SQLite 数据库，并包含在完整 JSON 备份中。单个文件最多 8 MB。'),
+        const LText('附件保存于当前浏览器的 SQLite 数据库，并包含在完整 JSON 备份中。单个文件最多 8 MB。'),
         if (busy) const LinearProgressIndicator(),
         const SizedBox(height: 12),
         FutureBuilder<List<_PdfItem>>(
@@ -324,7 +326,7 @@ class _VisitPdfPageState extends ConsumerState<VisitPdfPage> {
             if (rows.isEmpty)
               return const Padding(
                 padding: EdgeInsets.all(24),
-                child: Text('本次就诊尚无 PDF 附件。'),
+                child: LText('本次就诊尚无 PDF 附件。'),
               );
             return Column(
               children: [
@@ -348,13 +350,13 @@ class _VisitPdfPageState extends ConsumerState<VisitPdfPage> {
                         itemBuilder: (_) => const [
                           PopupMenuItem(
                             value: 'download',
-                            child: Text('下载 PDF'),
+                            child: LText('下载 PDF'),
                           ),
                           PopupMenuItem(
                             value: 'edit',
-                            child: Text('编辑名称 / 备注'),
+                            child: LText('编辑名称 / 备注'),
                           ),
-                          PopupMenuItem(value: 'delete', child: Text('删除附件')),
+                          PopupMenuItem(value: 'delete', child: LText('删除附件')),
                         ],
                       ),
                     ),

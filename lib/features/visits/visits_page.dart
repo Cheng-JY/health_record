@@ -1,3 +1,6 @@
+import '../../core/localization/display_i18n_v5.dart'; // HEALTHRECORD_DISPLAY_I18N_V5
+import '../../core/localization/ui_i18n.dart'; // HEALTHRECORD_UI_I18N_V2
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -94,18 +97,18 @@ class _VisitsPageState extends ConsumerState<VisitsPage> {
     final yes = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('删除就诊记录'),
+        title: const LText('删除就诊记录'),
         content: Text(
           '确定删除 ${_formatDate(visit.startDate)} 的就诊记录吗？本次就诊的报告分组及其关联将一并移除，但原始检查结果不会删除。此操作无法撤销。',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('取消'),
+            child: const LText('取消'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('删除'),
+            child: const LText('删除'),
           ),
         ],
       ),
@@ -127,7 +130,7 @@ class _VisitsPageState extends ConsumerState<VisitsPage> {
     final visits = ref.watch(visitsProvider);
     final hospitals = ref.watch(visitHospitalsProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('医院与就诊管理')),
+      appBar: AppBar(title: const LText('医院与就诊管理')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -150,14 +153,19 @@ class _VisitsPageState extends ConsumerState<VisitsPage> {
                         initialValue: ids.contains(hospitalFilter)
                             ? hospitalFilter
                             : null,
-                        decoration: const InputDecoration(
-                          labelText: '按医院筛选',
+                        decoration: InputDecoration(
+                          labelText: DisplayI18nV5.tr(
+                            context,
+                            '按医院筛选',
+                            'Filter by hospital',
+                            'Nach Krankenhaus filtern',
+                          ),
                           border: OutlineInputBorder(),
                         ),
                         items: [
                           const DropdownMenuItem<String>(
                             value: '',
-                            child: Text('全部医院'),
+                            child: LText('全部医院'),
                           ),
                           for (final h in items)
                             DropdownMenuItem<String>(
@@ -176,8 +184,13 @@ class _VisitsPageState extends ConsumerState<VisitsPage> {
                     SizedBox(
                       width: 280,
                       child: TextField(
-                        decoration: const InputDecoration(
-                          labelText: '搜索科室、医生、诊断或备注',
+                        decoration: InputDecoration(
+                          labelText: DisplayI18nV5.tr(
+                            context,
+                            '搜索科室、医生、诊断或备注',
+                            'Search department, doctor, diagnosis or notes',
+                            'Abteilung, Arzt, Diagnose oder Notizen suchen',
+                          ),
                           prefixIcon: Icon(Icons.search),
                           border: OutlineInputBorder(),
                         ),
@@ -189,7 +202,7 @@ class _VisitsPageState extends ConsumerState<VisitsPage> {
                     FilledButton.icon(
                       onPressed: busy ? null : () => editVisit(items),
                       icon: const Icon(Icons.add),
-                      label: const Text('新增就诊'),
+                      label: const LText('新增就诊'),
                     ),
                   ],
                 );
@@ -219,16 +232,20 @@ class _VisitsPageState extends ConsumerState<VisitsPage> {
                       return q.contains(search);
                     }).toList();
                     if (filtered.isEmpty) {
-                      return const Center(child: Text('暂无符合条件的就诊记录'));
+                      return const Center(child: LText('暂无符合条件的就诊记录'));
                     }
                     return ListView.builder(
                       itemCount: filtered.length,
                       itemBuilder: (context, index) {
                         final v = filtered[index];
-                        final type = _visitTypes[v.visitType] ?? v.visitType;
+                        final type = DisplayI18nV5.visitType(
+                          context,
+                          v.visitType,
+                          _visitTypes[v.visitType] ?? v.visitType,
+                        );
                         final period = v.endDate == null
                             ? _formatDate(v.startDate)
-                            : '${_formatDate(v.startDate)} 至 ${_formatDate(v.endDate!)}';
+                            : '${_formatDate(v.startDate)} ${DisplayI18nV5.tr(context, '至', 'to', 'bis')} ${_formatDate(v.endDate!)}';
                         return Card(
                           child: ListTile(
                             leading: const Icon(Icons.event_note_outlined),
@@ -239,15 +256,45 @@ class _VisitsPageState extends ConsumerState<VisitsPage> {
                               [
                                 period,
                                 if (v.department?.isNotEmpty == true)
-                                  '科室：${v.department}',
+                                  DisplayI18nV5.visitLabel(
+                                    context,
+                                    '科室',
+                                    'Department',
+                                    'Abteilung',
+                                    v.department,
+                                  ),
                                 if (v.doctor?.isNotEmpty == true)
-                                  '医生：${v.doctor}',
+                                  DisplayI18nV5.visitLabel(
+                                    context,
+                                    '医生',
+                                    'Doctor',
+                                    'Arzt/Ärztin',
+                                    v.doctor,
+                                  ),
                                 if (v.diagnosis?.isNotEmpty == true)
-                                  '诊断：${v.diagnosis}',
+                                  DisplayI18nV5.visitLabel(
+                                    context,
+                                    '诊断',
+                                    'Diagnosis',
+                                    'Diagnose',
+                                    v.diagnosis,
+                                  ),
                                 if (v.reason?.isNotEmpty == true)
-                                  '就诊原因：${v.reason}',
+                                  DisplayI18nV5.visitLabel(
+                                    context,
+                                    '就诊原因',
+                                    'Reason for visit',
+                                    'Besuchsgrund',
+                                    v.reason,
+                                  ),
                                 if (v.notes?.isNotEmpty == true)
-                                  '备注：${v.notes}',
+                                  DisplayI18nV5.visitLabel(
+                                    context,
+                                    '备注',
+                                    'Notes',
+                                    'Notizen',
+                                    v.notes,
+                                  ),
                               ].join('\n'),
                             ),
                             isThreeLine: true,
@@ -383,7 +430,7 @@ class _VisitDialogState extends State<_VisitDialog> {
   void save() {
     if (endDate != null && endDate!.isBefore(startDate)) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('结束日期不能早于开始日期')));
+          .showSnackBar(const SnackBar(content: LText('结束日期不能早于开始日期')));
       return;
     }
     Navigator.pop(
@@ -470,7 +517,7 @@ class _VisitDialogState extends State<_VisitDialog> {
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () => setState(() => endDate = null),
-                    child: const Text('清除结束日期'),
+                    child: const LText('清除结束日期'),
                   ),
                 ),
               for (final pair in [
@@ -497,9 +544,9 @@ class _VisitDialogState extends State<_VisitDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('取消'),
+          child: const LText('取消'),
         ),
-        FilledButton(onPressed: save, child: const Text('保存')),
+        FilledButton(onPressed: save, child: const LText('保存')),
       ],
     );
   }

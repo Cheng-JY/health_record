@@ -1,3 +1,5 @@
+import '../../core/localization/ui_i18n.dart'; // HEALTHRECORD_UI_I18N_V2
+
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -251,7 +253,7 @@ class _SymptomsPageState extends ConsumerState<SymptomsPage> {
                               icon: const Icon(
                                 Icons.add_photo_alternate_outlined,
                               ),
-                              label: const Text('添加照片'),
+                              label: const LText('添加照片'),
                               onPressed: picking || photos.length >= maxPhotos
                                   ? null
                                   : () async {
@@ -366,7 +368,7 @@ class _SymptomsPageState extends ConsumerState<SymptomsPage> {
                             ],
                           ),
                         const SizedBox(height: 6),
-                        Text(
+                        LText(
                           '照片仅保存于本地数据库，最多 3 张，每张不超过 3 MB。',
                           style: Theme.of(dialogContext).textTheme.bodySmall,
                         ),
@@ -377,7 +379,7 @@ class _SymptomsPageState extends ConsumerState<SymptomsPage> {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(dialogContext),
-                    child: const Text('取消'),
+                    child: const LText('取消'),
                   ),
                   FilledButton(
                     onPressed: picking
@@ -386,7 +388,7 @@ class _SymptomsPageState extends ConsumerState<SymptomsPage> {
                             final name = symptomController.text.trim();
                             if (name.isEmpty) {
                               ScaffoldMessenger.of(dialogContext).showSnackBar(
-                                const SnackBar(content: Text('请填写症状名称')),
+                                const SnackBar(content: LText('请填写症状名称')),
                               );
                               return;
                             }
@@ -398,7 +400,7 @@ class _SymptomsPageState extends ConsumerState<SymptomsPage> {
                               photos: List<SymptomPhoto>.of(photos),
                             ));
                           },
-                    child: const Text('保存'),
+                    child: const LText('保存'),
                   ),
                 ],
               ),
@@ -473,16 +475,16 @@ class _SymptomsPageState extends ConsumerState<SymptomsPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('删除症状记录？'),
+        title: const LText('删除症状记录？'),
         content: Text('确定删除“${item.symptom}”这条记录及关联照片吗？'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('取消'),
+            child: const LText('取消'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('删除'),
+            child: const LText('删除'),
           ),
         ],
       ),
@@ -509,17 +511,17 @@ class _SymptomsPageState extends ConsumerState<SymptomsPage> {
   Widget build(BuildContext context) {
     final records = ref.watch(symptomsProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('症状记录')),
+      appBar: AppBar(title: const LText('症状记录')),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _edit(),
         icon: const Icon(Icons.add),
-        label: const Text('新增症状'),
+        label: const LText('新增症状'),
       ),
       body: records.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('读取症状失败：$e')),
         data: (items) => items.isEmpty
-            ? const Center(child: Text('还没有症状记录，点击右下角开始添加。'))
+            ? const Center(child: LText('还没有症状记录，点击右下角开始添加。'))
             : ListView.builder(
                 padding: const EdgeInsets.fromLTRB(12, 12, 12, 100),
                 itemCount: items.length,
@@ -545,8 +547,11 @@ class _SymptomsPageState extends ConsumerState<SymptomsPage> {
                               if (value == 'delete') _delete(item);
                             },
                             itemBuilder: (_) => const [
-                              PopupMenuItem(value: 'edit', child: Text('编辑')),
-                              PopupMenuItem(value: 'delete', child: Text('删除')),
+                              PopupMenuItem(value: 'edit', child: LText('编辑')),
+                              PopupMenuItem(
+                                value: 'delete',
+                                child: LText('删除'),
+                              ),
                             ],
                           ),
                         ),

@@ -1,3 +1,5 @@
+import '../../core/localization/ui_i18n.dart'; // HEALTHRECORD_UI_I18N_V2
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -57,7 +59,7 @@ class _VisitReportsPageState extends ConsumerState<VisitReportsPage> {
             context: context,
             builder: (ctx) => StatefulBuilder(
               builder: (ctx, setDialogState) => AlertDialog(
-                title: const Text('新增检查报告'),
+                title: const LText('新增检查报告'),
                 content: SizedBox(
                   width: 440,
                   child: SingleChildScrollView(
@@ -103,7 +105,7 @@ class _VisitReportsPageState extends ConsumerState<VisitReportsPage> {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(ctx),
-                    child: const Text('取消'),
+                    child: const LText('取消'),
                   ),
                   FilledButton(
                     onPressed: () {
@@ -114,7 +116,7 @@ class _VisitReportsPageState extends ConsumerState<VisitReportsPage> {
                         date: date,
                       ));
                     },
-                    child: const Text('保存'),
+                    child: const LText('保存'),
                   ),
                 ],
               ),
@@ -178,7 +180,7 @@ class _VisitReportsPageState extends ConsumerState<VisitReportsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
+                  const LText(
                     '只显示同医院的 CSV 结果及尚未关联的手动记录。'
                     '手动记录没有医院字段，请自行核对来源。',
                   ),
@@ -213,7 +215,7 @@ class _VisitReportsPageState extends ConsumerState<VisitReportsPage> {
                                 () => selected.addAll(filteredKeys),
                               ),
                         icon: const Icon(Icons.select_all),
-                        label: const Text('全选当前结果'),
+                        label: const LText('全选当前结果'),
                       ),
                       TextButton.icon(
                         onPressed: selectedInFilter == 0
@@ -222,7 +224,7 @@ class _VisitReportsPageState extends ConsumerState<VisitReportsPage> {
                                 () => selected.removeAll(filteredKeys),
                               ),
                         icon: const Icon(Icons.deselect),
-                        label: const Text('取消全选'),
+                        label: const LText('取消全选'),
                       ),
                     ],
                   ),
@@ -271,7 +273,7 @@ class _VisitReportsPageState extends ConsumerState<VisitReportsPage> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('取消'),
+                child: const LText('取消'),
               ),
               FilledButton(
                 onPressed: selected.isEmpty
@@ -327,16 +329,16 @@ class _VisitReportsPageState extends ConsumerState<VisitReportsPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('删除报告分组'),
+        title: const LText('删除报告分组'),
         content: Text('删除「${report.title}」及其关联关系？原始检查结果不会删除。'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('取消'),
+            child: const LText('取消'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('删除'),
+            child: const LText('删除'),
           ),
         ],
       ),
@@ -374,7 +376,7 @@ class _VisitReportsPageState extends ConsumerState<VisitReportsPage> {
         categories.asData == null;
     if (err != null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('本次检查报告')),
+        appBar: AppBar(title: const LText('本次检查报告')),
         body: Center(child: SelectableText('读取失败：$err')),
       );
     }
@@ -460,7 +462,7 @@ class _VisitReportsPageState extends ConsumerState<VisitReportsPage> {
         .toList();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('本次检查报告与结果')),
+      appBar: AppBar(title: const LText('本次检查报告与结果')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -471,7 +473,7 @@ class _VisitReportsPageState extends ConsumerState<VisitReportsPage> {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 4),
-            const Text('新建报告分组，再从已有检查数据中选择记录关联。日期不要求与就诊日期完全一致。'),
+            const LText('新建报告分组，再从已有检查数据中选择记录关联。日期不要求与就诊日期完全一致。'),
             const SizedBox(height: 12),
             Wrap(
               spacing: 10,
@@ -484,7 +486,7 @@ class _VisitReportsPageState extends ConsumerState<VisitReportsPage> {
                     ),
                   ),
                   icon: const Icon(Icons.picture_as_pdf_outlined),
-                  label: const Text('上传医疗文件'),
+                  label: const LText('上传医疗文件'),
                 ),
               ],
             ),
@@ -492,7 +494,7 @@ class _VisitReportsPageState extends ConsumerState<VisitReportsPage> {
             FilledButton.icon(
               onPressed: busy ? null : addReport,
               icon: const Icon(Icons.note_add_outlined),
-              label: const Text('整理检查指标'),
+              label: const LText('整理检查指标'),
             ),
             if (busy) const LinearProgressIndicator(),
             const SizedBox(height: 12),
@@ -500,7 +502,7 @@ class _VisitReportsPageState extends ConsumerState<VisitReportsPage> {
               child: loading
                   ? const Center(child: CircularProgressIndicator())
                   : reports.requireValue.isEmpty
-                  ? const Center(child: Text('本次就诊尚未关联检查报告'))
+                  ? const Center(child: LText('本次就诊尚未关联检查报告'))
                   : ListView(
                       children: [
                         for (final report in reports.requireValue)
@@ -531,14 +533,14 @@ class _VisitReportsPageState extends ConsumerState<VisitReportsPage> {
                                                 available,
                                               ),
                                         icon: const Icon(Icons.add_link),
-                                        label: const Text('关联检查结果'),
+                                        label: const LText('关联检查结果'),
                                       ),
                                       TextButton.icon(
                                         onPressed: busy
                                             ? null
                                             : () => deleteReport(report),
                                         icon: const Icon(Icons.delete_outline),
-                                        label: const Text('删除报告分组'),
+                                        label: const LText('删除报告分组'),
                                       ),
                                     ],
                                   ),

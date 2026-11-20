@@ -1,0 +1,30 @@
+{
+  "files": {
+    "lib\\features\\backup\\backup_page.dart": 16,
+    "lib\\features\\csv_import\\csv_import_page.dart": 25,
+    "lib\\features\\home\\health_dashboard_page.dart": 13,
+    "lib\\features\\hospitals\\hospital_tools_page.dart": 16,
+    "lib\\features\\hospitals\\hospitals_page.dart": 12,
+    "lib\\features\\labs\\csv_result_edit_page.dart": 3,
+    "lib\\features\\labs\\lab_pages.dart": 20,
+    "lib\\features\\labs\\unified_lab_page.dart": 14,
+    "lib\\features\\medications\\inventory_page.dart": 37,
+    "lib\\features\\medications\\medications_page.dart": 38,
+    "lib\\features\\settings\\settings_page.dart": 1,
+    "lib\\features\\symptoms\\symptoms_page.dart": 13,
+    "lib\\features\\sync\\sync_page.dart": 5,
+    "lib\\features\\trends\\unified_trends_page.dart": 14,
+    "lib\\features\\visits\\visit_pdf_page.dart": 14,
+    "lib\\features\\visits\\visit_reports_page.dart": 18,
+    "lib\\features\\visits\\visits_page.dart": 11
+  },
+  "not_translated_static_text": [
+    "仅显示前 100 条，",
+    "取一半：<3 → 1.5",
+    "取阈值：<3 → 3",
+    "存在与标准单位不同的记录，尚未实现单位转换。为避免误导，暂停绘图；请核对单位。",
+    "自定义比例：<3 → 3 × 系数",
+    "药物资料已更新",
+    "这个设置仅影响含 <、≤ 等界限值的图表绘制。原始检查结果始终保留，不会覆盖数据库中的检测数值。"
+  ]
+}

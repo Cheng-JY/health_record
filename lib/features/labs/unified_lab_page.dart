@@ -1,3 +1,6 @@
+import '../../core/localization/medical_ui_text.dart'; // HEALTHRECORD_DYNAMIC_I18N_V3
+import '../../core/localization/ui_i18n.dart'; // HEALTHRECORD_UI_I18N_V2
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -269,10 +272,15 @@ class _UnifiedLabPageState extends ConsumerState<UnifiedLabPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('检查结果', style: Theme.of(context).textTheme.headlineSmall),
+              LText('检查结果', style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: 4),
               Text(
-                '共 $total 条 · 手动 ${filteredManual.length} 条 · CSV ${filteredCsv.length} 条',
+                MedicalUiText.labsOverview(
+                  context,
+                  total,
+                  filteredManual.length,
+                  filteredCsv.length,
+                ),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(height: 16),
@@ -282,7 +290,7 @@ class _UnifiedLabPageState extends ConsumerState<UnifiedLabPage> {
                 children: [
                   FilledButton.icon(
                     icon: const Icon(Icons.edit_note_outlined),
-                    label: const Text('手动录入'),
+                    label: const LText('手动录入'),
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
                         builder: (_) => const LabFormPage(),
@@ -291,11 +299,11 @@ class _UnifiedLabPageState extends ConsumerState<UnifiedLabPage> {
                   ),
                   FilledButton.icon(
                     icon: const Icon(Icons.upload_file_outlined),
-                    label: const Text('CSV 导入'),
+                    label: const LText('CSV 导入'),
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
                         builder: (_) => Scaffold(
-                          appBar: AppBar(title: const Text('CSV 检查报告导入')),
+                          appBar: AppBar(title: const LText('CSV 检查报告导入')),
                           body: const CsvImportPage(),
                         ),
                       ),
@@ -316,10 +324,10 @@ class _UnifiedLabPageState extends ConsumerState<UnifiedLabPage> {
               border: OutlineInputBorder(),
             ),
             items: [
-              const DropdownMenuItem(value: 'all', child: Text('所有医院 / 全部来源')),
+              const DropdownMenuItem(value: 'all', child: LText('所有医院 / 全部来源')),
               const DropdownMenuItem(
                 value: 'unassigned',
-                child: Text('未指定医院（含手动记录）'),
+                child: LText('未指定医院（含手动记录）'),
               ),
               for (final item in hospitalList)
                 DropdownMenuItem(
@@ -334,12 +342,12 @@ class _UnifiedLabPageState extends ConsumerState<UnifiedLabPage> {
         const SizedBox(height: 12),
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 16),
-          child: Text('按指标代码合并显示，保留每条记录的原始来源；未自动进行单位换算。'),
+          child: LText('按指标代码合并显示，保留每条记录的原始来源；未自动进行单位换算。'),
         ),
         if (total == 0)
           const Padding(
             padding: EdgeInsets.all(24),
-            child: Text('暂无检查结果，请先手动录入或导入 CSV。'),
+            child: LText('暂无检查结果，请先手动录入或导入 CSV。'),
           ),
         for (final category in names)
           Card(
@@ -348,21 +356,33 @@ class _UnifiedLabPageState extends ConsumerState<UnifiedLabPage> {
               key: PageStorageKey('lab-category-$category'),
               initiallyExpanded: false,
               title: Text(
-                category,
+                MedicalUiText.name(context, category),
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               subtitle: Text(
-                '${byCategory[category]!.length} 个指标',
+                MedicalUiText.countIndicators(
+                  context,
+                  byCategory[category]!.length,
+                ),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               children: [
                 for (final group in byCategory[category]!)
                   ListTile(
-                    title: Text(group.title),
+                    title: Text(MedicalUiText.name(context, group.title)),
                     subtitle: Text(
-                      '最新：${DateFormat('yyyy-MM-dd').format(group.entries.map((e) => e.date).reduce((a, b) => a.isAfter(b) ? a : b))}',
+                      MedicalUiText.latest(
+                        context,
+                        DateFormat('yyyy-MM-dd').format(
+                          group.entries
+                              .map((e) => e.date)
+                              .reduce((a, b) => a.isAfter(b) ? a : b),
+                        ),
+                      ),
                     ),
-                    trailing: Text('${group.entries.length} 条'),
+                    trailing: Text(
+                      MedicalUiText.countRecords(context, group.entries.length),
+                    ),
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
                         builder: (_) => _UnifiedDetailPage(
@@ -426,7 +446,7 @@ class _UnifiedDetailPageState extends ConsumerState<_UnifiedDetailPage> {
     final sorted = [...group.entries]..sort((a, b) => b.date.compareTo(a.date));
 
     return Scaffold(
-      appBar: AppBar(title: Text(group.title)),
+      appBar: AppBar(title: Text(MedicalUiText.name(context, group.title))),
       body: ListView(
         children: [
           Padding(
@@ -443,7 +463,10 @@ class _UnifiedDetailPageState extends ConsumerState<_UnifiedDetailPage> {
                 for (final category in categoryOptions)
                   DropdownMenuItem(
                     value: category,
-                    child: Text(category, overflow: TextOverflow.ellipsis),
+                    child: Text(
+                      MedicalUiText.name(context, category),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
               ],
               onChanged: (value) {
@@ -476,7 +499,10 @@ class _UnifiedDetailPageState extends ConsumerState<_UnifiedDetailPage> {
                 for (final item in indicators)
                   DropdownMenuItem(
                     value: item.key,
-                    child: Text(item.title, overflow: TextOverflow.ellipsis),
+                    child: Text(
+                      MedicalUiText.name(context, item.title),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
               ],
               onChanged: (value) {
@@ -489,7 +515,7 @@ class _UnifiedDetailPageState extends ConsumerState<_UnifiedDetailPage> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             child: Text(
-              '${group.category} · 共 ${sorted.length} 条',
+              '${MedicalUiText.name(context, group.category)} · ${MedicalUiText.countRecords(context, sorted.length)}',
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
@@ -504,7 +530,7 @@ class _UnifiedDetailPageState extends ConsumerState<_UnifiedDetailPage> {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
-            child: Text(
+            child: LText(
               '检查历史记录',
               style: Theme.of(context).textTheme.titleLarge,
             ),
@@ -540,7 +566,7 @@ class _UnifiedDetailPageState extends ConsumerState<_UnifiedDetailPage> {
                           final confirmed = await showDialog<bool>(
                             context: context,
                             builder: (dialogContext) => AlertDialog(
-                              title: const Text('删除导入记录？'),
+                              title: const LText('删除导入记录？'),
                               content: Text(
                                 '确定隐藏 ${r.indicatorNameCn} 的这条检查结果吗？原始记录仍保留在数据库。',
                               ),
@@ -548,12 +574,12 @@ class _UnifiedDetailPageState extends ConsumerState<_UnifiedDetailPage> {
                                 TextButton(
                                   onPressed: () =>
                                       Navigator.pop(dialogContext, false),
-                                  child: const Text('取消'),
+                                  child: const LText('取消'),
                                 ),
                                 FilledButton(
                                   onPressed: () =>
                                       Navigator.pop(dialogContext, true),
-                                  child: const Text('删除'),
+                                  child: const LText('删除'),
                                 ),
                               ],
                             ),
@@ -575,8 +601,8 @@ class _UnifiedDetailPageState extends ConsumerState<_UnifiedDetailPage> {
                         }
                       },
                       itemBuilder: (_) => const [
-                        PopupMenuItem(value: 'edit', child: Text('编辑')),
-                        PopupMenuItem(value: 'delete', child: Text('删除')),
+                        PopupMenuItem(value: 'edit', child: LText('编辑')),
+                        PopupMenuItem(value: 'delete', child: LText('删除')),
                       ],
                     ),
               onTap: item.manual != null

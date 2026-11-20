@@ -1,3 +1,5 @@
+import '../../core/localization/ui_i18n.dart'; // HEALTHRECORD_UI_I18N_V2
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -68,9 +70,9 @@ class _HealthDashboardPageState extends ConsumerState<HealthDashboardPage> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Text('我的健康', style: Theme.of(context).textTheme.headlineMedium),
+        LText('我的健康', style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 4),
-        Text('健康记录与日常管理', style: Theme.of(context).textTheme.bodyMedium),
+        LText('健康记录与日常管理', style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 16),
         _sectionTitle(context, '快捷操作'),
         Wrap(
@@ -79,22 +81,22 @@ class _HealthDashboardPageState extends ConsumerState<HealthDashboardPage> {
           children: [
             FilledButton.tonalIcon(
               icon: const Icon(Icons.edit_note_outlined),
-              label: const Text('录入检查'),
+              label: const LText('录入检查'),
               onPressed: () => _open(const LabFormPage()),
             ),
             OutlinedButton.icon(
               icon: const Icon(Icons.event_note_outlined),
-              label: const Text('就诊管理'),
+              label: const LText('就诊管理'),
               onPressed: () => _open(const VisitsPage()),
             ),
             OutlinedButton.icon(
               icon: const Icon(Icons.medication_outlined),
-              label: const Text('用药管理'),
+              label: const LText('用药管理'),
               onPressed: () => _open(const MedicationsPage()),
             ),
             OutlinedButton.icon(
               icon: const Icon(Icons.healing_outlined),
-              label: const Text('症状记录'),
+              label: const LText('症状记录'),
               onPressed: () => _open(const SymptomsPage()),
             ),
           ],
@@ -106,7 +108,7 @@ class _HealthDashboardPageState extends ConsumerState<HealthDashboardPage> {
             children: [
               ListTile(
                 leading: const Icon(Icons.medication_outlined),
-                title: const Text('今日用药计划'),
+                title: const LText('今日用药计划'),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => _open(const MedicationsPage()),
               ),
@@ -117,7 +119,7 @@ class _HealthDashboardPageState extends ConsumerState<HealthDashboardPage> {
                   padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
                   child: Align(
                     alignment: Alignment.centerLeft,
-                    child: Text('用药记录暂时无法读取，请进入用药管理查看。'),
+                    child: LText('用药记录暂时无法读取，请进入用药管理查看。'),
                   ),
                 )
               else if (activePlans.isEmpty)
@@ -125,7 +127,7 @@ class _HealthDashboardPageState extends ConsumerState<HealthDashboardPage> {
                   padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
                   child: Align(
                     alignment: Alignment.centerLeft,
-                    child: Text('今天没有生效的服药方案。'),
+                    child: LText('今天没有生效的服药方案。'),
                   ),
                 )
               else
@@ -180,8 +182,8 @@ class _HealthDashboardPageState extends ConsumerState<HealthDashboardPage> {
             children: [
               ListTile(
                 leading: const Icon(Icons.healing_outlined),
-                title: const Text('我的症状日记'),
-                subtitle: const Text('记录症状、发生时间、严重程度与备注'),
+                title: const LText('我的症状日记'),
+                subtitle: const LText('记录症状、发生时间、严重程度与备注'),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => _open(const SymptomsPage()),
               ),
@@ -193,7 +195,7 @@ class _HealthDashboardPageState extends ConsumerState<HealthDashboardPage> {
                     onPressed: () =>
                         _open(const SymptomsPage(openEditor: true)),
                     icon: const Icon(Icons.add),
-                    label: const Text('记录新症状'),
+                    label: const LText('记录新症状'),
                   ),
                 ),
               ),
@@ -202,7 +204,7 @@ class _HealthDashboardPageState extends ConsumerState<HealthDashboardPage> {
         ),
         const SizedBox(height: 14),
         const SizedBox(height: 20),
-        Text(
+        LText(
           '首页仅展示已有记录，不提供诊断或调整用药建议。',
           style: Theme.of(context).textTheme.bodySmall,
         ),
